@@ -1,0 +1,21 @@
+/* Métricas del modelo: cifras en Roboto Mono, barras que crecen (growx) con su línea de referencia. */
+:host { display: block; }
+.group { margin-top: 16px; padding: 18px; border-radius: 26px; }
+.group-title { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
+.model { margin: 0; font-size: 15px; font-weight: 600; }
+.lead, .note, .metric p { margin: 8px 0 0; font-size: 14px; line-height: 1.45; color: var(--text-2); }
+ul { margin: 0; padding: 0; list-style: none; }
+.periods { margin-top: 8px; display: grid; gap: 2px; font-size: 13px; line-height: 1.4; color: var(--text-2); }
+h3 { margin: 18px 0 10px; font-size: 15px; font-weight: 700; }
+
+.metric-list, .factor-list { display: grid; gap: 14px; }
+.metric-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 15px; font-weight: 600; }
+.metric-head b { font-size: 16px; }
+.factor-list .metric-head { font-size: 14px; }
+.factor-list .metric-head b { font-size: 14px; }
+.bar { position: relative; height: 8px; margin-top: 7px; border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.1); }
+.fill { display: block; height: 100%; border-radius: inherit; background: var(--gradient-primary); }
+.fill.is-down { background: var(--text-2); }
+/* Referencia (azar, tasa base): una línea fina sobre la barra. */
+.marker { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--text); }
+.marker-label, .factor-list small { display: block; margin-top: 4px; font-size: 12px; color: var(--text-2); }

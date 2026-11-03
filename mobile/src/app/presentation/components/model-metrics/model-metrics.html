@@ -1,0 +1,73 @@
+<section class="glass-card group" aria-labelledby="metrics-title">
+  <h2 id="metrics-title" class="group-title">{{ 'metrics.title' | t }}</h2>
+  @if (hasAny()) {
+    @if (modelName() || metrics.version) {
+      <p class="model">
+        {{ modelName() }}@if (modelName() && metrics.version) { · }@if (metrics.version) {<span class="mono">v{{ metrics.version }}</span>}
+      </p>
+    }
+    <p class="lead">{{ 'metrics.predicts' | t }}</p>
+    @if (periods().length > 0 || rowsText()) {
+      <ul class="periods">
+        @for (period of periods(); track period) {
+          <li>{{ period }}</li>
+        }
+        @if (rowsText(); as rows) {
+          <li>{{ rows }}</li>
+        }
+      </ul>
+    }
+
+    @if (main().length > 0) {
+      <h3>{{ 'metrics.input' | t }}</h3>
+      <ul class="metric-list">
+        @for (row of main(); track row.name; let i = $index) {
+          <li class="metric anim-up" [style.--i]="i">
+            <div class="metric-head">
+              <span>{{ row.name }}</span>
+              <b class="mono">{{ row.value }}</b>
+            </div>
+            <div class="bar" aria-hidden="true">
+              <span class="fill anim-growx" [style.--i]="i + 1" [style.width.%]="row.fill"></span>
+              @if (row.marker; as marker) {
+                <span class="marker" [style.left.%]="marker.at"></span>
+              }
+            </div>
+            @if (row.marker; as marker) {
+              <small class="marker-label mono">{{ marker.label }}</small>
+            }
+            <p>{{ row.text }}</p>
+          </li>
+        }
+      </ul>
+      @if (baseRate(); as text) {
+        <p class="note">{{ text }}</p>
+      }
+    }
+
+    @if (power(); as line) {
+      <p class="note">{{ 'metrics.power' | t }} <span class="mono">{{ line }}</span></p>
+    }
+
+    @if (factors().length > 0) {
+      <h3>{{ 'metrics.factorsTitle' | t }}</h3>
+      <ul class="factor-list">
+        @for (factor of factors(); track factor.name; let i = $index) {
+          <li class="anim-up" [style.--i]="i">
+            <div class="metric-head">
+              <span>{{ factor.label | t }}</span>
+              <b class="mono">{{ factor.weight }}</b>
+            </div>
+            <div class="bar" aria-hidden="true">
+              <span class="fill anim-growx" [class.is-down]="factor.direction === 'down'" [style.--i]="i + 1" [style.width.%]="factor.share * 100"></span>
+            </div>
+            <small>{{ (factor.direction === 'up' ? 'metrics.up' : 'metrics.down') | t }}</small>
+          </li>
+        }
+      </ul>
+      <p class="note">{{ 'metrics.factorsNote' | t }}</p>
+    }
+  } @else {
+    <p class="note">{{ 'metrics.unavailable' | t }}</p>
+  }
+</section>
