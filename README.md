@@ -134,10 +134,38 @@ que la app nunca aparece en el idioma equivocado:
   altura final, con un brillo que lo recorre, así que nada se mueve cuando llega.
 - **Movimiento:** Automático (sigue al teléfono) o Reducido (sin entrada del mapa, partículas ni animaciones).
   Los dos apagan todas las animaciones de abajo, sin retrasos: lo escalonado aparece al instante.
-- **Vibración**, **Datos** (borrar favoritos, con confirmación; borrar la caché de pronósticos y límites),
-  **Ayuda** (ver la introducción otra vez) y **Acerca de** (versión 0.30.0, cómo se calcula el riesgo y las
-  fuentes con su licencia o cita: NASA FIRMS, Open-Meteo, ERA5/Copernicus, NASA POWER, Gobernación de
-  Nariño, OpenStreetMap, UNGRD y DANE).
+- **Vibración**, **Alertas** (ver abajo), **Datos** (borrar favoritos, con confirmación; borrar la caché de
+  pronósticos y límites), **Ayuda** (ver la introducción otra vez) y **Acerca de** (versión 0.30.0, cómo se
+  calcula el riesgo, una línea con las métricas reales del modelo, el enlace a «Cómo funciona» y las fuentes
+  con su licencia o cita: NASA FIRMS, Open-Meteo, ERA5/Copernicus, NASA POWER, Gobernación de Nariño,
+  OpenStreetMap, UNGRD y DANE).
+
+#### Cómo funciona y métricas del modelo (v0.33)
+`/how-it-works` (carga perezosa, sin pestaña) se abre desde el enlace bajo la nota de Inicio y desde Acerca
+de. Explica en pasos el camino de los datos (fuentes → ingesta y scraping → puntaje 50/30/20 → pronóstico a
+72 h → mapa), los cortes de cada nivel, lo que Atalaya no es y sus límites conocidos. La tarjeta «Métricas
+del modelo» muestra el tipo (regresión logística), la versión, los periodos y, con el clima de Open-Meteo
+ajustado, ROC-AUC 0,842, PR-AUC 0,496 y Brier 0,100 frente a la tasa base (15,6 %; Brier de la tasa base
+0,131), con POWER como comparación, más las seis variables con mayor coeficiente estandarizado.
+- Salen de `mobile/src/app/data/model-metrics-1.0.0.json`, copiado de
+  `backend/src/infrastructure/ml/risk-model-1.0.0.json` y de `docs/ML.md`; `backend/test/modelMetricsCopy.test.ts`
+  falla si la copia deja de coincidir. Lo que falte en el archivo no se muestra.
+
+#### Alertas locales (v0.33)
+Ajustes > Alertas avisa cuando un favorito sube a Alto o a Extremo (umbral a elegir), sin servidor propio ni
+push remoto (`@capacitor/local-notifications`):
+- **Cuándo se revisan:** al llegar la lista de zonas, es decir al abrir la app o al volver a ella tras 10 min.
+  **Con la app cerrada no llegan**, y la tarjeta lo dice. Un aviso por favorito y por subida de nivel: si se
+  queda igual no se repite y si baja solo se recuerda (Preferences, `alerts.seenLevels`). Al activarlas se
+  avisa una vez de los favoritos que ya están en el umbral; uno agregado después solo se recuerda.
+- **Texto:** municipio, nivel y puntaje de la lista y, si respondió el modelo, la probabilidad a 72 h; en el
+  idioma de la app. Tocarla abre el municipio en el mapa. «Probar notificación» no lleva ningún municipio.
+- **Permiso:** apagado por defecto. El permiso (`POST_NOTIFICATIONS` en Android 13+) solo se pide al activar
+  el interruptor y después de explicarlo; si se niega, vuelve a apagado y dice cómo activarlo en el
+  teléfono. Sin favoritos no se puede activar, y «Borrar favoritos» lo apaga. Nada sale del teléfono.
+- **Por qué no en segundo plano:** `@capacitor/background-runner` (WorkManager) corre cada 15 min como
+  mínimo, sin hora fija, y Doze o el ahorro de batería de cada marca lo retrasan o lo matan; además pide
+  duplicar la lógica en otro motor de JavaScript. Se dejó fuera para no prometer alertas que no llegan.
 
 #### Animaciones (v0.32)
 Todas salen de `mobile/src/app/theme/animations.css` (`anim-up`, `anim-sheet`, `anim-growx`, `anim-growy`,
