@@ -1,5 +1,6 @@
 import { Component, DestroyRef, ElementRef, OnDestroy, afterNextRender, afterRenderEffect, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { LocalAlerts } from '../../../core/alerts/local-alerts';
 import { APP_VERSION } from '../../../core/config/app-version';
 import { Haptic } from '../../../core/haptics';
 import { OnboardingFlag } from '../../../core/onboarding-flag';
@@ -36,6 +37,10 @@ export const WIND_CHOICES: readonly Choice<Settings['wind']>[] = [
 export const MOTION_CHOICES: readonly Choice<Settings['motion']>[] = [
   { value: 'auto', label: 'settings.auto' },
   { value: 'reduced', label: 'settings.reduced' },
+];
+export const THRESHOLD_CHOICES: readonly Choice<Settings['alertThreshold']>[] = [
+  { value: 'high', label: 'risk.high' },
+  { value: 'extreme', label: 'risk.extreme' },
 ];
 
 /** How long (ms) «Listo» stays after clearing the data cache. */
@@ -84,6 +89,7 @@ export class SettingsPage implements OnDestroy {
   protected readonly temperatures = TEMPERATURE_CHOICES;
   protected readonly winds = WIND_CHOICES;
   protected readonly motions = MOTION_CHOICES;
+  protected readonly thresholds = THRESHOLD_CHOICES;
   protected readonly version = APP_VERSION;
   protected readonly sources = DATA_SOURCES;
   /** The [Year] of the Copernicus notice: the data shown is of this year. */
@@ -118,6 +124,8 @@ export class SettingsPage implements OnDestroy {
       this.settings.temperature();
       this.settings.wind();
       this.settings.motion();
+      this.settings.alertThreshold();
+      this.alertsOn(); // the threshold row comes and goes with the switch
       this.i18n.language();
       placeThumbs(host);
     });
@@ -146,6 +154,47 @@ export class SettingsPage implements OnDestroy {
   protected clearFavorites(): void {
     this.confirmingClear.set(false);
     void this.favorites.clear();
+    // Without favorites there is nothing to warn about: the switch does not stay on.
+    void this.alerts.disable();
+  }
+
+  protected readonly alerts = inject(LocalAlerts);
+  protected readonly hasFavorites = computed(() => this.favorites.ids().length > 0);
+  /** On only with favorites: «Alertas» only applies to them. */
+  protected readonly alertsOn = computed(() => this.settings.alerts() && this.hasFavorites());
+  /** The explanation shown before Android (or the browser) asks for the permission. */
+  protected readonly askingPermission = signal(false);
+  protected readonly alertsBusy = signal(false);
+  protected readonly testSent = signal(false);
+
+  /** Off: at once. On: the permission is asked only now, after saying why (unless already given). */
+  protected toggleAlerts(): void {
+    this.testSent.set(false);
+    if (this.alertsOn()) {
+      void this.alerts.disable();
+    } else if (this.alerts.permission() === 'granted') {
+      void this.turnAlertsOn();
+    } else {
+      this.askingPermission.set(true);
+    }
+  }
+
+  protected confirmAlerts(): void {
+    this.askingPermission.set(false);
+    void this.turnAlertsOn();
+  }
+
+  private async turnAlertsOn(): Promise<void> {
+    this.alertsBusy.set(true);
+    try {
+      await this.alerts.enable(); // denied: it stays off and the card says how to allow it
+    } finally {
+      this.alertsBusy.set(false);
+    }
+  }
+
+  protected testAlert(): void {
+    void this.alerts.test().then((sent) => this.testSent.set(sent));
   }
 
   protected clearCache(): void {

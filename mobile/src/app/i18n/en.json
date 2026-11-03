@@ -272,5 +272,17 @@
   "alerts.body": "Score {score}/100. Tap to see it on the map.",
   "alerts.bodyForecast": "Score {score}/100. Forecast: {percent} probability of heat spots in the next 72 h. Tap to see it on the map.",
   "alerts.testTitle": "Test notification",
-  "alerts.testBody": "This is how the alerts about your favorite municipalities will look."
+  "alerts.testBody": "This is how the alerts about your favorite municipalities will look.",
+  "alerts.settingsTitle": "Alerts",
+  "alerts.hint": "Lets you know when one of your favorites goes up a level.",
+  "alerts.noFavorites": "Mark municipalities with the heart on their sheet to get alerts about them.",
+  "alerts.permissionExplain": "Atalaya will ask for permission to show notifications. It only warns about your favorites, with the map's data, when you open the app or come back to it. Nothing leaves the phone.",
+  "alerts.continue": "Continue",
+  "alerts.denied": "Notifications are blocked for Atalaya. To get alerts, turn them on in the phone's settings (Apps > Atalaya > Notifications) or, in the browser, in the site's permissions.",
+  "alerts.threshold": "Warn from",
+  "alerts.test": "Test notification",
+  "alerts.testHint": "Shows what an alert looks like.",
+  "alerts.testSent": "Sent: check your notifications.",
+  "alerts.try": "Try",
+  "alerts.limits": "They are checked when you open the app or come back to it; with the app closed none arrive. Only about your favorites, and nothing leaves the phone."
 }

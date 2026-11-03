@@ -41,31 +41,40 @@ export interface Notifier {
 
 export const NOTIFIER = new InjectionToken<Notifier>('NOTIFIER', {
   providedIn: 'root',
-  factory: () => ({
-    checkPermission: async () => (await LocalNotifications.checkPermissions()).display,
-    requestPermission: async () => (await LocalNotifications.requestPermissions()).display,
-    show: async (notifications) => {
-      await LocalNotifications.schedule({
-        notifications: notifications.map(({ id, title, body, zoneId }) => ({
-          id,
-          title,
-          body,
-          largeBody: body,
-          extra: zoneId ? { zoneId } : undefined,
-          // Shown at once, not at a time: without this the plugin would open Android's «Alarms» screen.
-          isExactNotification: false,
-        })),
-      });
-    },
-    onTap: (handler) => {
-      void LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
-        const extra: unknown = action.notification.extra;
-        const zoneId = typeof extra === 'object' && extra !== null ? (extra as Record<string, unknown>)['zoneId'] : null;
-        handler(typeof zoneId === 'string' ? zoneId : null);
-      });
-    },
-  }),
+  factory: (): Notifier => {
+    let tap: ((zoneId: string | null) => void) | null = null;
+    // The tap listener goes first and every other call waits for it: in the browser, two first calls at
+    // once make @capacitor/core load two web plugins, and the listener was left on the one thrown away.
+    const ready = LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
+      const extra: unknown = action.notification.extra;
+      const zoneId = typeof extra === 'object' && extra !== null ? (extra as Record<string, unknown>)['zoneId'] : null;
+      tap?.(typeof zoneId === 'string' ? zoneId : null);
+    });
+    const after = <T>(run: () => Promise<T>): Promise<T> => ready.then(run, run);
+    return {
+      checkPermission: () => after(async () => (await LocalNotifications.checkPermissions()).display),
+      requestPermission: () => after(async () => (await LocalNotifications.requestPermissions()).display),
+      show: (notifications) => after(() => schedule(notifications)),
+      onTap: (handler) => {
+        tap = handler;
+      },
+    };
+  },
 });
+
+async function schedule(notifications: readonly AlertNotification[]): Promise<void> {
+  await LocalNotifications.schedule({
+    notifications: notifications.map(({ id, title, body, zoneId }) => ({
+      id,
+      title,
+      body,
+      largeBody: body,
+      extra: zoneId ? { zoneId } : undefined,
+      // Shown at once, not at a time: without this the plugin would open Android's «Alarms» screen.
+      isExactNotification: false,
+    })),
+  });
+}
 
 /** Where the levels seen at the last check are kept: Preferences, only on this phone. */
 export interface AlertsStorage {
