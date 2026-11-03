@@ -160,6 +160,21 @@ describe('ZoneSheet', () => {
     expect(heart.classList).not.toContain('is-on');
   });
 
+  it('asks the page to compare the zone, and says when it is already compared', () => {
+    const { fixture, host } = render();
+    const button = host.querySelector<HTMLButtonElement>('.compare-button')!;
+    expect(button.getAttribute('aria-label')).toBe('Comparar Pasto con otros municipios');
+    let requested = 0;
+    fixture.componentInstance.compareRequested.subscribe(() => requested++);
+    button.click();
+    expect(requested).toBe(1);
+
+    fixture.componentRef.setInput('compared', true);
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-label')).toBe('Pasto ya está en la comparación: verla');
+    expect(button.classList).toContain('is-on');
+  });
+
   it('lifts the share arrow again on every tap', () => {
     const { fixture, host } = render();
     const share = host.querySelector<HTMLButtonElement>('.share-button')!;
