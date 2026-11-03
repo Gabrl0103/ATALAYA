@@ -262,6 +262,20 @@ Degradado del mapa: 165°, de `map` a `map-deep` (66 %). Cubierta de la hoja de 
 
 ## 13. Registro de cambios
 
+- **2026-11-03 (v0.34, rama `feat/compare-replay-nearby`):** comparar municipios, historial de focos y
+  «Cerca de mí».
+  - Backend: `GET /api/hotspots/history` lee `hotspot_detection` (35 días), agrupa por día local de Colombia y
+    quita duplicados entre satélites como el mapa; valida el rango (400) y guarda cada rango 10 min. Con los
+    datos locales del 3 nov: 279 focos en 35 días, 2,5 KB comprimido. Un mes 13 lanzaba `RangeError` (500):
+    corregido con su test.
+  - Comparar: 2 o 3 municipios lado a lado en `/compare`, con el de mayor riesgo resaltado por fila y «—»
+    donde falta el dato. Solo usa endpoints que ya existían (lista de zonas y pronóstico por zona).
+  - Historial de focos: barra con deslizador, play/pausa y 1x/2x; los focos recientes se ocultan solo cuando
+    llega un día, así que con error el mapa no queda vacío.
+  - Cerca de mí: «Mi ubicación» muestra la tarjeta en lugar de abrir la hoja (cambio de comportamiento
+    aprobado); municipio por punto en polígono sobre los límites del DANE, foco de 5 días más cercano a 100 km
+    con rumbo de 8 puntos. Nada sale del teléfono.
+  - Sin plugins nuevos. La hoja de zona deja 6 px entre sus botones para que el nuevo «Comparar» quepa a 390 px.
 - **2026-11-03 (v0.33, rama `feat/how-it-works-alerts`):** «Cómo funciona», métricas del modelo y alertas
   locales.
   - «Cómo funciona» (`/how-it-works`, desde Inicio y Acerca de): flujo de los datos, cortes de los niveles,
