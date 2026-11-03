@@ -263,5 +263,9 @@
   "feature.hotspots_ring_30d": "Heat spots 25–50 km away in 30 days",
   "feature.day_of_year_sin": "Time of year (sine)",
   "feature.day_of_year_cos": "Time of year (cosine)",
-  "feature.zone_hotspot_days_per_year": "History: heat spot days per year (2015–2018)"
+  "feature.zone_hotspot_days_per_year": "History: heat spot days per year (2015–2018)",
+  "home.howLink": "How Atalaya works",
+  "about.modelSummary": "Model v{version}: ROC-AUC {rocAuc} and PR-AUC {prAuc} with the adjusted Open-Meteo weather, evaluated on data from {from} to {to}.",
+  "settings.howItWorks": "How it works",
+  "settings.howItWorksHint": "Data, model, metrics and limits."
 }

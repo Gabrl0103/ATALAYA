@@ -263,5 +263,9 @@
   "feature.hotspots_ring_30d": "Focos a 25–50 km en 30 días",
   "feature.day_of_year_sin": "Época del año (seno)",
   "feature.day_of_year_cos": "Época del año (coseno)",
-  "feature.zone_hotspot_days_per_year": "Historial: días con focos al año (2015–2018)"
+  "feature.zone_hotspot_days_per_year": "Historial: días con focos al año (2015–2018)",
+  "home.howLink": "Cómo funciona Atalaya",
+  "about.modelSummary": "Modelo v{version}: ROC-AUC {rocAuc} y PR-AUC {prAuc} con el clima de Open-Meteo ajustado, evaluado con datos de {from} a {to}.",
+  "settings.howItWorks": "Cómo funciona",
+  "settings.howItWorksHint": "Datos, modelo, métricas y límites."
 }

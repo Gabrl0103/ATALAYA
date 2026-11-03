@@ -52,6 +52,10 @@ export class HomePage {
     void this.router.navigateByUrl('/settings');
   }
 
+  protected openHowItWorks(): void {
+    void this.router.navigateByUrl('/how-it-works');
+  }
+
   /** Abre el mapa con la hoja de la zona (el mapa la muestra cuando llega store.detail). */
   protected openZone(zoneId: string): void {
     this.store.select(zoneId);

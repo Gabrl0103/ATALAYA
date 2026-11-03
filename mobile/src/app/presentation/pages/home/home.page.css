@@ -60,4 +60,15 @@ h2 { margin: 28px 0 12px; }
 @keyframes favorite-out { to { opacity: 0; transform: scale(0.9); } }
 
 .note { margin: 36px 0 0; font-size: 13px; line-height: 1.35; color: rgba(255, 243, 234, 0.5); }
+/* «Cómo funciona Atalaya»: un enlace de 44 px bajo la nota, sin pestaña nueva. */
+.how-link {
+  min-height: 44px;
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--amber);
+  font-size: 15px;
+  font-weight: 600;
+}
 .state-card { margin-top: 24px; }
