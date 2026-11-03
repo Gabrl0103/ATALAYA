@@ -33,15 +33,26 @@
 }
 
 
+<!-- One panel at the bottom at a time (#overview: the credits and the framing follow its height). -->
 @if (!store.selected()) {
-  <app-map-overview-sheet
-    #overview
-    [zoneCount]="store.zones().length"
-    [hotspotCount]="store.hotspots().length"
-    [updatedLabel]="updatedLabel()"
-    [canZoom]="!mapUnavailable()"
-    (zoomRequested)="zoomToNarino()"
-  />
+  @if (nearby(); as summary) {
+    <app-nearby-card
+      #overview
+      [summary]="summary"
+      (openZone)="openNearbyZone($event)"
+      (showHotspot)="showNearbyHotspot()"
+      (closed)="closeNearby()"
+    />
+  } @else {
+    <app-map-overview-sheet
+      #overview
+      [zoneCount]="store.zones().length"
+      [hotspotCount]="store.hotspots().length"
+      [updatedLabel]="updatedLabel()"
+      [canZoom]="!mapUnavailable()"
+      (zoomRequested)="zoomToNarino()"
+    />
+  }
 }
 
 @if (store.error(); as code) {

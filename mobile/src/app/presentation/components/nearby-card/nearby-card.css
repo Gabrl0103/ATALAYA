@@ -1,0 +1,42 @@
+/* «Cerca de mí»: la misma hoja de vidrio de abajo del mapa, justo por encima de la barra flotante. */
+:host { position: absolute; z-index: 60; inset: auto 0 0; display: block; }
+.nearby {
+  --sheet-clearance: calc(var(--nav-height) + var(--nav-bottom) + 10px + env(safe-area-inset-bottom, 0px));
+  padding: 16px 20px var(--sheet-clearance);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  border-top: 1px solid var(--glass-border);
+  background: var(--glass-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 -16px 38px rgba(0, 0, 0, 0.5);
+}
+.nearby-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+.icon-button {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--glass-bg);
+  color: var(--text);
+}
+.place { margin: 4px 0 0; font-size: 15px; font-weight: 600; line-height: 1.35; }
+.risk { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
+.risk b { font-size: 15px; }
+.hotspot { margin: 10px 0 0; font-size: 14px; line-height: 1.4; }
+.note { margin: 4px 0 0; font-size: 12px; line-height: 1.35; color: var(--text-2); }
+.actions { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.action {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+}
+.action.primary { border-color: transparent; background: var(--text); color: var(--ink); }

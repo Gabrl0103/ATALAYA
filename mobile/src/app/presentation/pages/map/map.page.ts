@@ -14,7 +14,7 @@ import { ZoneSharer, type ShareOutcome } from '../../../core/share/share-zone';
 import { SearchRequest } from '../../../core/search-request';
 import type { ZoneBoundaries, ZoneRiskSummary } from '../../../domain/model/risk';
 import { averagePerYear } from '../../../domain/util/fire-history';
-import { nearestZone } from '../../../domain/util/geo';
+import { nearbySummary, type NearbySummary } from '../../../domain/util/nearby';
 import { formatTime } from '../../../domain/util/format';
 import { shareText } from '../../../domain/util/share-text';
 import { I18n } from '../../../i18n/i18n';
@@ -24,6 +24,7 @@ import { FavoritesStore } from '../../../state/favorites.store';
 import { ZonesStore } from '../../../state/zones.store';
 import { AppIcon } from '../../components/app-icon/app-icon';
 import { MapOverviewSheet } from '../../components/map-overview-sheet/map-overview-sheet';
+import { NearbyCard } from '../../components/nearby-card/nearby-card';
 import { SearchBox } from '../../components/search-box/search-box';
 import { MID_HEIGHT } from '../../components/zone-sheet/sheet-snap';
 import { ZoneSheet } from '../../components/zone-sheet/zone-sheet';
@@ -33,8 +34,9 @@ import {
   globeHalo, globeStart, hasWebGL, introPlan, narinoPadding, readIntroPlayed, rememberIntroPlayed, spinCenter,
 } from './map-camera';
 import {
-  BOUNDARIES_SOURCE, DEPARTMENT_SOURCE, HOTSPOTS_SOURCE, ZONE_FILL_LAYER, ZONE_SELECTED_LAYERS, boundariesSource, boundaryLayers,
-  departmentSource, hotspotLayers, hotspotPoints, hotspotsSource, readMapColors, selectedZoneFilter, zoneStates, type MapColors,
+  BOUNDARIES_SOURCE, DEPARTMENT_SOURCE, HIGHLIGHT_SOURCE, HOTSPOTS_SOURCE, ZONE_FILL_LAYER, ZONE_SELECTED_LAYERS, boundariesSource,
+  boundaryLayers, departmentSource, highlightLayers, highlightPoint, hotspotLayers, hotspotPoints, hotspotsSource, readMapColors,
+  selectedZoneFilter, zoneStates, type MapColors,
 } from './map-layers';
 import { mapStyle } from './map-style';
 import {
@@ -65,7 +67,7 @@ const SEAT_OFFSET: [number, number] = [0, -150];
 
 @Component({
   selector: 'app-map-page',
-  imports: [AppIcon, MapOverviewSheet, SearchBox, TranslatePipe, ZoneSheet],
+  imports: [AppIcon, MapOverviewSheet, NearbyCard, SearchBox, TranslatePipe, ZoneSheet],
   templateUrl: './map.page.html',
   styleUrl: './map.page.css',
   // --sheet-inset: how much of the map the sheet covers, so the credits sit just above it.
@@ -112,6 +114,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   protected readonly locating = signal(false);
   /** Why «Mi ubicación» failed, as a text key (kept apart from the store error, whose retry reloads zones). */
   protected readonly locationError = signal<MessageKey | null>(null);
+  /** «Cerca de mí», after «Mi ubicación»: it takes the place of the overview sheet until closed. */
+  protected readonly nearby = signal<NearbySummary | null>(null);
   protected readonly errorKeys = API_ERROR_KEYS;
   protected readonly shareNotice = signal<string | null>(null);
   private noticeTimer?: ReturnType<typeof setTimeout>;
@@ -141,6 +145,10 @@ export class MapPage implements AfterViewInit, OnDestroy {
     effect(() => {
       if (!this.mapReady()) return;
       this.source(HOTSPOTS_SOURCE)?.setData(hotspotPoints(this.store.hotspots()));
+    });
+    // Opening a zone (from the card, the search or the map) ends «Cerca de mí».
+    effect(() => {
+      if (this.store.selectedId()) untracked(() => this.closeNearby());
     });
     effect(() => {
       if (!this.mapReady()) return;
@@ -325,15 +333,36 @@ export class MapPage implements AfterViewInit, OnDestroy {
     }
     const { latitude, longitude } = result;
     this.showUser(latitude, longitude);
-    const zone = nearestZone(this.store.zones(), latitude, longitude);
-    if (zone) this.store.select(zone.id);
+    // The card says where the person is; the zone sheet opens from it (it no longer opens by itself).
+    this.nearby.set(nearbySummary(latitude, longitude, this.store.zones(), this.store.hotspots(), this.store.boundaries()));
     this.flyToSeat(longitude, latitude);
+  }
+
+  protected openNearbyZone(zoneId: string): void {
+    const zone = this.store.zones().find((z) => z.id === zoneId);
+    if (zone) this.selectZone(zone);
+  }
+
+  /** Flies to the closest heat spot and rings it; the card stays open. */
+  protected showNearbyHotspot(): void {
+    const nearest = this.nearby()?.hotspot?.hotspot;
+    if (!nearest) return;
+    this.source(HIGHLIGHT_SOURCE)?.setData(highlightPoint(nearest));
+    this.flyToSeat(nearest.longitude, nearest.latitude);
+  }
+
+  protected closeNearby(): void {
+    if (!this.nearby()) return;
+    this.nearby.set(null);
+    this.source(HIGHLIGHT_SOURCE)?.setData(highlightPoint(null));
   }
 
   /** The base style is ready: add the hotspots and (when they arrive) the municipal polygons. */
   private addLayers(map: MapLibreMap, colors: MapColors): void {
     map.addSource(HOTSPOTS_SOURCE, hotspotsSource([]));
     for (const layer of hotspotLayers(colors)) map.addLayer(layer);
+    map.addSource(HIGHLIGHT_SOURCE, { type: 'geojson', data: highlightPoint(null) });
+    for (const layer of highlightLayers()) map.addLayer(layer);
   }
 
   /** Polygons go under the hotspots and the markers. Added once: risk and selection only restyle them. */
