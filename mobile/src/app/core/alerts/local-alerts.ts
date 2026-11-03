@@ -52,6 +52,8 @@ export const NOTIFIER = new InjectionToken<Notifier>('NOTIFIER', {
           body,
           largeBody: body,
           extra: zoneId ? { zoneId } : undefined,
+          // Shown at once, not at a time: without this the plugin would open Android's «Alarms» screen.
+          isExactNotification: false,
         })),
       });
     },

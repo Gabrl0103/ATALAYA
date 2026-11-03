@@ -11,6 +11,13 @@ const config: CapacitorConfig = {
     androidScheme: 'http',
     cleartext: true,
   },
+  plugins: {
+    // Alertas locales: la llama monocroma (res/drawable/ic_stat_atalaya.xml) en el naranja de la app.
+    LocalNotifications: {
+      smallIcon: 'ic_stat_atalaya',
+      iconColor: '#FF8A2B',
+    },
+  },
 };
 
 export default config;
