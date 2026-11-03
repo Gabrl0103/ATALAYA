@@ -30,7 +30,9 @@ export interface HotspotHistory {
 }
 
 function validDay(value: string, name: string): string {
-  if (!DAY.test(value) || new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) !== value) {
+  const time = Date.parse(`${value}T00:00:00Z`);
+  // 2026-13-01 does not parse; 2026-02-30 parses as 2 March: both are rejected.
+  if (!DAY.test(value) || Number.isNaN(time) || new Date(time).toISOString().slice(0, 10) !== value) {
     throw new ValidationError(`${name} must be a date YYYY-MM-DD`);
   }
   return value;
