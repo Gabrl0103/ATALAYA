@@ -30,24 +30,37 @@
       </div>
     </section>
 
+    <!--
+      «Mis municipios»: a card that is added comes in like the rest (anim-up); one that is removed
+      shrinks and fades (animate.leave), and so does the whole section when the last one goes.
+    -->
     @if (myZones().length > 0) {
-      <h2 class="section-title anim-up" style="--i: 2">{{ 'home.myZones' | t }}</h2>
-      <div class="carousel favorites">
-        @for (zone of myZones(); track zone.id; let i = $index) {
-          <button type="button" class="glass-card zone anim-up" [style.--i]="3 + i" (click)="openZone(zone.id)">
-            <app-icon class="favorite-mark" name="heart-filled" [size]="16" />
-            <app-risk-badge [level]="zone.level" />
-            <h3>{{ zone.name }}</h3>
-            <p class="mono">{{ 'common.scoreOf100' | t: { score: zone.score } }}</p>
-          </button>
-        }
-      </div>
+      <section class="my-zones" animate.leave="is-leaving">
+        <h2 class="section-title anim-up" style="--i: 2">{{ 'home.myZones' | t }}</h2>
+        <div class="carousel favorites">
+          @for (zone of myZones(); track zone.id; let i = $index) {
+            <button
+              type="button"
+              class="glass-card zone anim-up"
+              [style.--i]="3 + stagger(i)"
+              animate.leave="is-leaving"
+              (click)="openZone(zone.id)"
+            >
+              <app-icon class="favorite-mark" name="heart-filled" [size]="16" />
+              <app-risk-badge [level]="zone.level" />
+              <h3>{{ zone.name }}</h3>
+              <p class="mono">{{ 'common.scoreOf100' | t: { score: zone.score } }}</p>
+            </button>
+          }
+        </div>
+      </section>
     }
 
-    <h2 class="section-title anim-up" style="--i: 2">{{ 'home.topZones' | t }}</h2>
+    <!-- After «Mis municipios» when it is there, so both sections do not come in at once. -->
+    <h2 class="section-title anim-up" [style.--i]="topStart()">{{ 'home.topZones' | t }}</h2>
     <div class="carousel">
       @for (zone of topZones(); track zone.id; let i = $index) {
-        <button type="button" class="glass-card zone anim-up" [style.--i]="3 + i" (click)="openZone(zone.id)">
+        <button type="button" class="glass-card zone anim-up" [style.--i]="topStart() + 1 + stagger(i)" (click)="openZone(zone.id)">
           <app-risk-badge [level]="zone.level" />
           <h3>{{ zone.name }}</h3>
           <p class="mono">{{ 'common.scoreOf100' | t: { score: zone.score } }}</p>
@@ -55,7 +68,7 @@
       }
     </div>
 
-    <p class="note anim-up" style="--i: 5">
+    <p class="note anim-up" [style.--i]="topStart() + 3">
       {{ 'home.note' | t }}
     </p>
   } @else if (store.error(); as code) {
