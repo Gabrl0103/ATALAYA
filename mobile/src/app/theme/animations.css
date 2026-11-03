@@ -20,6 +20,12 @@
 @keyframes a-sheet { from { opacity: 0; transform: translateY(70px); } to { opacity: 1; transform: none; } }
 @keyframes a-growy { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes a-growx { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* Respuesta breve a un toque (en el icono de un botón): latir, encogerse, subir y volver. a-lift-a y -b son
+   iguales: alternarlas hace que la animación vuelva a empezar en cada toque. */
+@keyframes a-pop { 50% { transform: scale(1.25); } }
+@keyframes a-shrink { 50% { transform: scale(0.8); } }
+@keyframes a-lift-a { 45% { transform: translateY(-4px); } }
+@keyframes a-lift-b { 45% { transform: translateY(-4px); } }
 @keyframes a-ring {
   from { stroke-dasharray: 0 var(--ring-total, 100); }
   to { stroke-dasharray: var(--ring-value, 0) var(--ring-total, 100); }

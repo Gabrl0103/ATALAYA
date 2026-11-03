@@ -48,10 +48,6 @@
 }
 .zone-title { min-width: 0; }
 h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; overflow-wrap: anywhere; }
-/* Junto al anillo quedan ~170 px: «Chachagüí» se partía a la mitad. */
-@media (max-width: 359px) {
-  h2 { font-size: 30px; }
-}
 .zone-title p { margin: 6px 0 0; font-size: 15px; color: var(--text-2); }
 /* Badge, favorito y compartir: en pantallas angostas (o «Extremo») bajan de línea en vez de meterse bajo el anillo. */
 .zone-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
@@ -71,16 +67,12 @@ h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spac
 }
 .icon-action:active { transform: scale(0.92); }
 .favorite-toggle.is-on { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 45%, transparent); }
-/* Tras tocarlo: late al marcar, se encoge al desmarcar. Solo transform; base.css lo apaga con movimiento reducido. */
-.favorite-toggle.is-touched.is-on app-icon { animation: heart-pop 0.32s var(--ease-out); }
-.favorite-toggle.is-touched:not(.is-on) app-icon { animation: heart-release 0.32s var(--ease-out); }
-@keyframes heart-pop { 50% { transform: scale(1.25); } }
-@keyframes heart-release { 50% { transform: scale(0.8); } }
-/* Compartir: la flecha sube y vuelve. */
-.share-button.is-shared-a app-icon { animation: share-lift-a 0.36s var(--ease-out); }
-.share-button.is-shared-b app-icon { animation: share-lift-b 0.36s var(--ease-out); }
-@keyframes share-lift-a { 45% { transform: translateY(-4px); } }
-@keyframes share-lift-b { 45% { transform: translateY(-4px); } }
+/* Tras tocarlo: late al marcar, se encoge al desmarcar; la flecha de compartir sube y vuelve (keyframes en
+   theme/animations.css). Solo transform; base.css lo apaga con movimiento reducido. */
+.is-touched.is-on app-icon { animation: a-pop 0.32s var(--ease-out); }
+.is-touched:not(.is-on) app-icon { animation: a-shrink 0.32s var(--ease-out); }
+.is-shared-a app-icon { animation: a-lift-a 0.36s var(--ease-out); }
+.is-shared-b app-icon { animation: a-lift-b 0.36s var(--ease-out); }
 
 .score-ring {
   position: relative;
@@ -102,10 +94,6 @@ h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spac
 .weather-row { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .weather-row .stat-tile { padding: 10px 4px; display: grid; justify-items: center; gap: 4px; border-radius: 18px; text-align: center; font-size: 11px; line-height: 1.2; overflow-wrap: anywhere; color: var(--text-2); }
 .weather-row .stat-tile b { font-size: 15px; white-space: nowrap; color: var(--text); }
-/* Por debajo de 360 px «12 km/h» no cabe en un cuarto de fila y pisaba la tarjeta vecina: dos por fila. */
-@media (max-width: 359px) {
-  .weather-row { grid-template-columns: repeat(2, 1fr); }
-}
 .factors-title { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: var(--text-2); }
 .factor + .factor { margin-top: 13px; }
 .factor-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 16px; font-weight: 600; }
@@ -136,3 +124,10 @@ h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spac
   text-overflow: ellipsis;
 }
 .disclaimer { margin: 14px 8px 0; text-align: center; font-size: 12px; line-height: 1.35; color: var(--text-2); }
+
+/* Bajo 360 px: junto al anillo quedan ~170 px («Chachagüí» se partía a la mitad) y «12 km/h» no cabe en un
+   cuarto de fila (pisaba la tarjeta vecina): el nombre baja a 30 px y el clima va de a dos. */
+@media (max-width: 359px) {
+  h2 { font-size: 30px; }
+  .weather-row { grid-template-columns: repeat(2, 1fr); }
+}
