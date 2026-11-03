@@ -144,8 +144,9 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
             <section class="weather" aria-labelledby="weather-title" [attr.aria-busy]="weatherPending()">
               <h3 id="weather-title" class="factors-title">{{ 'weather.title' | t }}</h3>
               <ul class="weather-row">
-                @for (item of weather(); track item.label) {
-                  <li class="stat-tile">
+                <!-- Tiles come in 0.1 s apart; tracked by label, so a value that arrives does not replay it. -->
+                @for (item of weather(); track item.label; let i = $index) {
+                  <li class="stat-tile anim-up" [style.--i]="i">
                     <app-icon [name]="item.icon" [size]="16" />
                     @if (item.value !== null) {
                       <b class="mono">{{ item.value }}</b>
@@ -160,7 +161,8 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
           }
           <h3 class="factors-title">{{ 'sheet.factorsTitle' | t }}</h3>
           @for (factor of factors(); track factor.label; let i = $index) {
-            <div class="factor">
+            <!-- After «Clima ahora»: each factor comes in, then its bar grows. -->
+            <div class="factor anim-up" [style.--i]="i + 2">
               <div class="factor-head">
                 <span>{{ factor.label | t }} <small>· <span class="mono">{{ factor.weight }} %</span></small></span>
                 @if (factor.value !== null) {
@@ -171,7 +173,7 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
               </div>
               <div class="factor-track" [class.skeleton]="factor.value === null">
                 @if (factor.value !== null) {
-                  <span class="anim-growx" [style.--i]="i + 1" [style.width.%]="factor.value"></span>
+                  <span class="anim-growx" [style.--i]="i + 3" [style.width.%]="factor.value"></span>
                 }
               </div>
             </div>
