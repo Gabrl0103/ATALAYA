@@ -48,8 +48,13 @@
 }
 .zone-title { min-width: 0; }
 h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; overflow-wrap: anywhere; }
+/* Junto al anillo quedan ~170 px: «Chachagüí» se partía a la mitad. */
+@media (max-width: 359px) {
+  h2 { font-size: 30px; }
+}
 .zone-title p { margin: 6px 0 0; font-size: 15px; color: var(--text-2); }
-.zone-meta { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+/* Badge, favorito y compartir: en pantallas angostas (o «Extremo») bajan de línea en vez de meterse bajo el anillo. */
+.zone-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
 
 /* Acciones de la hoja (favorito, compartir): botones de vidrio de 44 px. */
 .icon-action {
@@ -89,6 +94,10 @@ h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spac
 .weather-row { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .weather-row .stat-tile { padding: 10px 4px; display: grid; justify-items: center; gap: 4px; border-radius: 18px; text-align: center; font-size: 11px; line-height: 1.2; overflow-wrap: anywhere; color: var(--text-2); }
 .weather-row .stat-tile b { font-size: 15px; white-space: nowrap; color: var(--text); }
+/* Por debajo de 360 px «12 km/h» no cabe en un cuarto de fila y pisaba la tarjeta vecina: dos por fila. */
+@media (max-width: 359px) {
+  .weather-row { grid-template-columns: repeat(2, 1fr); }
+}
 .factors-title { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: var(--text-2); }
 .factor + .factor { margin-top: 13px; }
 .factor-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 16px; font-weight: 600; }
