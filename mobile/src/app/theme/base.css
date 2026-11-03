@@ -76,18 +76,23 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
 .risk-high { --risk: var(--risk-high); }
 .risk-extreme { --risk: var(--risk-extreme); }
 
-/* El teléfono pide menos movimiento, o Ajustes > Movimiento está en «Reducido» (core/motion.ts). */
+/* El teléfono pide menos movimiento, o Ajustes > Movimiento está en «Reducido» (core/motion.ts).
+   Sin retrasos: con el escalonado (--i) una tarjeta se quedaba invisible hasta su turno. */
 :root.reduce-motion *, :root.reduce-motion *::before, :root.reduce-motion *::after {
+  animation-delay: 0s !important;
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   scroll-behavior: auto !important;
+  transition-delay: 0s !important;
   transition-duration: 0.01ms !important;
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
+    animation-delay: 0s !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
+    transition-delay: 0s !important;
     transition-duration: 0.01ms !important;
   }
 }

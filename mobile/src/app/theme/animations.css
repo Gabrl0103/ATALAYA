@@ -25,16 +25,28 @@
   to { stroke-dasharray: var(--ring-value, 0) var(--ring-total, 100); }
 }
 
-/* Lugar de un dato que todavía no llega: un bloque tenue que late. */
+/* Lugar de un dato que todavía no llega: un bloque tenue que un brillo recorre. El brillo es un
+   ::after que solo se desplaza (transform), recortado por el bloque: no cambia su tamaño ni repinta. */
 .skeleton {
+  position: relative;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.1);
-  animation: a-pulse 1.2s ease-in-out infinite alternate;
 }
-@keyframes a-pulse { from { opacity: 1; } to { opacity: 0.45; } }
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  transform: translateX(-100%);
+  animation: a-shimmer 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes a-shimmer { to { transform: translateX(100%); } }
 /* Texto de muestra con la forma del dato real (mismo tamaño y alto de línea) pero invisible: el bloque
-   ocupa lo mismo que ocupará el dato, así que nada se mueve cuando llega. */
-.skeleton-text { color: transparent !important; border-radius: 6px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+   ocupa lo mismo que ocupará el dato, así que nada se mueve cuando llega. inline-block para que recorte
+   el brillo (un inline no recorta); con varias líneas es un solo bloque del ancho del párrafo. */
+.skeleton-text { display: inline-block; vertical-align: top; color: transparent !important; border-radius: 6px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .anim-up, .anim-sheet, .anim-growy, .anim-growx, .anim-ring, .skeleton { animation: none; }
+  .anim-up, .anim-sheet, .anim-growy, .anim-growx, .anim-ring, .skeleton::after { animation: none; }
 }

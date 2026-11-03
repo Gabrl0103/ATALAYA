@@ -21,6 +21,8 @@ h3 { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: var(--text-2); 
 .forecast-body > * { grid-area: 1 / 1; min-width: 0; }
 .forecast-sizer { visibility: hidden; }
 .forecast-sizer.is-loading { visibility: visible; }
+/* Oculto bajo la respuesta, su brillo no debe seguir gastando cuadros. */
+.forecast-sizer:not(.is-loading) .skeleton::after { animation: none; }
 .skeleton-badge { width: 64px; height: 22px; border-radius: var(--radius-pill); }
 .skeleton-value { width: 48px; height: 16px; border-radius: 6px; }
 
