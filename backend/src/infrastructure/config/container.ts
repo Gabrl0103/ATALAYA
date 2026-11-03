@@ -1,5 +1,6 @@
 import { ZoneRiskCalculator } from '../../application/service/ZoneRiskCalculator.js';
 import { GetFireHistoryUseCase } from '../../application/useCase/GetFireHistoryUseCase.js';
+import { GetHotspotHistoryUseCase } from '../../application/useCase/GetHotspotHistoryUseCase.js';
 import { GetHotspotsUseCase } from '../../application/useCase/GetHotspotsUseCase.js';
 import { GetZoneBoundariesUseCase } from '../../application/useCase/GetZoneBoundariesUseCase.js';
 import { GetZoneDetailUseCase } from '../../application/useCase/GetZoneDetailUseCase.js';
@@ -54,6 +55,7 @@ export interface Container {
   readonly getZoneBoundaries: GetZoneBoundariesUseCase;
   readonly getFireHistory: GetFireHistoryUseCase;
   readonly getHotspots: GetHotspotsUseCase;
+  readonly getHotspotHistory: GetHotspotHistoryUseCase;
   /** Scheduled by the server (node-cron) and runnable once with `npm run ingest`. */
   readonly ingestionJobs: readonly IngestionJob[];
 }
@@ -117,6 +119,7 @@ export function buildContainer(config: Env = env): Container {
     getZoneBoundaries: new GetZoneBoundariesUseCase({ source: BOUNDARY_SOURCE, boundaries: NARINO_BOUNDARIES.boundaries }),
     getFireHistory: new GetFireHistoryUseCase(repositories.fireEvents, repositories.zones),
     getHotspots: new GetHotspotsUseCase(repositories.hotspots),
+    getHotspotHistory: new GetHotspotHistoryUseCase(repositories.hotspotDetections),
     ingestionJobs: buildIngestionJobs(repositories, config),
   };
 }

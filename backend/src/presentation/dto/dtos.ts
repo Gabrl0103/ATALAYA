@@ -1,3 +1,4 @@
+import type { HotspotHistory } from '../../application/useCase/GetHotspotHistoryUseCase.js';
 import type { ZoneBoundaries } from '../../application/useCase/GetZoneBoundariesUseCase.js';
 import type { ZoneDetail } from '../../application/useCase/GetZoneDetailUseCase.js';
 import type { ForecastFallbackReason, ForecastHours, ZoneForecast } from '../../domain/model/RiskForecast.js';
@@ -105,6 +106,28 @@ export function toZoneBoundariesDto({ source, boundaries }: ZoneBoundaries): Zon
       id: zoneId,
       properties: { id: zoneId, divipola, name },
       geometry,
+    })),
+  };
+}
+
+/** Shape of GET /api/hotspots/history: the least the replay needs, coordinates rounded to ~11 m. */
+export interface HotspotHistoryDto {
+  readonly from: string;
+  readonly to: string;
+  readonly hotspots: ReadonlyArray<{ readonly lat: number; readonly lon: number; readonly date: string; readonly satellite: string }>;
+}
+
+const round4 = (value: number): number => Math.round(value * 10_000) / 10_000;
+
+export function toHotspotHistoryDto({ from, to, hotspots }: HotspotHistory): HotspotHistoryDto {
+  return {
+    from,
+    to,
+    hotspots: hotspots.map(({ latitude, longitude, date, satellite }) => ({
+      lat: round4(latitude),
+      lon: round4(longitude),
+      date,
+      satellite,
     })),
   };
 }
