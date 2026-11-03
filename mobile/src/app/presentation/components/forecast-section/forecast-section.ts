@@ -65,21 +65,24 @@ export const WHEN_KEYS: Record<24 | 48 | 72, MessageKey> = { 24: 'when.today', 4
         @default {
           @if (forecast(); as data) {
             @if (data.source === 'model') {
-              <ul class="forecast-rows">
-                @for (horizon of data.horizons; track horizon.hours; let i = $index) {
-                  <li class="forecast-row" [class]="'risk-' + horizon.level">
-                    <div class="forecast-head">
-                      <span class="forecast-when"><b class="mono">{{ horizon.hours }} h</b><small>{{ whenKeys[horizon.hours] | t }}</small></span>
-                      <app-risk-badge [level]="horizon.level" />
-                      <b class="mono forecast-value">{{ percent(horizon.probability) }}</b>
-                    </div>
-                    <div class="forecast-track" aria-hidden="true">
-                      <span class="anim-growx" [style.--i]="i + 1" [style.width.%]="horizon.probability * 100"></span>
-                    </div>
-                  </li>
-                }
-              </ul>
-              <p class="forecast-note">{{ 'forecast.note' | t }}</p>
+              <!-- One child of .forecast-body: the rows and, under them, the note (as in the sizer). -->
+              <div class="forecast-model">
+                <ul class="forecast-rows">
+                  @for (horizon of data.horizons; track horizon.hours; let i = $index) {
+                    <li class="forecast-row" [class]="'risk-' + horizon.level">
+                      <div class="forecast-head">
+                        <span class="forecast-when"><b class="mono">{{ horizon.hours }} h</b><small>{{ whenKeys[horizon.hours] | t }}</small></span>
+                        <app-risk-badge [level]="horizon.level" />
+                        <b class="mono forecast-value">{{ percent(horizon.probability) }}</b>
+                      </div>
+                      <div class="forecast-track" aria-hidden="true">
+                        <span class="anim-growx" [style.--i]="i + 1" [style.width.%]="horizon.probability * 100"></span>
+                      </div>
+                    </li>
+                  }
+                </ul>
+                <p class="forecast-note">{{ 'forecast.note' | t }}</p>
+              </div>
             } @else {
               <div class="forecast-state is-fallback" role="status">
                 <p>{{ 'forecast.fallback' | t: { reason: reason() } }}</p>

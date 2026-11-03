@@ -14,7 +14,9 @@ h3 { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: var(--text-2); 
 .forecast-track span { display: block; height: 100%; border-radius: inherit; background: var(--risk); }
 
 /* El molde del pronóstico completo ocupa siempre su lugar (encimado con la respuesta en la misma celda);
-   solo se ve mientras carga, como esqueleto: las tres filas con su hora y la nota en bloques que laten. */
+   solo se ve mientras carga, como esqueleto: las tres filas con su hora y la nota en bloques que laten.
+   Cada estado entra como UN solo hijo (molde, .forecast-model, respaldo o error): dos hermanos caerían
+   en la misma celda y uno taparía al otro (la nota quedaba encima de las filas). */
 .forecast-body { display: grid; }
 .forecast-body > * { grid-area: 1 / 1; min-width: 0; }
 .forecast-sizer { visibility: hidden; }
