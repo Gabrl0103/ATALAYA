@@ -131,12 +131,26 @@ que la app nunca aparece en el idioma equivocado:
   viento y días sin lluvia; lo que no llegue se omite). Solo cambia cómo se muestran. El clima llega con la
   lista de zonas, así que la fila sale al abrir la hoja; con un backend anterior se pide al tocar el
   municipio. Mientras algo carga (clima, focos, incendios por año, pronóstico), su esqueleto ocupa la misma
-  altura final, así que nada se mueve cuando llega.
+  altura final, con un brillo que lo recorre, así que nada se mueve cuando llega.
 - **Movimiento:** Automático (sigue al teléfono) o Reducido (sin entrada del mapa, partículas ni animaciones).
+  Los dos apagan todas las animaciones de abajo, sin retrasos: lo escalonado aparece al instante.
 - **Vibración**, **Datos** (borrar favoritos, con confirmación; borrar la caché de pronósticos y límites),
   **Ayuda** (ver la introducción otra vez) y **Acerca de** (versión 0.30.0, cómo se calcula el riesgo y las
   fuentes con su licencia o cita: NASA FIRMS, Open-Meteo, ERA5/Copernicus, NASA POWER, Gobernación de
   Nariño, OpenStreetMap, UNGRD y DANE).
+
+#### Animaciones (v0.32)
+Todas salen de `mobile/src/app/theme/animations.css` (`anim-up`, `anim-sheet`, `anim-growx`, `anim-growy`,
+`anim-ring`, curva `cubic-bezier(0.2, 0.8, 0.2, 1)`, escalón `--i` de 0,1 s) y solo mueven `transform` y
+`opacity`, para ir fluidas en un Android de gama media; ninguna anima alturas ni cambia el tamaño final.
+- **Hoja de zona:** las tarjetas de «Clima ahora», los factores y las filas del pronóstico entran
+  escalonadas y cada barra crece (`growx`) cuando su fila ya está. El corazón late al marcar y se encoge al
+  desmarcar (solo tras tocarlo) y la flecha de compartir sube y vuelve.
+- **Inicio:** las tarjetas de «Mis municipios» entran escalonadas; la que se quita se encoge y se desvanece
+  (`animate.leave` de Angular, sin librerías), y la sección entera con el último favorito.
+- **Ajustes:** tarjetas y filas escalonadas; en idioma, unidades y movimiento la píldora clara se desliza
+  bajo la opción elegida.
+- **Esqueletos:** un brillo (`::after` desplazado con `transform`) en lugar del latido.
 
 ### 3. App en Android (emulador o celular)
 ```
