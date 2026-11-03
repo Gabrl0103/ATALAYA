@@ -17,10 +17,18 @@ function setup(saved: string | null, storage: Partial<SettingsStorage> = {}) {
 }
 
 describe('SettingsStore', () => {
-  it('starts with automatic language and motion, °C, km/h and vibration on', async () => {
+  it('starts with automatic language and motion, °C, km/h, vibration on and the alerts off', async () => {
     const { store } = setup(null);
     await store.load();
-    expect(store.settings()).toEqual({ language: 'auto', temperature: 'c', wind: 'kmh', motion: 'auto', haptics: true });
+    expect(store.settings()).toEqual({
+      language: 'auto',
+      temperature: 'c',
+      wind: 'kmh',
+      motion: 'auto',
+      haptics: true,
+      alerts: false,
+      alertThreshold: 'high',
+    });
   });
 
   it('reads what was saved', async () => {
@@ -31,6 +39,13 @@ describe('SettingsStore', () => {
     expect(store.wind()).toBe('mph');
     expect(store.motion()).toBe('reduced');
     expect(store.haptics()).toBe(false);
+  });
+
+  it('reads the saved alerts and their threshold', async () => {
+    const { store } = setup('{"alerts":true,"alertThreshold":"extreme"}');
+    await store.load();
+    expect(store.alerts()).toBe(true);
+    expect(store.alertThreshold()).toBe('extreme');
   });
 
   it('saves every change with the rest of the settings', async () => {
@@ -59,6 +74,7 @@ describe('SettingsStore', () => {
 describe('parseSettings', () => {
   it('falls back to the default of each value that is missing, unknown or broken', () => {
     expect(parseSettings('{"language":"fr","temperature":"f","haptics":"yes"}')).toEqual({ ...DEFAULT_SETTINGS, temperature: 'f' });
+    expect(parseSettings('{"alerts":"yes","alertThreshold":"low"}')).toEqual(DEFAULT_SETTINGS);
     expect(parseSettings('not json')).toEqual(DEFAULT_SETTINGS);
     expect(parseSettings('[1,2]')).toEqual(DEFAULT_SETTINGS);
     expect(parseSettings(null)).toEqual(DEFAULT_SETTINGS);
