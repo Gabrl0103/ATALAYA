@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "model": "logistic-regression",
+  "calibration": "platt",
+  "label": "VIIRS hotspot <= 25 km of the municipal seat in the next 72 h",
+  "trainedAt": "2026-10-03T22:32:28+00:00",
+  "periods": {
+    "train": [
+      "2019-01-01",
+      "2023-12-31"
+    ],
+    "validation": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "test": [
+      "2025-01-01",
+      "2026-09-29"
+    ]
+  },
+  "evaluation": {
+    "openMeteoMapped": {
+      "rows": 40176,
+      "positiveRate": 0.1561,
+      "rocAuc": 0.8424,
+      "prAuc": 0.496,
+      "brier": 0.1004
+    },
+    "power": {
+      "rows": 40768,
+      "positiveRate": 0.1555,
+      "rocAuc": 0.8531,
+      "prAuc": 0.5116,
+      "brier": 0.0996
+    }
+  },
+  "brierBaseRate": 0.131,
+  "features": [
+    {
+      "name": "rain_1d_mm",
+      "coefficient": -0.1722755459311431
+    },
+    {
+      "name": "rain_3d_mm",
+      "coefficient": -0.19458854762115
+    },
+    {
+      "name": "rain_7d_mm",
+      "coefficient": 0.13455942859921846
+    },
+    {
+      "name": "rain_14d_mm",
+      "coefficient": 0.015377773899453356
+    },
+    {
+      "name": "rain_30d_mm",
+      "coefficient": -0.20869245641711265
+    },
+    {
+      "name": "dry_days",
+      "coefficient": 0.032755338128547314
+    },
+    {
+      "name": "temperature_mean_c",
+      "coefficient": 0.019646353715569866
+    },
+    {
+      "name": "temperature_max_c",
+      "coefficient": -0.09479606954459313
+    },
+    {
+      "name": "temperature_range_c",
+      "coefficient": -0.2236442240893615
+    },
+    {
+      "name": "temperature_trend_7d_c",
+      "coefficient": 0.0073989823932458934
+    },
+    {
+      "name": "humidity_mean_pct",
+      "coefficient": -0.48197158454086153
+    },
+    {
+      "name": "humidity_7d_pct",
+      "coefficient": -0.4106954315124959
+    },
+    {
+      "name": "wind_max_ms",
+      "coefficient": 0.1686085337388133
+    },
+    {
+      "name": "wind_7d_ms",
+      "coefficient": 0.1940994334898459
+    },
+    {
+      "name": "evapotranspiration_mm",
+      "coefficient": 0.309677368911402
+    },
+    {
+      "name": "water_balance_30d_mm",
+      "coefficient": 0.41241509284518546
+    },
+    {
+      "name": "surface_soil_wetness",
+      "coefficient": -0.03123145625605253
+    },
+    {
+      "name": "hotspots_zone_1d",
+      "coefficient": 0.029470191832173413
+    },
+    {
+      "name": "hotspots_zone_7d",
+      "coefficient": 0.06062682306952541
+    },
+    {
+      "name": "hotspots_zone_30d",
+      "coefficient": 0.26572574279630384
+    },
+    {
+      "name": "hotspots_ring_7d",
+      "coefficient": 0.058143921032878715
+    },
+    {
+      "name": "hotspots_ring_30d",
+      "coefficient": 0.33595061529327225
+    },
+    {
+      "name": "day_of_year_sin",
+      "coefficient": -0.09204295735944132
+    },
+    {
+      "name": "day_of_year_cos",
+      "coefficient": 0.13379422784958128
+    },
+    {
+      "name": "zone_hotspot_days_per_year",
+      "coefficient": 1.2314453964314274
+    }
+  ]
+}
