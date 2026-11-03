@@ -262,6 +262,28 @@ Degradado del mapa: 165°, de `map` a `map-deep` (66 %). Cubierta de la hoja de 
 
 ## 13. Registro de cambios
 
+- **2026-11-03 (v0.33, rama `feat/how-it-works-alerts`):** «Cómo funciona», métricas del modelo y alertas
+  locales.
+  - «Cómo funciona» (`/how-it-works`, desde Inicio y Acerca de): flujo de los datos, cortes de los niveles,
+    lo que Atalaya no es y sus límites. Métricas reales del modelo v1.0.0 en un archivo versionado de la app
+    (copiado de `risk-model-1.0.0.json` y `docs/ML.md`, con un test del backend que lo mantiene igual):
+    ROC-AUC 0,842, PR-AUC 0,496 y Brier 0,100 con Open-Meteo ajustado (POWER: 0,853 / 0,512 / 0,100), tasa
+    base 15,6 %, y los seis factores de mayor coeficiente estandarizado. Acerca de resume la versión,
+    ROC-AUC y PR-AUC.
+  - Alertas locales con `@capacitor/local-notifications` 8.3.1, sin servidor ni push: se revisan al llegar
+    la lista de zonas (al abrir la app o al volver tras 10 min), solo de favoritos, una por subida de nivel
+    al umbral (Alto o Extremo), con el pronóstico solo si respondió el modelo; tocar una abre el mapa. Con la
+    app cerrada no llegan, y Ajustes lo dice. Se descartó `@capacitor/background-runner` (mínimo 15 min sin
+    hora fija, Doze y ahorro de batería, lógica duplicada en otro motor).
+  - Permiso: `POST_NOTIFICATIONS` declarado y pedido solo al activar, tras explicarlo; si se niega, el
+    interruptor vuelve a apagado con cómo activarlo en el teléfono. Se quita `SCHEDULE_EXACT_ALARM` (lo
+    agrega el plugin): las alertas salen al instante con `isExactNotification: false`, que además evita que
+    el plugin abra la pantalla de alarmas. Icono monocromo `ic_stat_atalaya`.
+  - En el navegador, `@capacitor/core` creaba dos instancias del plugin web si dos llamadas llegaban a la vez
+    al arrancar, y el oyente del toque quedaba en la descartada: ahora se registra primero y las demás
+    llamadas lo esperan.
+  - El aviso del bundle inicial sube de 650 a 700 kB (663 kB, ~162 kB comprimido): los diccionarios es/en
+    crecen y el servicio de alertas arranca con la app.
 - **2026-11-03 (v0.32, rama `fix/forecast-note-animations`):** la nota del pronóstico ya no tapa las filas y
   animaciones en los apartados nuevos.
   - Causa: desde la v0.31 el molde y la respuesta del pronóstico comparten la celda 1/1 de `.forecast-body`,

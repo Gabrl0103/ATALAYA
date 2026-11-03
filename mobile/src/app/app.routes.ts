@@ -19,5 +19,10 @@ export const routes: Routes = [
     path: 'settings',
     loadComponent: () => import('./presentation/pages/settings/settings.page').then((m) => m.SettingsPage),
   },
+  // Not a tab either: opened from Inicio and from Ajustes > Acerca de.
+  {
+    path: 'how-it-works',
+    loadComponent: () => import('./presentation/pages/how-it-works/how-it-works.page').then((m) => m.HowItWorksPage),
+  },
   { path: '**', redirectTo: 'home' },
 ];

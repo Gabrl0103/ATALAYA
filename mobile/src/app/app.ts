@@ -1,5 +1,6 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular';
+import { LocalAlerts } from './core/alerts/local-alerts';
 import { AppCurtain } from './core/app-curtain';
 import { OnboardingFlag } from './core/onboarding-flag';
 import { Motion } from './core/motion';
@@ -37,6 +38,8 @@ export class App {
     // Started here so <html lang> follows the language from the first screen.
     inject(I18n);
     inject(Motion);
+    // From the start: a tap on an alert (even one that opened the app) goes to its zone on the map.
+    inject(LocalAlerts);
     // Se resuelve mucho antes de que termine la splash, así que la introducción ya está debajo al desvanecerse.
     const onboarding = inject(OnboardingFlag);
     void onboarding.isDone().then((done) => this.showOnboarding.set(!done));

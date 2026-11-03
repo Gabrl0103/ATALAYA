@@ -77,6 +77,12 @@
   font-weight: 600;
 }
 .action.danger { border-color: transparent; background: var(--risk-extreme); }
+.action.primary { border-color: transparent; background: var(--text); color: var(--ink); }
+
+/* Alertas: el interruptor se apaga sin favoritos; el aviso de permiso negado va en ámbar. */
+.switch:disabled { opacity: 0.4; cursor: default; }
+.notice { margin: 4px 0 8px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 179, 71, 0.12); color: var(--amber); font-size: 13px; line-height: 1.4; }
+.limits { padding-top: 10px; border-top: 1px solid var(--glass-border); }
 .row > div { min-width: 0; padding: 8px 0; }
 .confirm { padding: 12px 0; display: grid; gap: 10px; border-top: 1px solid var(--glass-border); }
 .confirm p { margin: 0; font-size: 15px; }
@@ -87,6 +93,8 @@
 .about p { margin: 6px 0 0; font-size: 14px; line-height: 1.45; color: var(--text-2); }
 .about .version { margin: 0; color: var(--text); }
 .about .disclaimer { color: var(--text); font-weight: 600; }
+.about .model-summary { font-family: var(--font-mono); font-size: 13px; }
+.about .how-row { margin-top: 10px; border-top: 1px solid var(--glass-border); }
 .sources { margin: 0; padding: 0; list-style: none; }
 .sources li { padding: 10px 0; display: grid; gap: 3px; font-size: 14px; }
 .sources li + li { border-top: 1px solid var(--glass-border); }

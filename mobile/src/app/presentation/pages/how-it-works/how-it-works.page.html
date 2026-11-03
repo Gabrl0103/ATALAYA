@@ -1,0 +1,79 @@
+<app-lava-bg />
+
+<div class="page-scroll">
+  <header class="head anim-up">
+    <button type="button" class="back" [attr.aria-label]="'settings.back' | t" (click)="back()">
+      <app-icon name="chevron-left" [size]="24" />
+    </button>
+    <h1 class="page-title">{{ 'how.title' | t }}</h1>
+  </header>
+  <p class="intro anim-up" style="--i: 1">{{ 'how.intro' | t }}</p>
+
+  <section class="glass-card group anim-up" style="--i: 2" aria-labelledby="flow-title">
+    <h2 id="flow-title" class="group-title">{{ 'how.flowTitle' | t }}</h2>
+    <ol class="flow">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="step anim-up" [style.--i]="3 + i">
+          <span class="step-icon"><app-icon [name]="step.icon" [size]="20" /></span>
+          <div class="step-body">
+            <h3>{{ step.title | t }}</h3>
+            <p>{{ step.text | t }}</p>
+            @if (i === 0) {
+              <ul class="chips">
+                @for (source of sources; track source) {
+                  <li>{{ source }}</li>
+                }
+              </ul>
+            }
+            @if (step.title === 'how.step.score') {
+              <ul class="weights">
+                @for (factor of weights; track factor.label; let w = $index) {
+                  <li>
+                    <span>{{ factor.label | t }}</span>
+                    <b class="mono">{{ factor.weight }} %</b>
+                    <span class="track" aria-hidden="true">
+                      <span class="anim-growx" [style.--i]="5 + w" [style.width.%]="factor.weight * 2"></span>
+                    </span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section class="glass-card group anim-up" style="--i: 3" aria-labelledby="levels-title">
+    <h2 id="levels-title" class="group-title">{{ 'how.levelsTitle' | t }}</h2>
+    <p class="hint">{{ 'how.levelsText' | t }}</p>
+    <ul class="levels">
+      @for (range of levels; track range.level; let i = $index) {
+        <li class="anim-up" [style.--i]="4 + i">
+          <app-risk-badge [level]="range.level" />
+          <b class="mono">{{ range.from }}–{{ range.to }}</b>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="glass-card group anim-up" style="--i: 4" aria-labelledby="not-title">
+    <h2 id="not-title" class="group-title">{{ 'how.notTitle' | t }}</h2>
+    <ul class="bullets">
+      @for (item of notItems; track item) {
+        <li>{{ item | t }}</li>
+      }
+    </ul>
+  </section>
+
+  <app-model-metrics class="anim-up" style="--i: 5" />
+
+  <section class="glass-card group anim-up" style="--i: 6" aria-labelledby="limits-title">
+    <h2 id="limits-title" class="group-title">{{ 'how.limitsTitle' | t }}</h2>
+    <ul class="bullets">
+      @for (item of limits; track item) {
+        <li>{{ item | t }}</li>
+      }
+    </ul>
+  </section>
+</div>

@@ -1,6 +1,13 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import type { PermissionState } from '@capacitor/core';
+import { of } from 'rxjs';
+import { NOTIFIER } from '../../../core/alerts/notifier';
+import { fakeNotifier } from '../../../core/alerts/notifier.testing';
 import { OnboardingFlag } from '../../../core/onboarding-flag';
+import type { ZoneRiskSummary } from '../../../domain/model/risk';
+import { ForecastRepository } from '../../../domain/repository/repositories';
 import { FAVORITES_STORAGE, FavoritesStore } from '../../../state/favorites.store';
 import { SettingsStore } from '../../../state/settings.store';
 import { ZonesStore } from '../../../state/zones.store';
@@ -8,13 +15,27 @@ import { SettingsPage, placeThumbs } from './settings.page';
 
 const text = (el: Element | null | undefined): string => el?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 
-function render(savedFavorites: string | null = null) {
-  const zones = { clearCache: vi.fn() };
+const PASTO: ZoneRiskSummary = { id: 'pasto', name: 'Pasto', latitude: 1.21, longitude: -77.28, score: 62, level: 'high' };
+
+/** `answer` is what the notification permission dialog says. */
+function render(savedFavorites: string | null = null, answer: PermissionState = 'granted') {
+  // What LocalAlerts reads of the zones too: Pasto in Alto, just loaded.
+  const zones = {
+    clearCache: vi.fn(),
+    zones: signal([PASTO]),
+    updatedAt: signal(new Date()),
+    loading: signal(false),
+    load: vi.fn(),
+    select: vi.fn(),
+  };
+  const notifier = fakeNotifier(answer);
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
       { provide: ZonesStore, useValue: zones },
       { provide: FAVORITES_STORAGE, useValue: { read: async () => savedFavorites, write: async () => undefined } },
+      { provide: NOTIFIER, useValue: notifier },
+      { provide: ForecastRepository, useValue: { forecast: () => of() } },
     ],
   });
   const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
@@ -24,7 +45,16 @@ function render(savedFavorites: string | null = null) {
   const settings = TestBed.inject(SettingsStore);
   const radios = (group: string) => [...host.querySelectorAll<HTMLButtonElement>(`[aria-labelledby="${group}"] [role="radio"]`)];
   const checked = (group: string) => radios(group).filter((b) => b.getAttribute('aria-checked') === 'true').map(text);
-  return { fixture, host, settings, navigate, radios, checked, zones };
+  return { fixture, host, settings, navigate, radios, checked, zones, notifier };
+}
+
+/** Lets the switch's promises (permission, saving, first check) finish and draws again. */
+async function settle(fixture: { whenStable(): Promise<unknown>; detectChanges(): void }) {
+  for (let i = 0; i < 3; i++) {
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve));
+    fixture.detectChanges();
+  }
 }
 
 describe('SettingsPage', () => {
@@ -119,6 +149,92 @@ describe('SettingsPage', () => {
     placeThumbs(root);
     expect(thumb.style.transform).toBe('translateX(4px)');
     expect(thumb.style.width).toBe('109px');
+  });
+
+  describe('Alertas', () => {
+    const card = (host: HTMLElement) => host.querySelector<HTMLElement>('[aria-labelledby="alerts-title"]')!;
+    const toggle = (host: HTMLElement) => card(host).querySelector<HTMLButtonElement>('[role="switch"]')!;
+
+    it('explains them, and does not let them on, without favorites', async () => {
+      const { fixture, host } = render();
+      await settle(fixture);
+      expect(toggle(host).disabled).toBe(true);
+      expect(toggle(host).getAttribute('aria-checked')).toBe('false');
+      expect(text(card(host).querySelector('.hint'))).toBe('Marca municipios con el corazón de su hoja para recibir alertas de ellos.');
+      expect(text(card(host).querySelector('.limits'))).toContain('con la app cerrada no llegan');
+    });
+
+    it('asks for the permission only after explaining it, and then warns about a favorite in Alto', async () => {
+      const { fixture, host, settings, notifier } = render('["pasto"]');
+      await settle(fixture);
+      toggle(host).click();
+      fixture.detectChanges();
+      expect(notifier.requests).toBe(0); // first the explanation
+      expect(text(card(host).querySelector('.confirm p'))).toContain('Atalaya te pedirá permiso para mostrar notificaciones');
+
+      card(host).querySelector<HTMLButtonElement>('.confirm .primary')!.click();
+      await settle(fixture);
+      expect(notifier.requests).toBe(1);
+      expect(settings.alerts()).toBe(true);
+      expect(toggle(host).getAttribute('aria-checked')).toBe('true');
+      expect(notifier.shown.map((n) => n.title)).toEqual(['Pasto: riesgo Alto']);
+      const thresholds = [...card(host).querySelectorAll('[aria-labelledby="threshold-label"] [role="radio"]')];
+      expect(thresholds.map(text)).toEqual(['Alto', 'Extremo']);
+      expect(thresholds[0]!.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('goes back off and says how to allow it when the permission is denied', async () => {
+      const { fixture, host, settings, notifier } = render('["pasto"]', 'denied');
+      await settle(fixture);
+      toggle(host).click();
+      fixture.detectChanges();
+      card(host).querySelector<HTMLButtonElement>('.confirm .primary')!.click();
+      await settle(fixture);
+      expect(settings.alerts()).toBe(false);
+      expect(toggle(host).getAttribute('aria-checked')).toBe('false');
+      expect(text(card(host).querySelector('.notice'))).toContain('Aplicaciones > Atalaya > Notificaciones');
+      expect(notifier.shown).toEqual([]);
+    });
+
+    it('sends the test notification and changes the threshold', async () => {
+      const { fixture, host, settings, notifier } = render('["pasto"]');
+      await settle(fixture);
+      toggle(host).click();
+      fixture.detectChanges();
+      card(host).querySelector<HTMLButtonElement>('.confirm .primary')!.click();
+      await settle(fixture);
+
+      const testRow = [...card(host).querySelectorAll('.row')].find((row) => text(row).includes('Probar notificación'))!;
+      testRow.querySelector<HTMLButtonElement>('button')!.click();
+      await settle(fixture);
+      expect(notifier.shown.at(-1)?.title).toBe('Notificación de prueba');
+      expect(text(testRow.querySelector('.hint'))).toBe('Enviada: revisa tus notificaciones.');
+
+      card(host).querySelectorAll<HTMLButtonElement>('[aria-labelledby="threshold-label"] button')[1]!.click();
+      await settle(fixture);
+      expect(settings.alertThreshold()).toBe('extreme');
+    });
+
+    it('turns them off when the favorites are cleared', async () => {
+      const { fixture, host, settings } = render('["pasto"]');
+      await settle(fixture);
+      await settings.update({ alerts: true });
+      fixture.detectChanges();
+      host.querySelector<HTMLButtonElement>('[aria-labelledby="data-title"] .row .action')!.click();
+      fixture.detectChanges();
+      host.querySelector<HTMLButtonElement>('[aria-labelledby="data-title"] .confirm .danger')!.click();
+      await settle(fixture);
+      expect(settings.alerts()).toBe(false);
+    });
+  });
+
+  it('sums up the real metrics of the model in Acerca de and opens «Cómo funciona»', () => {
+    const { host, navigate } = render();
+    expect(text(host.querySelector('.about .model-summary'))).toBe(
+      'Modelo v1.0.0: ROC-AUC 0,842 y PR-AUC 0,496 con el clima de Open-Meteo ajustado, evaluado con datos de 2025 a 2026.',
+    );
+    host.querySelector<HTMLButtonElement>('.about .how-row button')!.click();
+    expect(navigate).toHaveBeenCalledWith('/how-it-works');
   });
 
   it('asks before clearing the favorites, in the same row', async () => {
