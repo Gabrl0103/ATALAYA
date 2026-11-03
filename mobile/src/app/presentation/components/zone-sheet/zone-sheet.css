@@ -67,12 +67,20 @@ h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spac
   border-radius: 50%;
   background: var(--glass-bg);
   color: var(--text);
+  transition: transform 0.2s var(--ease-out);
 }
+.icon-action:active { transform: scale(0.92); }
 .favorite-toggle.is-on { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 45%, transparent); }
-@media (prefers-reduced-motion: no-preference) {
-  .favorite-toggle.is-on app-icon { animation: heart-pop 0.32s var(--ease-out); }
-}
+/* Tras tocarlo: late al marcar, se encoge al desmarcar. Solo transform; base.css lo apaga con movimiento reducido. */
+.favorite-toggle.is-touched.is-on app-icon { animation: heart-pop 0.32s var(--ease-out); }
+.favorite-toggle.is-touched:not(.is-on) app-icon { animation: heart-release 0.32s var(--ease-out); }
 @keyframes heart-pop { 50% { transform: scale(1.25); } }
+@keyframes heart-release { 50% { transform: scale(0.8); } }
+/* Compartir: la flecha sube y vuelve. */
+.share-button.is-shared-a app-icon { animation: share-lift-a 0.36s var(--ease-out); }
+.share-button.is-shared-b app-icon { animation: share-lift-b 0.36s var(--ease-out); }
+@keyframes share-lift-a { 45% { transform: translateY(-4px); } }
+@keyframes share-lift-b { 45% { transform: translateY(-4px); } }
 
 .score-ring {
   position: relative;

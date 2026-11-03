@@ -100,17 +100,27 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
               <p>Nariño{{ updated() }}</p>
               <div class="zone-meta">
                 <app-risk-badge [level]="risk().level" />
+                <!-- is-touched: the heart only beats after a tap (not when the sheet opens on a favorite). -->
                 <button
                   type="button"
                   class="icon-action favorite-toggle"
                   [class.is-on]="favorite()"
+                  [class.is-touched]="favoriteTouched()"
                   [attr.aria-pressed]="favorite()"
                   [attr.aria-label]="(favorite() ? 'sheet.removeFavorite' : 'sheet.addFavorite') | t"
-                  (click)="favoriteToggled.emit()"
+                  (click)="toggleFavorite()"
                 >
                   <app-icon [name]="favorite() ? 'heart-filled' : 'heart'" [size]="22" />
                 </button>
-                <button type="button" class="icon-action share-button" [attr.aria-label]="'sheet.share' | t" (click)="shareRequested.emit()">
+                <!-- Two classes in turn: each tap changes the animation, so it plays again. -->
+                <button
+                  type="button"
+                  class="icon-action share-button"
+                  [class.is-shared-a]="shareTaps() % 2 === 1"
+                  [class.is-shared-b]="shareTaps() > 0 && shareTaps() % 2 === 0"
+                  [attr.aria-label]="'sheet.share' | t"
+                  (click)="share()"
+                >
                   <app-icon name="share" [size]="20" />
                 </button>
               </div>
@@ -273,6 +283,21 @@ export class ZoneSheet implements OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.closeTimer);
+  }
+
+  /** The heart was tapped in this sheet: from now on marking and unmarking animate it. */
+  protected readonly favoriteTouched = signal(false);
+  /** Taps on «Compartir», for its short lift. */
+  protected readonly shareTaps = signal(0);
+
+  protected toggleFavorite(): void {
+    this.favoriteTouched.set(true);
+    this.favoriteToggled.emit();
+  }
+
+  protected share(): void {
+    this.shareTaps.update((taps) => taps + 1);
+    this.shareRequested.emit();
   }
 
   protected toggle(): void {
