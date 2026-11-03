@@ -3,7 +3,7 @@ import { Component, input } from '@angular/core';
 export type IconName =
   | 'search' | 'crosshair' | 'map' | 'history' | 'flame' | 'x' | 'chevron-right' | 'chevron-left'
   | 'map-pin' | 'calendar' | 'alert' | 'wind' | 'thermometer' | 'droplet' | 'home' | 'bars' | 'wifi'
-  | 'heart' | 'heart-filled' | 'share' | 'settings';
+  | 'heart' | 'heart-filled' | 'share' | 'settings' | 'columns';
 
 /** Small inline SVG icon set (24x24, stroke). Keeps the APK free of icon fonts. */
 @Component({
@@ -58,6 +58,9 @@ export type IconName =
         @case ('share') {
           <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
           <path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98" />
+        }
+        @case ('columns') {
+          <rect x="3" y="4" width="7" height="16" rx="1.5" /><rect x="14" y="4" width="7" height="16" rx="1.5" />
         }
         @case ('settings') {
           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />

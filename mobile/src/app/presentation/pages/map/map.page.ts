@@ -20,6 +20,7 @@ import { shareText } from '../../../domain/util/share-text';
 import { I18n } from '../../../i18n/i18n';
 import { TranslatePipe } from '../../../i18n/t.pipe';
 import type { MessageKey } from '../../../i18n/translate';
+import { CompareStore } from '../../../state/compare.store';
 import { FavoritesStore } from '../../../state/favorites.store';
 import { ZonesStore } from '../../../state/zones.store';
 import { AppIcon } from '../../components/app-icon/app-icon';
@@ -76,6 +77,7 @@ const SEAT_OFFSET: [number, number] = [0, -150];
 export class MapPage implements AfterViewInit, OnDestroy {
   protected readonly store = inject(ZonesStore);
   protected readonly favorites = inject(FavoritesStore);
+  protected readonly compare = inject(CompareStore);
   private readonly router = inject(Router);
   private readonly searchRequest = inject(SearchRequest);
   private readonly curtain = inject(AppCurtain);
@@ -315,6 +317,12 @@ export class MapPage implements AfterViewInit, OnDestroy {
     clearTimeout(this.noticeTimer);
     this.shareNotice.set(this.i18n.t(notice));
     this.noticeTimer = setTimeout(() => this.shareNotice.set(null), NOTICE_MS);
+  }
+
+  /** Adds the zone to «Comparar» (if there is room; if not, «Comparar» offers it) and opens it. */
+  protected compareZone(zoneId: string): void {
+    this.compare.add(zoneId);
+    void this.router.navigateByUrl('/compare');
   }
 
   protected openHistory(zoneId: string): void {

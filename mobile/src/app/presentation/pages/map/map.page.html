@@ -91,6 +91,8 @@
     (favoriteToggled)="toggleFavorite(zone.id)"
     [notice]="shareNotice()"
     (shareRequested)="shareZone(zone)"
+    [compared]="compare.has(zone.id)"
+    (compareRequested)="compareZone(zone.id)"
     (forecastRetry)="store.retryForecast()"
     (closed)="closeSheet()"
     (historyRequested)="openHistory(zone.id)"

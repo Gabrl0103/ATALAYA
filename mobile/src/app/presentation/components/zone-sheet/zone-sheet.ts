@@ -113,6 +113,16 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
                   <app-icon [name]="favorite() ? 'heart-filled' : 'heart'" [size]="22" />
                 </button>
                 <!-- Two classes in turn: each tap changes the animation, so it plays again. -->
+                <!-- «Comparar»: adds the zone and opens /compare (or just opens it when the zone is already there). -->
+                <button
+                  type="button"
+                  class="icon-action compare-button"
+                  [class.is-on]="compared()"
+                  [attr.aria-label]="(compared() ? 'compare.inComparison' : 'compare.openAria') | t: { name: risk().name }"
+                  (click)="compareRequested.emit()"
+                >
+                  <app-icon name="columns" [size]="20" />
+                </button>
                 <button
                   type="button"
                   class="icon-action share-button"
@@ -252,6 +262,9 @@ export class ZoneSheet implements OnDestroy {
   /** Whether the zone is among «Mis municipios»; the heart only asks the page to change it. */
   readonly favorite = input(false);
   readonly favoriteToggled = output<void>();
+  /** Whether the zone is already in «Comparar»; the button only asks the page to add it and open it. */
+  readonly compared = input(false);
+  readonly compareRequested = output<void>();
   /** «Compartir»: the page builds the text with the data on screen and sends it. */
   readonly shareRequested = output<void>();
   /** A short notice over the map («Copiado»); null hides it. */
