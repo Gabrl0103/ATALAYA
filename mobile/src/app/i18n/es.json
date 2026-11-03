@@ -267,5 +267,10 @@
   "home.howLink": "Cómo funciona Atalaya",
   "about.modelSummary": "Modelo v{version}: ROC-AUC {rocAuc} y PR-AUC {prAuc} con el clima de Open-Meteo ajustado, evaluado con datos de {from} a {to}.",
   "settings.howItWorks": "Cómo funciona",
-  "settings.howItWorksHint": "Datos, modelo, métricas y límites."
+  "settings.howItWorksHint": "Datos, modelo, métricas y límites.",
+  "alerts.title": "{name}: riesgo {level}",
+  "alerts.body": "Puntaje {score}/100. Toca para verlo en el mapa.",
+  "alerts.bodyForecast": "Puntaje {score}/100. Pronóstico: {percent} de probabilidad de focos de calor en las 72 h siguientes. Toca para verlo en el mapa.",
+  "alerts.testTitle": "Notificación de prueba",
+  "alerts.testBody": "Así llegarán las alertas de tus municipios favoritos."
 }

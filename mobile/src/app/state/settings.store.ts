@@ -8,6 +8,8 @@ export type TemperatureUnit = 'c' | 'f';
 export type WindUnit = 'kmh' | 'mph';
 /** 'auto' follows the phone's prefers-reduced-motion; 'reduced' turns the motion off whatever it says. */
 export type MotionSetting = 'auto' | 'reduced';
+/** «Alertas»: the lowest level of a favorite that warns. */
+export type AlertThreshold = 'high' | 'extreme';
 
 export interface Settings {
   readonly language: LanguageSetting;
@@ -15,9 +17,20 @@ export interface Settings {
   readonly wind: WindUnit;
   readonly motion: MotionSetting;
   readonly haptics: boolean;
+  /** Local alerts about the favorites; off until turned on (it asks for the notification permission). */
+  readonly alerts: boolean;
+  readonly alertThreshold: AlertThreshold;
 }
 
-export const DEFAULT_SETTINGS: Settings = { language: 'auto', temperature: 'c', wind: 'kmh', motion: 'auto', haptics: true };
+export const DEFAULT_SETTINGS: Settings = {
+  language: 'auto',
+  temperature: 'c',
+  wind: 'kmh',
+  motion: 'auto',
+  haptics: true,
+  alerts: false,
+  alertThreshold: 'high',
+};
 
 /** Where the settings are kept: Preferences (native storage on the phone, localStorage in the browser). */
 export interface SettingsStorage {
@@ -51,6 +64,8 @@ export function parseSettings(value: string | null): Settings {
     wind: pick(saved['wind'], ['kmh', 'mph'], DEFAULT_SETTINGS.wind),
     motion: pick(saved['motion'], ['auto', 'reduced'], DEFAULT_SETTINGS.motion),
     haptics: typeof saved['haptics'] === 'boolean' ? saved['haptics'] : DEFAULT_SETTINGS.haptics,
+    alerts: typeof saved['alerts'] === 'boolean' ? saved['alerts'] : DEFAULT_SETTINGS.alerts,
+    alertThreshold: pick(saved['alertThreshold'], ['high', 'extreme'], DEFAULT_SETTINGS.alertThreshold),
   };
 }
 
@@ -65,6 +80,8 @@ export class SettingsStore {
   readonly wind = computed(() => this.settings().wind);
   readonly motion = computed(() => this.settings().motion);
   readonly haptics = computed(() => this.settings().haptics);
+  readonly alerts = computed(() => this.settings().alerts);
+  readonly alertThreshold = computed(() => this.settings().alertThreshold);
 
   private loading?: Promise<void>;
 

@@ -267,5 +267,10 @@
   "home.howLink": "How Atalaya works",
   "about.modelSummary": "Model v{version}: ROC-AUC {rocAuc} and PR-AUC {prAuc} with the adjusted Open-Meteo weather, evaluated on data from {from} to {to}.",
   "settings.howItWorks": "How it works",
-  "settings.howItWorksHint": "Data, model, metrics and limits."
+  "settings.howItWorksHint": "Data, model, metrics and limits.",
+  "alerts.title": "{name}: {level} risk",
+  "alerts.body": "Score {score}/100. Tap to see it on the map.",
+  "alerts.bodyForecast": "Score {score}/100. Forecast: {percent} probability of heat spots in the next 72 h. Tap to see it on the map.",
+  "alerts.testTitle": "Test notification",
+  "alerts.testBody": "This is how the alerts about your favorite municipalities will look."
 }
