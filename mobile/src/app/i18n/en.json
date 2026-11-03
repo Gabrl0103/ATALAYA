@@ -320,5 +320,19 @@
   "compare.dryDays": "Days without rain",
   "compare.open": "Compare",
   "compare.openAria": "Compare {name} with other municipalities",
-  "compare.inComparison": "{name} is already in the comparison: see it"
+  "compare.inComparison": "{name} is already in the comparison: see it",
+  "replay.open": "Heat spot history",
+  "replay.title": "Heat spot history",
+  "replay.close": "Close the heat spot history",
+  "replay.loading": "Loading the last 35 days…",
+  "replay.error": "We couldn't load the heat spot history. The map keeps the recent heat spots.",
+  "replay.count.zero": "No heat spots that day",
+  "replay.count.one": "{count} heat spot",
+  "replay.count.other": "{count} heat spots",
+  "replay.date": "Date",
+  "replay.play": "Play",
+  "replay.pause": "Pause",
+  "replay.speed": "Speed {speed}x",
+  "replay.range": "From {from} to {to}",
+  "replay.note": "Satellite heat detections (VIIRS), not confirmed fires."
 }

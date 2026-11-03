@@ -12,7 +12,7 @@ import { Haptic } from '../../../core/haptics';
 import { Motion } from '../../../core/motion';
 import { ZoneSharer, type ShareOutcome } from '../../../core/share/share-zone';
 import { SearchRequest } from '../../../core/search-request';
-import type { ZoneBoundaries, ZoneRiskSummary } from '../../../domain/model/risk';
+import type { HistoryHotspot, ZoneBoundaries, ZoneRiskSummary } from '../../../domain/model/risk';
 import { averagePerYear } from '../../../domain/util/fire-history';
 import { nearbySummary, type NearbySummary } from '../../../domain/util/nearby';
 import { formatTime } from '../../../domain/util/format';
@@ -24,6 +24,7 @@ import { CompareStore } from '../../../state/compare.store';
 import { FavoritesStore } from '../../../state/favorites.store';
 import { ZonesStore } from '../../../state/zones.store';
 import { AppIcon } from '../../components/app-icon/app-icon';
+import { HotspotReplay } from '../../components/hotspot-replay/hotspot-replay';
 import { MapOverviewSheet } from '../../components/map-overview-sheet/map-overview-sheet';
 import { NearbyCard } from '../../components/nearby-card/nearby-card';
 import { SearchBox } from '../../components/search-box/search-box';
@@ -35,9 +36,9 @@ import {
   globeHalo, globeStart, hasWebGL, introPlan, narinoPadding, readIntroPlayed, rememberIntroPlayed, spinCenter,
 } from './map-camera';
 import {
-  BOUNDARIES_SOURCE, DEPARTMENT_SOURCE, HIGHLIGHT_SOURCE, HOTSPOTS_SOURCE, ZONE_FILL_LAYER, ZONE_SELECTED_LAYERS, boundariesSource,
-  boundaryLayers, departmentSource, highlightLayers, highlightPoint, hotspotLayers, hotspotPoints, hotspotsSource, readMapColors,
-  selectedZoneFilter, zoneStates, type MapColors,
+  BOUNDARIES_SOURCE, DEPARTMENT_SOURCE, HIGHLIGHT_SOURCE, HOTSPOTS_SOURCE, HOTSPOT_LAYER_IDS, REPLAY_SOURCE, ZONE_FILL_LAYER,
+  ZONE_SELECTED_LAYERS, boundariesSource, boundaryLayers, departmentSource, highlightLayers, highlightPoint, hotspotLayers,
+  hotspotPoints, hotspotsSource, readMapColors, replayLayers, replayPoints, selectedZoneFilter, zoneStates, type MapColors,
 } from './map-layers';
 import { mapStyle } from './map-style';
 import {
@@ -68,7 +69,7 @@ const SEAT_OFFSET: [number, number] = [0, -150];
 
 @Component({
   selector: 'app-map-page',
-  imports: [AppIcon, MapOverviewSheet, NearbyCard, SearchBox, TranslatePipe, ZoneSheet],
+  imports: [AppIcon, HotspotReplay, MapOverviewSheet, NearbyCard, SearchBox, TranslatePipe, ZoneSheet],
   templateUrl: './map.page.html',
   styleUrl: './map.page.css',
   // --sheet-inset: how much of the map the sheet covers, so the credits sit just above it.
@@ -118,6 +119,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   protected readonly locationError = signal<MessageKey | null>(null);
   /** «Cerca de mí», after «Mi ubicación»: it takes the place of the overview sheet until closed. */
   protected readonly nearby = signal<NearbySummary | null>(null);
+  /** «Historial de focos»: its bar takes the bottom and the map shows only the chosen day's heat spots. */
+  protected readonly replayOpen = signal(false);
   protected readonly errorKeys = API_ERROR_KEYS;
   protected readonly shareNotice = signal<string | null>(null);
   private noticeTimer?: ReturnType<typeof setTimeout>;
@@ -150,7 +153,11 @@ export class MapPage implements AfterViewInit, OnDestroy {
     });
     // Opening a zone (from the card, the search or the map) ends «Cerca de mí».
     effect(() => {
-      if (this.store.selectedId()) untracked(() => this.closeNearby());
+      if (!this.store.selectedId()) return;
+      untracked(() => {
+        this.closeNearby();
+        this.closeReplay();
+      });
     });
     effect(() => {
       if (!this.mapReady()) return;
@@ -342,6 +349,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     const { latitude, longitude } = result;
     this.showUser(latitude, longitude);
     // The card says where the person is; the zone sheet opens from it (it no longer opens by itself).
+    this.closeReplay();
     this.nearby.set(nearbySummary(latitude, longitude, this.store.zones(), this.store.hotspots(), this.store.boundaries()));
     this.flyToSeat(longitude, latitude);
   }
@@ -359,6 +367,25 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.flyToSeat(nearest.longitude, nearest.latitude);
   }
 
+  protected openReplay(): void {
+    this.closeNearby();
+    this.replayOpen.set(true);
+  }
+
+  /** The recent heat spots give way only once a day arrives: while loading or after an error they stay. */
+  protected showReplayDay(hotspots: readonly HistoryHotspot[]): void {
+    for (const id of HOTSPOT_LAYER_IDS) this.map?.setLayoutProperty(id, 'visibility', 'none');
+    this.source(REPLAY_SOURCE)?.setData(replayPoints(hotspots));
+  }
+
+  /** Back to the recent heat spots (the last 5 days), as before opening it. */
+  protected closeReplay(): void {
+    if (!this.replayOpen()) return;
+    this.replayOpen.set(false);
+    this.source(REPLAY_SOURCE)?.setData(replayPoints([]));
+    for (const id of HOTSPOT_LAYER_IDS) this.map?.setLayoutProperty(id, 'visibility', 'visible');
+  }
+
   protected closeNearby(): void {
     if (!this.nearby()) return;
     this.nearby.set(null);
@@ -369,6 +396,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   private addLayers(map: MapLibreMap, colors: MapColors): void {
     map.addSource(HOTSPOTS_SOURCE, hotspotsSource([]));
     for (const layer of hotspotLayers(colors)) map.addLayer(layer);
+    map.addSource(REPLAY_SOURCE, { type: 'geojson', data: replayPoints([]) });
+    for (const layer of replayLayers(colors)) map.addLayer(layer);
     map.addSource(HIGHLIGHT_SOURCE, { type: 'geojson', data: highlightPoint(null) });
     for (const layer of highlightLayers()) map.addLayer(layer);
   }

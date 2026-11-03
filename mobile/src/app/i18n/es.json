@@ -320,5 +320,19 @@
   "compare.dryDays": "Días sin lluvia",
   "compare.open": "Comparar",
   "compare.openAria": "Comparar {name} con otros municipios",
-  "compare.inComparison": "{name} ya está en la comparación: verla"
+  "compare.inComparison": "{name} ya está en la comparación: verla",
+  "replay.open": "Historial de focos",
+  "replay.title": "Historial de focos",
+  "replay.close": "Cerrar el historial de focos",
+  "replay.loading": "Cargando los últimos 35 días…",
+  "replay.error": "No pudimos cargar el historial de focos. El mapa sigue con los focos recientes.",
+  "replay.count.zero": "Sin focos de calor ese día",
+  "replay.count.one": "{count} foco de calor",
+  "replay.count.other": "{count} focos de calor",
+  "replay.date": "Fecha",
+  "replay.play": "Reproducir",
+  "replay.pause": "Pausar",
+  "replay.speed": "Velocidad {speed}x",
+  "replay.range": "Del {from} al {to}",
+  "replay.note": "Detecciones satelitales de calor (VIIRS), no incendios confirmados."
 }

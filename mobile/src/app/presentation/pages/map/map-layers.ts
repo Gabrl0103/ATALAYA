@@ -18,6 +18,10 @@ export const ZONE_SELECTED_LAYERS = [ZONE_SELECTED_GLOW_LAYER, ZONE_SELECTED_LAY
 export const HOTSPOTS_SOURCE = 'hotspots';
 /** The heat spot «Cerca de mí» points at: a ring around it while the card is open. */
 export const HIGHLIGHT_SOURCE = 'hotspot-highlight';
+/** The heat spots of one day of the replay («Historial de focos»), shown instead of the recent ones. */
+export const REPLAY_SOURCE = 'hotspot-replay';
+/** The layers of the recent heat spots, hidden while the replay is open. */
+export const HOTSPOT_LAYER_IDS = ['hotspot-halo', 'hotspot-dot'] as const;
 
 /** Colors the GL layers need as values: they come from the CSS tokens (theme/tokens.css). */
 export interface MapColors {
@@ -223,4 +227,24 @@ export function highlightLayers(): AddLayerObject[] {
     },
   };
   return [ring];
+}
+
+/** The replay's points: the same GPU circles as the recent heat spots (hundreds stay smooth). */
+export function replayPoints(points: readonly { readonly latitude: number; readonly longitude: number }[]): FeatureCollection<Point> {
+  return {
+    type: 'FeatureCollection',
+    features: points.map((point) => ({
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'Point', coordinates: [point.longitude, point.latitude] },
+    })),
+  };
+}
+
+export function replayLayers(colors: MapColors): AddLayerObject[] {
+  const [halo, dot] = hotspotLayers(colors) as [LayerOf<'circle'>, LayerOf<'circle'>];
+  return [
+    { ...halo, id: 'replay-halo', source: REPLAY_SOURCE },
+    { ...dot, id: 'replay-dot', source: REPLAY_SOURCE },
+  ];
 }
