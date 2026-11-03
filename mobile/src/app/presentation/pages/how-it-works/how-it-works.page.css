@@ -1,0 +1,69 @@
+/* «Cómo funciona»: lava de fondo y tarjetas de vidrio, como Ajustes. */
+:host { position: absolute; inset: 0; display: block; background: var(--bg); }
+.head { display: flex; align-items: center; gap: 12px; }
+.back {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--glass-bg);
+  color: var(--text);
+}
+.intro { margin: 14px 0 0; font-size: 15px; line-height: 1.45; color: var(--text-2); }
+.group { margin-top: 16px; padding: 18px; border-radius: 26px; }
+.group-title { margin: 0 0 12px; font-size: 17px; font-weight: 700; }
+.hint { margin: -4px 0 12px; font-size: 13px; line-height: 1.35; color: var(--text-2); }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+/* Pasos unidos por una línea fina, cada uno con su icono en un círculo de vidrio. */
+.step { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; }
+.step + .step { margin-top: 16px; }
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: 48px;
+  bottom: -12px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--glass-border);
+}
+.step-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--glass-bg);
+  color: var(--amber);
+}
+h3 { margin: 10px 0 0; font-size: 15px; font-weight: 700; }
+.step-body p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; color: var(--text-2); }
+
+.chips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.chips li {
+  padding: 4px 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Pesos del puntaje: la barra llena es el 50 %. */
+.weights { margin-top: 10px; display: grid; gap: 8px; }
+.weights li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; font-size: 14px; }
+.weights b { font-size: 14px; }
+.track { grid-column: 1 / -1; height: 6px; overflow: hidden; border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.1); }
+.track span { display: block; height: 100%; border-radius: inherit; background: var(--gradient-primary); }
+
+.levels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.levels li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 18px; background: rgba(255, 255, 255, 0.07); }
+.levels b { font-size: 14px; }
+
+.bullets { display: grid; gap: 10px; }
+.bullets li { position: relative; padding-left: 16px; font-size: 14px; line-height: 1.45; color: var(--text-2); }
+.bullets li::before { content: ''; position: absolute; left: 2px; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
