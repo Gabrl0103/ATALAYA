@@ -16,6 +16,12 @@ export const ZONE_SELECTED_LAYER = 'zone-selected';
 /** The layers that only draw the selected zone: map.page.ts filters them all by its id. */
 export const ZONE_SELECTED_LAYERS = [ZONE_SELECTED_GLOW_LAYER, ZONE_SELECTED_LAYER] as const;
 export const HOTSPOTS_SOURCE = 'hotspots';
+/** The heat spot «Cerca de mí» points at: a ring around it while the card is open. */
+export const HIGHLIGHT_SOURCE = 'hotspot-highlight';
+/** The heat spots of one day of the replay («Historial de focos»), shown instead of the recent ones. */
+export const REPLAY_SOURCE = 'hotspot-replay';
+/** The layers of the recent heat spots, hidden while the replay is open. */
+export const HOTSPOT_LAYER_IDS = ['hotspot-halo', 'hotspot-dot'] as const;
 
 /** Colors the GL layers need as values: they come from the CSS tokens (theme/tokens.css). */
 export interface MapColors {
@@ -195,4 +201,50 @@ export function hotspotLayers(colors: MapColors): AddLayerObject[] {
     paint: { 'circle-radius': 3.5, 'circle-color': colors.hotspot, 'circle-stroke-width': 1, 'circle-stroke-color': '#f9f9f4' },
   };
   return [halo, dot];
+}
+
+/** One point (or none) for the highlight ring. */
+export function highlightPoint(point: { readonly latitude: number; readonly longitude: number } | null): FeatureCollection<Point> {
+  return {
+    type: 'FeatureCollection',
+    features: point
+      ? [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [point.longitude, point.latitude] } }]
+      : [],
+  };
+}
+
+/** A ring in the text color, wider than the halo, so the heat spot stands out among the others. */
+export function highlightLayers(): AddLayerObject[] {
+  const ring: LayerOf<'circle'> = {
+    id: 'hotspot-highlight',
+    type: 'circle',
+    source: HIGHLIGHT_SOURCE,
+    paint: {
+      'circle-radius': 14,
+      'circle-color': 'rgba(0, 0, 0, 0)',
+      'circle-stroke-width': 2.5,
+      'circle-stroke-color': '#f9f9f4',
+    },
+  };
+  return [ring];
+}
+
+/** The replay's points: the same GPU circles as the recent heat spots (hundreds stay smooth). */
+export function replayPoints(points: readonly { readonly latitude: number; readonly longitude: number }[]): FeatureCollection<Point> {
+  return {
+    type: 'FeatureCollection',
+    features: points.map((point) => ({
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'Point', coordinates: [point.longitude, point.latitude] },
+    })),
+  };
+}
+
+export function replayLayers(colors: MapColors): AddLayerObject[] {
+  const [halo, dot] = hotspotLayers(colors) as [LayerOf<'circle'>, LayerOf<'circle'>];
+  return [
+    { ...halo, id: 'replay-halo', source: REPLAY_SOURCE },
+    { ...dot, id: 'replay-dot', source: REPLAY_SOURCE },
+  ];
 }

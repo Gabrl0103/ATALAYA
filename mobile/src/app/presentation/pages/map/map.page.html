@@ -11,18 +11,31 @@
 
 <header #header class="map-header" [class.is-covered]="store.selected()">
   <h1>{{ 'nav.map' | t }}</h1>
-  <button
-    type="button"
-    class="location-button"
-    [class.is-locating]="locating()"
-    [disabled]="locating()"
-    [attr.aria-label]="(locating() ? 'map.locating' : 'map.myLocation') | t"
-    [attr.aria-busy]="locating()"
-    [title]="(locating() ? 'map.locating' : 'map.myLocation') | t"
-    (click)="locateMe()"
-  >
-    <app-icon name="crosshair" [size]="24" />
-  </button>
+  <div class="header-actions">
+    <button
+      type="button"
+      class="location-button replay-button"
+      [class.is-on]="replayOpen()"
+      [attr.aria-label]="'replay.open' | t"
+      [attr.aria-expanded]="replayOpen()"
+      [title]="'replay.open' | t"
+      (click)="replayOpen() ? closeReplay() : openReplay()"
+    >
+      <app-icon name="flame" [size]="24" />
+    </button>
+    <button
+      type="button"
+      class="location-button"
+      [class.is-locating]="locating()"
+      [disabled]="locating()"
+      [attr.aria-label]="(locating() ? 'map.locating' : 'map.myLocation') | t"
+      [attr.aria-busy]="locating()"
+      [title]="(locating() ? 'map.locating' : 'map.myLocation') | t"
+      (click)="locateMe()"
+    >
+      <app-icon name="crosshair" [size]="24" />
+    </button>
+  </div>
 </header>
 
 @if (searchOpen()) {
@@ -33,15 +46,28 @@
 }
 
 
+<!-- One panel at the bottom at a time (#overview: the credits and the framing follow its height). -->
 @if (!store.selected()) {
-  <app-map-overview-sheet
-    #overview
-    [zoneCount]="store.zones().length"
-    [hotspotCount]="store.hotspots().length"
-    [updatedLabel]="updatedLabel()"
-    [canZoom]="!mapUnavailable()"
-    (zoomRequested)="zoomToNarino()"
-  />
+  @if (replayOpen()) {
+    <app-hotspot-replay #overview (dayShown)="showReplayDay($event)" (closed)="closeReplay()" />
+  } @else if (nearby(); as summary) {
+    <app-nearby-card
+      #overview
+      [summary]="summary"
+      (openZone)="openNearbyZone($event)"
+      (showHotspot)="showNearbyHotspot()"
+      (closed)="closeNearby()"
+    />
+  } @else {
+    <app-map-overview-sheet
+      #overview
+      [zoneCount]="store.zones().length"
+      [hotspotCount]="store.hotspots().length"
+      [updatedLabel]="updatedLabel()"
+      [canZoom]="!mapUnavailable()"
+      (zoomRequested)="zoomToNarino()"
+    />
+  }
 }
 
 @if (store.error(); as code) {
@@ -80,6 +106,8 @@
     (favoriteToggled)="toggleFavorite(zone.id)"
     [notice]="shareNotice()"
     (shareRequested)="shareZone(zone)"
+    [compared]="compare.has(zone.id)"
+    (compareRequested)="compareZone(zone.id)"
     (forecastRetry)="store.retryForecast()"
     (closed)="closeSheet()"
     (historyRequested)="openHistory(zone.id)"

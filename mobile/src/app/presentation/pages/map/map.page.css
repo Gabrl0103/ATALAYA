@@ -43,6 +43,9 @@ h1 { margin: 0; padding: 4px 10px 0; color: var(--text); font-family: var(--font
   backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 .location-button:disabled { opacity: 0.75; }
+/* «Historial de focos» junto a «Mi ubicación»; encendido mientras su barra está abierta. */
+.header-actions { display: flex; gap: 10px; }
+.replay-button.is-on { color: var(--orange); border-color: color-mix(in srgb, var(--orange) 45%, transparent); }
 .location-button app-icon { display: block; }
 .location-button.is-locating app-icon { animation: locating 1.2s linear infinite; }
 @keyframes locating { to { transform: rotate(360deg); } }

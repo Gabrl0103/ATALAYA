@@ -58,6 +58,23 @@ export interface Hotspot {
   readonly detectedAt: string;
 }
 
+/** One heat spot of the replay (GET /api/hotspots/history): a local day of Colombia and its satellite. */
+export interface HistoryHotspot {
+  readonly latitude: number;
+  readonly longitude: number;
+  /** YYYY-MM-DD */
+  readonly date: string;
+  /** "SNPP", "NOAA20" or "NOAA21". */
+  readonly satellite: string;
+}
+
+/** The days asked for (both included) and their heat spots, a fire seen by two satellites once. */
+export interface HotspotHistory {
+  readonly from: string;
+  readonly to: string;
+  readonly hotspots: readonly HistoryHotspot[];
+}
+
 export type FireSource = 'news' | 'ungrd';
 
 export interface FireEvent {

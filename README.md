@@ -180,6 +180,25 @@ Todas salen de `mobile/src/app/theme/animations.css` (`anim-up`, `anim-sheet`, `
   bajo la opción elegida.
 - **Esqueletos:** un brillo (`::after` desplazado con `transform`) en lugar del latido.
 
+#### Comparar, historial de focos y «Cerca de mí» (v0.34)
+- **Comparar** (`/compare`, carga perezosa, sin pestaña): el botón de columnas de la hoja de zona agrega el
+  municipio (hasta 3; si ya hay 3, la comparación ofrece agregarlo cuando haya lugar) y el buscador elige los
+  demás, con los favoritos primero. Nivel, puntaje, pronóstico 24/48/72 h, clima ahora (en las unidades de
+  Ajustes) y los tres factores, en columnas iguales que caben a 320 px. Se resalta el de mayor riesgo de cada
+  fila (en humedad, la más baja) salvo empates, y lo que falta (pronóstico de respaldo, clima de un backend
+  anterior) se ve como «—». La comparación vive mientras la app está abierta.
+- **Historial de focos** (botón de la llama en la cabecera del mapa): una barra con el deslizador de los
+  últimos 35 días, play/pausa y 1x/2x. El mapa muestra solo los focos del día (capa GeoJSON de MapLibre) con la
+  fecha y el conteo, y la aclaración de que son detecciones satelitales de calor, no incendios confirmados;
+  al cerrar vuelven los focos recientes. Si `GET /api/hotspots/history` falla o el backend no lo tiene, avisa
+  con «Reintentar» y el mapa sigue con los focos recientes.
+- **Cerca de mí**: tras tocar «Mi ubicación» (ya no abre la hoja sola), una tarjeta dice en qué municipio está
+  el punto según los límites del DANE (o que está fuera de Nariño, o el más cercano si los límites no
+  cargaron), su riesgo y el foco de calor de los últimos 5 días más cercano a 100 km o menos, con distancia,
+  rumbo («a 12 km al noreste») y antigüedad, o que no hay ninguno. Sus botones abren la hoja o llevan al foco.
+  Distancia (haversine), rumbo y municipio se calculan en el teléfono; las distancias van en km (Ajustes no
+  tiene unidad de distancia).
+
 ### 3. App en Android (emulador o celular)
 ```
 cd mobile
@@ -217,6 +236,7 @@ Detalle, ajuste y limitaciones en `docs/ML.md` (sección 7); cómo reproducirlo 
 - `GET /api/zones/boundaries` — límites de los 64 municipios (GeoJSON, `feature.id` = id de la zona; caché de un día con ETag).
 - `GET /api/fires?zoneId=pasto` — historial de incendios y resumen.
 - `GET /api/hotspots` — focos de calor.
+- `GET /api/hotspots/history?from=AAAA-MM-DD&to=AAAA-MM-DD` — focos de cada día (Colombia) de `hotspot_detection`, a lo sumo 35 días (por defecto, los últimos 35 hasta hoy): `{ from, to, hotspots: [{ lat, lon, date, satellite }] }`, un mismo fuego de varios satélites una vez por día. `400` con fechas inválidas, `from` después de `to`, `to` en el futuro o más de 35 días; caché de 10 min.
 
 ## Qué falta
 - Desplegar el backend (Render/Railway) y cambiar `API_BASE_URL` en `mobile/src/app/core/config/api-config.ts`.

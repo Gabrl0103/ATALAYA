@@ -1,0 +1,86 @@
+<app-lava-bg />
+
+<div class="page-scroll">
+  <header class="head anim-up">
+    <button type="button" class="round" [attr.aria-label]="'settings.back' | t" (click)="back()">
+      <app-icon name="chevron-left" [size]="24" />
+    </button>
+    <h1 class="page-title">{{ 'compare.title' | t }}</h1>
+  </header>
+
+  @if (pendingZone(); as zone) {
+    <div class="notice anim-up" role="status">
+      @if (compare.full()) {
+        <p>{{ 'compare.full' | t: { name: zone.name } }}</p>
+      } @else {
+        <button type="button" class="action primary" (click)="addPending(zone)">{{ 'compare.addPending' | t: { name: zone.name } }}</button>
+      }
+    </div>
+  }
+
+  @if (zones().length === 0) {
+    <section class="glass-card group empty anim-up" style="--i: 1">
+      <p>{{ 'compare.empty' | t }}</p>
+      <button type="button" class="action primary" [disabled]="candidates().length === 0" (click)="openPicker()">
+        {{ 'compare.pick' | t }}
+      </button>
+    </section>
+  } @else {
+    <section class="glass-card group anim-up" style="--i: 1" [style.--count]="zones().length" [attr.aria-label]="'compare.title' | t">
+      <div class="columns">
+        @for (zone of zones(); track zone.id) {
+          <div class="column-head">
+            <b>{{ zone.name }}</b>
+            <button
+              type="button"
+              class="round small"
+              [attr.aria-label]="'compare.remove' | t: { name: zone.name }"
+              (click)="remove(zone)"
+            >
+              <app-icon name="x" [size]="18" />
+            </button>
+          </div>
+        }
+      </div>
+      @if (zones().length < max) {
+        <button type="button" class="add" [attr.aria-label]="'compare.addAria' | t" (click)="openPicker()">
+          <span aria-hidden="true">+</span> {{ 'compare.add' | t }}
+        </button>
+      }
+      @if (zones().length === 1) {
+        <p class="hint">{{ 'compare.addOne' | t }}</p>
+      }
+
+      @for (group of groups(); track group.title; let g = $index) {
+        <h2 class="group-title anim-up" [style.--i]="2 + g">{{ group.title | t }}</h2>
+        @for (row of group.rows; track row.id) {
+          <div class="row anim-up" [style.--i]="2 + g">
+            <span class="row-label">{{ row.label }}</span>
+            <div class="cells">
+              @for (cell of row.cells; track $index; let i = $index) {
+                <span class="cell" [class.is-riskiest]="cell.riskiest" [class.is-missing]="cell.text === missing">
+                  <span class="sr-only">{{ zones()[i]?.name }}: </span>
+                  @if (row.id === 'level') {
+                    <app-risk-badge [level]="zones()[i]!.level" />
+                  } @else if (cell.loading) {
+                    <span class="mono skeleton skeleton-text" aria-hidden="true">00 %</span>
+                  } @else {
+                    <span class="mono">{{ cell.text }}</span>
+                  }
+                </span>
+              }
+            </div>
+          </div>
+        }
+      }
+      <p class="hint legend">{{ 'compare.highlight' | t }}</p>
+    </section>
+  }
+</div>
+
+@if (pickerOpen()) {
+  <div class="picker-backdrop" (click)="pickerOpen.set(false)"></div>
+  <div class="picker anim-up" role="search">
+    <app-search-box [zones]="candidates()" [favoriteIds]="favorites.ids()" (selected)="pick($event)" (cancelled)="pickerOpen.set(false)" />
+  </div>
+}

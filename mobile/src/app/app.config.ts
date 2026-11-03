@@ -3,8 +3,12 @@ import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalE
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular';
 import { errorInterceptor } from './core/error/error.interceptor';
-import { HttpFireRepository, HttpForecastRepository, HttpHotspotRepository, HttpZoneRepository } from './data/http-repositories';
-import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from './domain/repository/repositories';
+import {
+  HttpFireRepository, HttpForecastRepository, HttpHotspotHistoryRepository, HttpHotspotRepository, HttpZoneRepository,
+} from './data/http-repositories';
+import {
+  FireRepository, ForecastRepository, HotspotHistoryRepository, HotspotRepository, ZoneRepository,
+} from './domain/repository/repositories';
 import { routes } from './app.routes';
 import { SettingsStore } from './state/settings.store';
 
@@ -21,5 +25,6 @@ export const appConfig: ApplicationConfig = {
     { provide: FireRepository, useClass: HttpFireRepository },
     { provide: HotspotRepository, useClass: HttpHotspotRepository },
     { provide: ForecastRepository, useClass: HttpForecastRepository },
+    { provide: HotspotHistoryRepository, useClass: HttpHotspotHistoryRepository },
   ],
 };
