@@ -57,7 +57,7 @@ export const WHEN_KEYS: Record<24 | 48 | 72, MessageKey> = { 24: 'when.today', 4
       @switch (status()) {
         @case ('loading') {}
         @case ('error') {
-          <div class="forecast-state is-error" role="alert">
+          <div class="forecast-state is-error anim-up" role="alert">
             <p>{{ 'forecast.error' | t }}</p>
             <button type="button" (click)="retry.emit()">{{ 'common.retry' | t }}</button>
           </div>
@@ -65,23 +65,27 @@ export const WHEN_KEYS: Record<24 | 48 | 72, MessageKey> = { 24: 'when.today', 4
         @default {
           @if (forecast(); as data) {
             @if (data.source === 'model') {
-              <ul class="forecast-rows">
-                @for (horizon of data.horizons; track horizon.hours; let i = $index) {
-                  <li class="forecast-row" [class]="'risk-' + horizon.level">
-                    <div class="forecast-head">
-                      <span class="forecast-when"><b class="mono">{{ horizon.hours }} h</b><small>{{ whenKeys[horizon.hours] | t }}</small></span>
-                      <app-risk-badge [level]="horizon.level" />
-                      <b class="mono forecast-value">{{ percent(horizon.probability) }}</b>
-                    </div>
-                    <div class="forecast-track" aria-hidden="true">
-                      <span class="anim-growx" [style.--i]="i + 1" [style.width.%]="horizon.probability * 100"></span>
-                    </div>
-                  </li>
-                }
-              </ul>
-              <p class="forecast-note">{{ 'forecast.note' | t }}</p>
+              <!-- One child of .forecast-body: the rows and, under them, the note (as in the sizer). -->
+              <div class="forecast-model">
+                <ul class="forecast-rows">
+                  @for (horizon of data.horizons; track horizon.hours; let i = $index) {
+                    <!-- Rows come in 0.1 s apart; each bar grows once its row is there. -->
+                    <li class="forecast-row anim-up" [class]="'risk-' + horizon.level" [style.--i]="i">
+                      <div class="forecast-head">
+                        <span class="forecast-when"><b class="mono">{{ horizon.hours }} h</b><small>{{ whenKeys[horizon.hours] | t }}</small></span>
+                        <app-risk-badge [level]="horizon.level" />
+                        <b class="mono forecast-value">{{ percent(horizon.probability) }}</b>
+                      </div>
+                      <div class="forecast-track" aria-hidden="true">
+                        <span class="anim-growx" [style.--i]="i + 1" [style.width.%]="horizon.probability * 100"></span>
+                      </div>
+                    </li>
+                  }
+                </ul>
+                <p class="forecast-note anim-up" [style.--i]="data.horizons.length">{{ 'forecast.note' | t }}</p>
+              </div>
             } @else {
-              <div class="forecast-state is-fallback" role="status">
+              <div class="forecast-state is-fallback anim-up" role="status">
                 <p>{{ 'forecast.fallback' | t: { reason: reason() } }}</p>
                 <span class="forecast-current">
                   <app-risk-badge [level]="data.current.level" /><b class="mono">{{ data.current.score }}</b>

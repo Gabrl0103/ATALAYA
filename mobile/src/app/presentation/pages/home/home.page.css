@@ -54,5 +54,10 @@ h2 { margin: 28px 0 12px; }
 }
 .zone p { margin: 8px 0 0; font-size: 14px; color: var(--text-2); }
 
+/* Un favorito que se quita (o «Mis municipios» entero, con el último): se encoge y se desvanece antes
+   de salir (animate.leave). Solo transform y opacity; base.css lo deja instantáneo con movimiento reducido. */
+.zone.is-leaving, .my-zones.is-leaving { animation: favorite-out 0.28s var(--ease-out) both; pointer-events: none; }
+@keyframes favorite-out { to { opacity: 0; transform: scale(0.9); } }
+
 .note { margin: 36px 0 0; font-size: 13px; line-height: 1.35; color: rgba(255, 243, 234, 0.5); }
 .state-card { margin-top: 24px; }

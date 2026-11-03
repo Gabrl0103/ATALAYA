@@ -24,18 +24,43 @@
 .row > span { font-size: 15px; }
 
 /* Opciones excluyentes: una píldora con la elegida resaltada. */
-.segmented { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--glass-border); border-radius: var(--radius-pill); }
+.segmented { position: relative; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--glass-border); border-radius: var(--radius-pill); }
 .segmented button {
+  position: relative;
   flex: 1;
   min-height: 44px;
   padding: 0 12px;
+  display: grid;
+  place-items: center;
   border-radius: var(--radius-pill);
   color: var(--text-2);
   font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
 }
-.segmented button[aria-checked='true'] { background: var(--text); color: var(--ink); }
+/* La píldora clara se desliza bajo la opción elegida (settings.page.ts la mide: solo transform; su
+   tamaño cambia de una vez). Hasta medirla, la opción elegida lleva el fondo como antes. */
+.segmented-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--radius-pill);
+  background: var(--text);
+  opacity: 0;
+  pointer-events: none;
+}
+.segmented.has-thumb .segmented-thumb { opacity: 1; transition: transform 0.28s var(--ease-out); }
+.segmented:not(.has-thumb) button[aria-checked='true'] { background: var(--text); }
+/* El texto cambia de color sin animar color: la copia oscura (::after, fuera del nombre accesible)
+   aparece y la clara se desvanece, con opacity. */
+.segmented button > span, .segmented button::after { grid-area: 1 / 1; transition: opacity 0.28s var(--ease-out); }
+.segmented button::after { content: attr(data-label); content: attr(data-label) / ''; color: var(--ink); opacity: 0; }
+.segmented button[aria-checked='true'] > span { opacity: 0; }
+.segmented button[aria-checked='true']::after { opacity: 1; }
+/* Bajo 360 px «Automático · Español · English» no cabía y «English» se salía de la tarjeta. */
+@media (max-width: 359px) {
+  .segmented button { padding: 0 6px; }
+}
 .segmented.compact { flex: none; }
 .segmented.compact button { flex: none; min-width: 64px; }
 

@@ -10,16 +10,18 @@
 
   <section class="glass-card group anim-up" style="--i: 1" aria-labelledby="language-title">
     <h2 id="language-title" class="group-title">{{ 'settings.language' | t }}</h2>
-    <div class="segmented" role="radiogroup" aria-labelledby="language-title">
+    <div class="segmented anim-up" style="--i: 2" role="radiogroup" aria-labelledby="language-title">
+      <span class="segmented-thumb" aria-hidden="true"></span>
       @for (choice of languages; track choice.value) {
         <button
           type="button"
           role="radio"
           [attr.aria-checked]="settings.language() === choice.value"
           [attr.lang]="choice.value === 'auto' ? null : choice.value"
+          [attr.data-label]="choice.label | t"
           (click)="choose({ language: choice.value })"
         >
-          {{ choice.label | t }}
+          <span>{{ choice.label | t }}</span>
         </button>
       }
     </div>
@@ -30,34 +32,38 @@
 
   <section class="glass-card group anim-up" style="--i: 2" aria-labelledby="units-title">
     <h2 id="units-title" class="group-title">{{ 'settings.units' | t }}</h2>
-    <div class="row">
+    <div class="row anim-up" style="--i: 3">
       <span id="temperature-label">{{ 'weather.temperature' | t }}</span>
       <div class="segmented compact" role="radiogroup" aria-labelledby="temperature-label">
+        <span class="segmented-thumb" aria-hidden="true"></span>
         @for (choice of temperatures; track choice.value) {
           <button
             type="button"
             role="radio"
             class="mono"
             [attr.aria-checked]="settings.temperature() === choice.value"
+            [attr.data-label]="choice.label | t"
             (click)="choose({ temperature: choice.value })"
           >
-            {{ choice.label | t }}
+            <span>{{ choice.label | t }}</span>
           </button>
         }
       </div>
     </div>
-    <div class="row">
+    <div class="row anim-up" style="--i: 4">
       <span id="wind-label">{{ 'weather.wind' | t }}</span>
       <div class="segmented compact" role="radiogroup" aria-labelledby="wind-label">
+        <span class="segmented-thumb" aria-hidden="true"></span>
         @for (choice of winds; track choice.value) {
           <button
             type="button"
             role="radio"
             class="mono"
             [attr.aria-checked]="settings.wind() === choice.value"
+            [attr.data-label]="choice.label | t"
             (click)="choose({ wind: choice.value })"
           >
-            {{ choice.label | t }}
+            <span>{{ choice.label | t }}</span>
           </button>
         }
       </div>
@@ -66,15 +72,17 @@
 
   <section class="glass-card group anim-up" style="--i: 3" aria-labelledby="motion-title">
     <h2 id="motion-title" class="group-title">{{ 'settings.motion' | t }}</h2>
-    <div class="segmented" role="radiogroup" aria-labelledby="motion-title">
+    <div class="segmented anim-up" style="--i: 4" role="radiogroup" aria-labelledby="motion-title">
+      <span class="segmented-thumb" aria-hidden="true"></span>
       @for (choice of motions; track choice.value) {
         <button
           type="button"
           role="radio"
           [attr.aria-checked]="settings.motion() === choice.value"
+          [attr.data-label]="choice.label | t"
           (click)="choose({ motion: choice.value })"
         >
-          {{ choice.label | t }}
+          <span>{{ choice.label | t }}</span>
         </button>
       }
     </div>
@@ -82,7 +90,7 @@
   </section>
 
   <section class="glass-card group anim-up" style="--i: 4" aria-labelledby="haptics-title">
-    <div class="row">
+    <div class="row anim-up" style="--i: 5">
       <div>
         <h2 id="haptics-title" class="group-title">{{ 'settings.haptics' | t }}</h2>
         <p class="hint">{{ 'settings.hapticsHint' | t }}</p>
@@ -102,7 +110,7 @@
 
   <section class="glass-card group anim-up" style="--i: 5" aria-labelledby="data-title">
     <h2 id="data-title" class="group-title">{{ 'settings.data' | t }}</h2>
-    <div class="row">
+    <div class="row anim-up" style="--i: 6">
       <div>
         <span>{{ 'settings.clearFavorites' | t }}</span>
         <p class="hint">{{ 'settings.favoritesCount' | t: { count: favorites.ids().length } }}</p>
@@ -112,7 +120,7 @@
       }
     </div>
     @if (confirmingClear()) {
-      <div class="confirm" role="alertdialog" aria-labelledby="confirm-text">
+      <div class="confirm anim-up" role="alertdialog" aria-labelledby="confirm-text">
         <p id="confirm-text">{{ 'settings.clearFavoritesConfirm' | t: { count: favorites.ids().length } }}</p>
         <div class="confirm-actions">
           <button type="button" class="action" (click)="confirmingClear.set(false)">{{ 'search.cancel' | t }}</button>
@@ -120,7 +128,7 @@
         </div>
       </div>
     }
-    <div class="row">
+    <div class="row anim-up" style="--i: 7">
       <div>
         <span>{{ 'settings.clearCache' | t }}</span>
         <p class="hint" role="status">{{ (cacheCleared() ? 'settings.cacheCleared' : 'settings.clearCacheHint') | t }}</p>
@@ -131,7 +139,7 @@
 
   <section class="glass-card group anim-up" style="--i: 6" aria-labelledby="help-title">
     <h2 id="help-title" class="group-title">{{ 'settings.help' | t }}</h2>
-    <div class="row">
+    <div class="row anim-up" style="--i: 7">
       <div>
         <span>{{ 'settings.replayIntro' | t }}</span>
         <p class="hint">{{ 'settings.replayIntroHint' | t }}</p>

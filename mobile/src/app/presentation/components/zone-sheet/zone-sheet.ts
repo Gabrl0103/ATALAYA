@@ -100,17 +100,27 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
               <p>Nariño{{ updated() }}</p>
               <div class="zone-meta">
                 <app-risk-badge [level]="risk().level" />
+                <!-- is-touched: the heart only beats after a tap (not when the sheet opens on a favorite). -->
                 <button
                   type="button"
                   class="icon-action favorite-toggle"
                   [class.is-on]="favorite()"
+                  [class.is-touched]="favoriteTouched()"
                   [attr.aria-pressed]="favorite()"
                   [attr.aria-label]="(favorite() ? 'sheet.removeFavorite' : 'sheet.addFavorite') | t"
-                  (click)="favoriteToggled.emit()"
+                  (click)="toggleFavorite()"
                 >
                   <app-icon [name]="favorite() ? 'heart-filled' : 'heart'" [size]="22" />
                 </button>
-                <button type="button" class="icon-action share-button" [attr.aria-label]="'sheet.share' | t" (click)="shareRequested.emit()">
+                <!-- Two classes in turn: each tap changes the animation, so it plays again. -->
+                <button
+                  type="button"
+                  class="icon-action share-button"
+                  [class.is-shared-a]="shareTaps() % 2 === 1"
+                  [class.is-shared-b]="shareTaps() > 0 && shareTaps() % 2 === 0"
+                  [attr.aria-label]="'sheet.share' | t"
+                  (click)="share()"
+                >
                   <app-icon name="share" [size]="20" />
                 </button>
               </div>
@@ -144,8 +154,9 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
             <section class="weather" aria-labelledby="weather-title" [attr.aria-busy]="weatherPending()">
               <h3 id="weather-title" class="factors-title">{{ 'weather.title' | t }}</h3>
               <ul class="weather-row">
-                @for (item of weather(); track item.label) {
-                  <li class="stat-tile">
+                <!-- Tiles come in 0.1 s apart; tracked by label, so a value that arrives does not replay it. -->
+                @for (item of weather(); track item.label; let i = $index) {
+                  <li class="stat-tile anim-up" [style.--i]="i">
                     <app-icon [name]="item.icon" [size]="16" />
                     @if (item.value !== null) {
                       <b class="mono">{{ item.value }}</b>
@@ -160,7 +171,8 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
           }
           <h3 class="factors-title">{{ 'sheet.factorsTitle' | t }}</h3>
           @for (factor of factors(); track factor.label; let i = $index) {
-            <div class="factor">
+            <!-- After «Clima ahora»: each factor comes in, then its bar grows. -->
+            <div class="factor anim-up" [style.--i]="i + 2">
               <div class="factor-head">
                 <span>{{ factor.label | t }} <small>· <span class="mono">{{ factor.weight }} %</span></small></span>
                 @if (factor.value !== null) {
@@ -171,7 +183,7 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
               </div>
               <div class="factor-track" [class.skeleton]="factor.value === null">
                 @if (factor.value !== null) {
-                  <span class="anim-growx" [style.--i]="i + 1" [style.width.%]="factor.value"></span>
+                  <span class="anim-growx" [style.--i]="i + 3" [style.width.%]="factor.value"></span>
                 }
               </div>
             </div>
@@ -271,6 +283,21 @@ export class ZoneSheet implements OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.closeTimer);
+  }
+
+  /** The heart was tapped in this sheet: from now on marking and unmarking animate it. */
+  protected readonly favoriteTouched = signal(false);
+  /** Taps on «Compartir», for its short lift. */
+  protected readonly shareTaps = signal(0);
+
+  protected toggleFavorite(): void {
+    this.favoriteTouched.set(true);
+    this.favoriteToggled.emit();
+  }
+
+  protected share(): void {
+    this.shareTaps.update((taps) => taps + 1);
+    this.shareRequested.emit();
   }
 
   protected toggle(): void {

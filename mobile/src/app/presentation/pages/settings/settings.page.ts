@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnDestroy, afterNextRender, afterRenderEffect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_VERSION } from '../../../core/config/app-version';
 import { Haptic } from '../../../core/haptics';
@@ -40,6 +40,28 @@ export const MOTION_CHOICES: readonly Choice<Settings['motion']>[] = [
 /** How long (ms) «Listo» stays after clearing the data cache. */
 const DONE_MS = 2000;
 
+/**
+ * Puts the pill of every choice group under its chosen option: transform for the place (it slides,
+ * settings.page.css), size at once. The first time it is placed without sliding, then it slides.
+ * Options of different widths («Automático» is wider) are why it is measured and not a share.
+ */
+export function placeThumbs(root: ParentNode): void {
+  for (const group of root.querySelectorAll<HTMLElement>('.segmented')) {
+    const thumb = group.querySelector<HTMLElement>('.segmented-thumb');
+    const chosen = group.querySelector<HTMLElement>('button[aria-checked="true"]');
+    // Not laid out (a test, a hidden page): the chosen option keeps its own background.
+    if (!thumb || !chosen || chosen.offsetWidth === 0) continue;
+    thumb.style.top = `${chosen.offsetTop}px`;
+    thumb.style.width = `${chosen.offsetWidth}px`;
+    thumb.style.height = `${chosen.offsetHeight}px`;
+    thumb.style.transform = `translateX(${chosen.offsetLeft}px)`;
+    if (!group.classList.contains('has-thumb')) {
+      void thumb.offsetWidth; // The first place is applied before the slide is turned on.
+      group.classList.add('has-thumb');
+    }
+  }
+}
+
 /** «Ajustes»: opened from the gear of Inicio. Every choice applies at once and is saved on the phone. */
 @Component({
   selector: 'app-settings-page',
@@ -69,6 +91,27 @@ export class SettingsPage implements OnDestroy {
   protected readonly confirmingClear = signal(false);
   protected readonly cacheCleared = signal(false);
   private doneTimer?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+    // After each choice, and with the language (the labels change width).
+    afterRenderEffect(() => {
+      this.settings.language();
+      this.settings.temperature();
+      this.settings.wind();
+      this.settings.motion();
+      this.i18n.language();
+      placeThumbs(host);
+    });
+    // The font arriving, a rotation or a wider screen also move the options.
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      if (typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(() => placeThumbs(host));
+      host.querySelectorAll('.segmented button').forEach((button) => observer.observe(button));
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
 
   ngOnDestroy(): void {
     clearTimeout(this.doneTimer);

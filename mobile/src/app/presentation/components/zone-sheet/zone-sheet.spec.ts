@@ -146,6 +146,41 @@ describe('ZoneSheet', () => {
     expect(heart.classList).toContain('is-on');
   });
 
+  it('beats the heart only after a tap: one animation to mark, another to unmark', () => {
+    const { fixture, host } = render();
+    fixture.componentRef.setInput('favorite', true);
+    fixture.detectChanges();
+    const heart = host.querySelector<HTMLButtonElement>('.favorite-toggle')!;
+    expect(heart.classList).not.toContain('is-touched'); // opening the sheet of a favorite does not beat
+
+    heart.click();
+    fixture.componentRef.setInput('favorite', false);
+    fixture.detectChanges();
+    expect(heart.classList).toContain('is-touched');
+    expect(heart.classList).not.toContain('is-on');
+  });
+
+  it('lifts the share arrow again on every tap', () => {
+    const { fixture, host } = render();
+    const share = host.querySelector<HTMLButtonElement>('.share-button')!;
+    const lift = () => ['is-shared-a', 'is-shared-b'].filter((name) => share.classList.contains(name));
+    expect(lift()).toEqual([]);
+    for (const expected of ['is-shared-a', 'is-shared-b', 'is-shared-a']) {
+      share.click();
+      fixture.detectChanges();
+      expect(lift()).toEqual([expected]);
+    }
+  });
+
+  it('brings «Clima ahora» in tile by tile and then the factors, each bar after its row', () => {
+    const { host } = render();
+    const steps = (selector: string) =>
+      [...host.querySelectorAll<HTMLElement>(selector)].map((el) => el.style.getPropertyValue('--i').trim());
+    expect(steps('.weather-row .stat-tile.anim-up')).toEqual(['0', '1', '2', '3']);
+    expect(steps('.factor.anim-up')).toEqual(['2', '3', '4']);
+    expect(steps('.factor-track .anim-growx')).toEqual(['3', '4', '5']);
+  });
+
   it('asks the page to share and shows its short notice', () => {
     const { fixture, host } = render();
     const share = host.querySelector<HTMLButtonElement>('.share-button')!;

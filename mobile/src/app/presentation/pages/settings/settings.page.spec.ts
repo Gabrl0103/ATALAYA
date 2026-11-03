@@ -4,7 +4,7 @@ import { OnboardingFlag } from '../../../core/onboarding-flag';
 import { FAVORITES_STORAGE, FavoritesStore } from '../../../state/favorites.store';
 import { SettingsStore } from '../../../state/settings.store';
 import { ZonesStore } from '../../../state/zones.store';
-import { SettingsPage } from './settings.page';
+import { SettingsPage, placeThumbs } from './settings.page';
 
 const text = (el: Element | null | undefined): string => el?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 
@@ -69,6 +69,56 @@ describe('SettingsPage', () => {
     fixture.detectChanges();
     expect(settings.motion()).toBe('reduced');
     expect(checked('motion-title')).toEqual(['Reducido']);
+  });
+
+  it('brings each row in after its card, 0.1 s apart', () => {
+    const { host } = render();
+    const steps = (selector: string) =>
+      [...host.querySelectorAll<HTMLElement>(selector)].map((el) => el.style.getPropertyValue('--i').trim());
+    expect(steps('[aria-labelledby="language-title"] > .segmented.anim-up')).toEqual(['2']);
+    expect(steps('[aria-labelledby="units-title"] > .row.anim-up')).toEqual(['3', '4']);
+    expect(steps('[aria-labelledby="motion-title"] > .segmented.anim-up')).toEqual(['4']);
+    expect(steps('[aria-labelledby="data-title"] > .row.anim-up')).toEqual(['6', '7']);
+  });
+
+  it('keeps each option named once, with its dark copy only for the pill', () => {
+    const { radios } = render();
+    expect(radios('language-title').map(text)).toEqual(['Automático', 'Español', 'English']);
+    expect(radios('language-title').map((button) => button.dataset['label'])).toEqual(['Automático', 'Español', 'English']);
+  });
+
+  it('leaves the pill unplaced while the options are not laid out: the chosen one keeps its background', () => {
+    const { host } = render();
+    expect(host.querySelectorAll('.segmented-thumb').length).toBe(4);
+    expect(host.querySelector('.segmented.has-thumb')).toBeNull();
+  });
+
+  it('slides the pill under the chosen option, its first place without sliding', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<div class="segmented"><span class="segmented-thumb"></span><button aria-checked="false"></button><button aria-checked="true"></button></div>';
+    const layout = (el: Element, left: number, width: number) =>
+      Object.defineProperties(el, {
+        offsetLeft: { value: left, configurable: true },
+        offsetTop: { value: 4 },
+        offsetWidth: { value: width },
+        offsetHeight: { value: 44 },
+      });
+    const [first, second] = root.querySelectorAll('button');
+    layout(first!, 4, 109); // «Automático» is wider than the others
+    layout(second!, 117, 90);
+    const group = root.querySelector('.segmented')!;
+    const thumb = root.querySelector<HTMLElement>('.segmented-thumb')!;
+
+    placeThumbs(root);
+    expect(thumb.style.transform).toBe('translateX(117px)');
+    expect([thumb.style.top, thumb.style.width, thumb.style.height]).toEqual(['4px', '90px', '44px']);
+    expect(group.classList).toContain('has-thumb');
+
+    second!.setAttribute('aria-checked', 'false');
+    first!.setAttribute('aria-checked', 'true');
+    placeThumbs(root);
+    expect(thumb.style.transform).toBe('translateX(4px)');
+    expect(thumb.style.width).toBe('109px');
   });
 
   it('asks before clearing the favorites, in the same row', async () => {

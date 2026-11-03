@@ -262,6 +262,24 @@ Degradado del mapa: 165°, de `map` a `map-deep` (66 %). Cubierta de la hoja de 
 
 ## 13. Registro de cambios
 
+- **2026-11-03 (v0.32, rama `fix/forecast-note-animations`):** la nota del pronóstico ya no tapa las filas y
+  animaciones en los apartados nuevos.
+  - Causa: desde la v0.31 el molde y la respuesta del pronóstico comparten la celda 1/1 de `.forecast-body`,
+    pero con datos del modelo las filas y la nota eran dos hijos, así que la nota caía en la misma celda y se
+    dibujaba encima de la fila de 24 h (medido a 390 × 844: empezaba 14 px bajo el tope de las filas). Ahora
+    van juntas en `.forecast-model`. Verificado cargando, con datos, respaldo y error, en español e inglés, a
+    390 y 320 px: la nota queda debajo y el bloque mide lo mismo que el molde (265,75 px a 390).
+  - Pantallas angostas (bajo 360 px): el badge, el favorito y compartir se salían junto al anillo, «12 km/h»
+    pisaba la tarjeta vecina de «Clima ahora» y «English» se salía de su tarjeta en Ajustes. La fila de
+    acciones baja de línea, el clima va de a dos, el nombre de la zona baja a 30 px y los botones del idioma
+    se angostan.
+  - Animaciones con `theme/animations.css` (solo `transform` y `opacity`): hoja de zona (clima, factores,
+    filas y barras del pronóstico, corazón y compartir), Inicio (entrada y salida de «Mis municipios» con
+    `animate.leave`), Ajustes (filas y píldora deslizante) y esqueletos con brillo en vez de latido, sin
+    cambiar su tamaño. El molde oculto del pronóstico ya no anima.
+  - Movimiento reducido (teléfono o Ajustes) anula también los retrasos: antes las entradas escalonadas
+    quedaban invisibles hasta su turno (hasta 0,8 s).
+  - No había tarjeta de ayuda ante incendios en `main`, así que no se animó.
 - **2026-10-24 (v0.31, rama `fix/sheet-weather`):** «Clima ahora» al instante y la hoja de zona sin saltos.
   - Antes: el clima solo venía en `GET /api/zones/:id`, que se pedía al tocar (la hoja no esperaba) y
     respondía a los ~0,5 s en local, ~0,4 s en Render despierto y 21,9 s con Render dormido. Al llegar el

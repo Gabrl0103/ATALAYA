@@ -21,18 +21,22 @@ function render(favoriteIds: string[] = []) {
     load: vi.fn(),
     select: vi.fn(),
   };
+  const favorites = { ids: signal(favoriteIds) };
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
       { provide: ZonesStore, useValue: store },
-      { provide: FavoritesStore, useValue: { ids: signal(favoriteIds) } },
+      { provide: FavoritesStore, useValue: favorites },
     ],
   });
   const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
   const fixture = TestBed.createComponent(HomePage);
   fixture.detectChanges();
-  return { fixture, host: fixture.nativeElement as HTMLElement, store, navigate };
+  return { fixture, host: fixture.nativeElement as HTMLElement, store, navigate, favorites };
 }
+
+/** Entry step (--i) of an element: 0.1 s apart (theme/animations.css). */
+const step = (el: Element | null | undefined): string => (el as HTMLElement).style.getPropertyValue('--i').trim();
 
 describe('HomePage', () => {
   it('lists the riskiest zones first', () => {
@@ -59,6 +63,34 @@ describe('HomePage', () => {
     cards[0]!.click();
     expect(store.select).toHaveBeenCalledWith('ipiales');
     expect(navigate).toHaveBeenCalledWith('/map');
+  });
+
+  // jsdom has no Web Animations, so animate.leave removes at once here (the browser shrinks it first).
+  it('takes out a removed favorite, and the whole section with the last one', () => {
+    const { fixture, host, favorites } = render(['ipiales', 'pasto']);
+    favorites.ids.set(['pasto']);
+    fixture.detectChanges();
+    expect([...host.querySelectorAll('.favorites .zone h3')].map((el) => el.textContent?.trim())).toEqual(['Pasto']);
+
+    favorites.ids.set([]);
+    fixture.detectChanges();
+    expect(host.querySelector('.my-zones')).toBeNull();
+    expect([...host.querySelectorAll('h2')].map((el) => el.textContent?.trim())).toEqual(['Zonas con mayor riesgo']);
+  });
+
+  it('brings «Zonas con mayor riesgo» in after «Mis municipios» when there are favorites', () => {
+    const topTitle = (host: HTMLElement) => [...host.querySelectorAll('h2')].at(-1);
+    const withFavorites = render(['ipiales']).host;
+    expect(step(withFavorites.querySelector('.my-zones h2'))).toBe('2');
+    expect(step(withFavorites.querySelector('.favorites .zone'))).toBe('3');
+    expect(step(topTitle(withFavorites))).toBe('4');
+    expect([...withFavorites.querySelectorAll('.carousel:not(.favorites) .zone')].map(step)).toEqual(['5', '6']);
+    expect(step(withFavorites.querySelector('.note'))).toBe('7');
+
+    TestBed.resetTestingModule();
+    const withoutFavorites = render().host;
+    expect(step(topTitle(withoutFavorites))).toBe('2');
+    expect([...withoutFavorites.querySelectorAll('.zone')].map(step)).toEqual(['3', '4']);
   });
 
   it('leaves «Mis municipios» out when there are no favorites', () => {

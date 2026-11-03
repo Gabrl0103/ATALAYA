@@ -15,6 +15,8 @@ import { RiskBadge } from '../../components/risk-badge/risk-badge';
 
 /** Cuántas zonas muestra el carrusel "Zonas con mayor riesgo". */
 const TOP_ZONE_COUNT = 5;
+/** Last card of a carousel with its own entry step (0.1 s each). */
+const MAX_STAGGER = 3;
 
 @Component({
   selector: 'app-home-page',
@@ -33,6 +35,10 @@ export class HomePage {
   protected readonly topZones = computed(() => topZones(this.store.zones(), TOP_ZONE_COUNT));
   /** «Mis municipios»: the hearts of the zone sheet, in the order they were added. */
   protected readonly myZones = computed(() => favoriteZones(this.favorites.ids(), this.store.zones()));
+  /** Step (--i) at which «Zonas con mayor riesgo» comes in: after «Mis municipios» when it is shown. */
+  protected readonly topStart = computed(() => (this.myZones().length > 0 ? 4 : 2));
+  /** A carousel shows about two cards and a half: past the fourth the rest come in together. */
+  protected readonly stagger = (index: number): number => Math.min(index, MAX_STAGGER);
 
   protected riskName(level: RiskLevel): string {
     return riskLabel(level, this.i18n.language());
