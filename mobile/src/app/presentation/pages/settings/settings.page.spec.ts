@@ -279,7 +279,7 @@ describe('SettingsPage', () => {
   it('shows the version, how the risk is calculated and every source with its license', () => {
     const { host } = render();
     const about = host.querySelector('[aria-labelledby="about-title"]')!;
-    expect(text(about.querySelector('.version'))).toBe('Versión 0.30.0');
+    expect(text(about.querySelector('.version'))).toBe('Versión 1.0.0');
     expect(text(about)).toContain('clima seco (50 %)');
     expect(text(about)).not.toContain('predicción exacta');
     expect([...about.querySelectorAll('.sources b')].map(text)).toEqual([
