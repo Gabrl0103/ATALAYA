@@ -155,6 +155,42 @@ genera el APK. En Android la app usa el backend desplegado en Render
 (`mobile/src/app/core/config/api-config.ts`), no el de tu PC. Su URL, `https://willay-api.onrender.com/api`,
 conserva el nombre original del proyecto: Render no cambia el subdominio al renombrar el servicio.
 
+#### APK desde la terminal
+
+Gradle 8.14 necesita **JDK 21** (el JDK que trae Android Studio es el 25 y Gradle no lo soporta). En Git Bash:
+
+```
+cd mobile
+npm run build:android
+cd android
+export JAVA_HOME="/c/Program Files/Java/jdk-21"
+./gradlew.bat assembleDebug      # mobile/android/app/build/outputs/apk/debug/app-debug.apk
+./gradlew.bat assembleRelease    # mobile/android/app/build/outputs/apk/release/app-release.apk (firmado)
+```
+
+#### Firmar el APK de release
+
+El release se firma con `mobile/android/keystore.properties`. Ni ese archivo ni el keystore (`*.jks`,
+`*.keystore`) se suben a git. Sin ellos, `assembleRelease` deja `app-release-unsigned.apk`, que Android no
+instala.
+
+1. Crea el keystore una sola vez (pide las contraseñas y tus datos):
+   ```
+   cd mobile/android
+   "/c/Program Files/Java/jdk-21/bin/keytool.exe" -genkeypair -v -keystore atalaya-release.jks -alias atalaya -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. Crea `mobile/android/keystore.properties`:
+   ```
+   storeFile=atalaya-release.jks
+   storePassword=<la contraseña del keystore>
+   keyAlias=atalaya
+   keyPassword=<la contraseña de la clave>
+   ```
+3. Corre `./gradlew.bat assembleRelease`.
+
+Guarda una copia del keystore y de sus contraseñas fuera del proyecto: las actualizaciones del APK se firman
+con la misma clave y, si se pierde, no se puede actualizar la app instalada.
+
 ## Variables de entorno (`backend/.env`)
 
 Todas son opcionales. La plantilla está en `backend/.env.example`; nunca se versiona `.env`.
