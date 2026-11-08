@@ -11,7 +11,9 @@ import type { MessageKey, MessageParams, PluralKey } from '../../../i18n/transla
 import { SettingsStore } from '../../../state/settings.store';
 import type { ForecastStatus } from '../../../state/zones.store';
 import { AppIcon, type IconName } from '../app-icon/app-icon';
+import { EmergencyHelp } from '../emergency-help/emergency-help';
 import { ForecastSection } from '../forecast-section/forecast-section';
+import { PreventionTips } from '../prevention-tips/prevention-tips';
 import { RiskBadge } from '../risk-badge/risk-badge';
 import { FULL_HEIGHT, clampOffset, resolveSnap, snapOffset, type SheetSnap } from './sheet-snap';
 
@@ -56,7 +58,7 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
 
 @Component({
   selector: 'app-zone-sheet',
-  imports: [AppIcon, ForecastSection, RiskBadge, TranslatePipe],
+  imports: [AppIcon, EmergencyHelp, ForecastSection, PreventionTips, RiskBadge, TranslatePipe],
   template: `
     <div class="sheet-layer" [class.is-closing]="snap() === 'closed'">
       <button type="button" class="sheet-backdrop" [attr.aria-label]="'sheet.close' | t" (click)="close()"></button>
@@ -234,9 +236,13 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
 
           <app-forecast-section [forecast]="forecast()" [status]="forecastStatus()" (retry)="forecastRetry.emit()" />
 
+          <!-- Below everything the sheet loads, so neither these tips nor the card below move it. -->
+          <app-prevention-tips class="prevention anim-up" [style.--i]="6" [level]="risk().level" />
+
           <button type="button" class="history-cta" (click)="historyRequested.emit()">
             {{ 'sheet.history' | t: { name: risk().name } }}
           </button>
+          <app-emergency-help class="sheet-emergency" [zoneName]="risk().name" [startIndex]="7" />
           <p class="disclaimer">{{ 'sheet.disclaimer' | t }}</p>
         </div>
       </section>
@@ -386,8 +392,7 @@ export class ZoneSheet implements OnDestroy {
   protected readonly risk = computed(() => this.detail() ?? this.zone());
   protected readonly ringValue = computed(() => (Math.min(Math.max(this.risk().score, 0), 100) / 100) * RING_TOTAL);
   private readonly i18n = inject(I18n);
-  protected readonly riskLabel = computed(() => riskLabel(this.risk().level, this.i18n.language()));
-  protected readonly updated = computed(() => {
+  protected readonly riskLabel = computed(() => riskLabel(this.risk().level, this.i18n.language()));  protected readonly updated = computed(() => {
     const date = this.updatedAt();
     return date ? ` · ${this.i18n.t('sheet.updated', { day: formatUpdatedDay(date, this.i18n.language()) })}` : '';
   });

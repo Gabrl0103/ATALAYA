@@ -13,6 +13,7 @@ import { SettingsStore, type Settings } from '../../../state/settings.store';
 import { ZonesStore } from '../../../state/zones.store';
 import { AppIcon } from '../../components/app-icon/app-icon';
 import { DataAttribution } from '../../components/data-attribution/data-attribution';
+import { EmergencyHelp } from '../../components/emergency-help/emergency-help';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
 import { DATA_SOURCES } from './data-sources';
 
@@ -71,7 +72,7 @@ export function placeThumbs(root: ParentNode): void {
 /** «Ajustes»: opened from the gear of Inicio. Every choice applies at once and is saved on the phone. */
 @Component({
   selector: 'app-settings-page',
-  imports: [AppIcon, DataAttribution, LavaBg, TranslatePipe],
+  imports: [AppIcon, DataAttribution, EmergencyHelp, LavaBg, TranslatePipe],
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.css',
   host: { class: 'ion-page' },

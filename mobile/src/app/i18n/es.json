@@ -360,5 +360,14 @@
   "emergency.locating": "Buscando tu ubicación…",
   "emergency.shareWithout": "Compartir sin ubicación",
   "emergency.shareNote": "Se envía con el menú de compartir de tu teléfono, a quien tú elijas. Atalaya no la guarda ni la manda a ningún servidor.",
-  "emergency.disclaimer": "Atalaya no reemplaza a las autoridades y no avisa a nadie automáticamente. Ante una emergencia, llama."
+  "emergency.disclaimer": "Atalaya no reemplaza a las autoridades y no avisa a nadie automáticamente. Ante una emergencia, llama.",
+  "prevention.title": "Prevención",
+  "prevention.low.1": "Apaga bien fogatas y fogones con agua y tierra antes de irte.",
+  "prevention.low.2": "No tires colillas ni vidrios en potreros o al borde de la vía.",
+  "prevention.medium.1": "Evita quemar basura o rastrojos.",
+  "prevention.medium.2": "Mantén limpio de hojas secas y maleza el alrededor de tu casa.",
+  "prevention.high.1": "No hagas quemas ni fogatas.",
+  "prevention.high.2": "Ten a mano las líneas de emergencia y piensa por dónde salir si el fuego se acerca.",
+  "prevention.extreme.1": "No uses fuego al aire libre por ningún motivo.",
+  "prevention.extreme.2": "Si ves humo, aléjate y llama de inmediato; no intentes apagar un incendio grande."
 }

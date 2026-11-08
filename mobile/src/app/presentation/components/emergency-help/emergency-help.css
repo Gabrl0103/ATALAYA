@@ -1,5 +1,5 @@
 /* «¿Ves fuego? Avisa»: una tarjeta de vidrio compacta; ocupa su propio lugar en el flujo (no flota sobre nada). */
-:host { display: block; }
+:host { display: block; margin-top: 24px; }
 .emergency { padding: 18px; }
 .emergency-head { display: flex; align-items: center; gap: 10px; }
 .emergency-icon {
@@ -17,7 +17,10 @@
 
 /* Las líneas, de a dos; cada botón mide al menos 44 px de alto. */
 .lines { margin: 14px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* Los dos botones de una fila miden lo mismo aunque un nombre ocupe dos líneas. */
+.lines li { display: flex; }
 .call {
+  flex: 1;
   min-height: 52px;
   padding: 8px 12px;
   display: grid;
@@ -32,7 +35,8 @@
   text-decoration: none;
 }
 .call app-icon { grid-row: span 2; color: var(--amber); }
-.call-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; color: var(--text-2); }
+/* El nombre entero, en dos líneas si hace falta («Línea de emergencias» no cabe en una a 390 px). */
+.call-name { min-width: 0; font-size: 13px; font-weight: 600; line-height: 1.2; color: var(--text-2); }
 .call b { font-size: 18px; font-weight: 700; }
 
 /* «Qué decir al llamar»: plegado, para que la tarjeta no crezca si nadie lo abre. */
@@ -41,10 +45,18 @@
   min-height: 44px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
+  list-style: none;
 }
+.tips summary::-webkit-details-marker { display: none; }
+/* La flecha gira al abrir: dice que se despliega (el marcador del navegador no sale con display: flex). */
+.tips summary app-icon { color: var(--text-2); transition: transform 0.2s var(--ease-out); }
+.tips[open] summary app-icon { transform: rotate(90deg); }
+:host-context(.reduce-motion) .tips summary app-icon { transition: none; }
+@media (prefers-reduced-motion: reduce) { .tips summary app-icon { transition: none; } }
 .tips ul { margin: 0 0 4px; padding-left: 20px; font-size: 14px; line-height: 1.45; }
 .tips li + li { margin-top: 4px; }
 

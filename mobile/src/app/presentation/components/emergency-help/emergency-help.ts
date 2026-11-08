@@ -47,7 +47,7 @@ let nextId = 0;
       </ul>
 
       <details class="tips">
-        <summary>{{ 'emergency.tipsTitle' | t }}</summary>
+        <summary>{{ 'emergency.tipsTitle' | t }}<app-icon name="chevron-right" [size]="18" /></summary>
         <ul>
           @for (tip of tips; track tip) {
             <li>{{ tip | t }}</li>

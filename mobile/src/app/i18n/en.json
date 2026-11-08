@@ -360,5 +360,14 @@
   "emergency.locating": "Finding your location…",
   "emergency.shareWithout": "Share without location",
   "emergency.shareNote": "It goes through your phone's share menu, to whoever you choose. Atalaya does not save it or send it to any server.",
-  "emergency.disclaimer": "Atalaya does not replace the authorities and does not report to anyone automatically. In an emergency, call."
+  "emergency.disclaimer": "Atalaya does not replace the authorities and does not report to anyone automatically. In an emergency, call.",
+  "prevention.title": "Prevention",
+  "prevention.low.1": "Put out campfires and cooking fires with water and soil before you leave.",
+  "prevention.low.2": "Do not throw cigarette butts or glass in pastures or by the road.",
+  "prevention.medium.1": "Avoid burning trash or crop waste.",
+  "prevention.medium.2": "Keep the area around your home clear of dry leaves and brush.",
+  "prevention.high.1": "Do not burn anything or light campfires.",
+  "prevention.high.2": "Keep the emergency lines at hand and think about how to get out if the fire comes close.",
+  "prevention.extreme.1": "Do not use fire outdoors for any reason.",
+  "prevention.extreme.2": "If you see smoke, move away and call right away; do not try to put out a large fire."
 }

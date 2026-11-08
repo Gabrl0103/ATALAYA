@@ -259,4 +259,23 @@ describe('ZoneSheet', () => {
     expect(text(render(DETAIL, { updatedAt: new Date() }).host, '.zone-title p')).toEqual(['Nariño · actualizado hoy']);
     expect(text(render().host, '.zone-title p')).toEqual(['Nariño']);
   });
+  it("gives two prevention tips for the zone's level, under the forecast", () => {
+    const { host } = render();
+    expect(text(host, '.prevention h3')).toEqual(['Prevención']);
+    expect(text(host, '.prevention app-risk-badge')).toEqual(['Medio']);
+    expect(text(host, '.prevention li')).toEqual([
+      'Evita quemar basura o rastrojos.',
+      'Mantén limpio de hojas secas y maleza el alrededor de tu casa.',
+    ]);
+    const extreme = render(null, {}, { ...ZONE, score: 80, level: 'extreme' }).host;
+    expect(text(extreme, '.prevention li')[0]).toBe('No uses fuego al aire libre por ningún motivo.');
+  });
+
+  it('ends with «¿Ves fuego? Avisa» for the zone, after «Ver historial»', () => {
+    const { host } = render();
+    const content = host.querySelector('.zone-content')!;
+    const order = [...content.children].map((el) => el.className.split(' ')[0] || el.tagName.toLowerCase());
+    expect(order.slice(-3)).toEqual(['history-cta', 'sheet-emergency', 'disclaimer']);
+    expect(host.querySelectorAll('app-emergency-help a[href^="tel:"]').length).toBeGreaterThanOrEqual(4);
+  });
 });

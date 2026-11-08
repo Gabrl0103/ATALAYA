@@ -299,4 +299,12 @@ describe('SettingsPage', () => {
     const { host } = render();
     expect(text(host.querySelector('.hint'))).toBe('Usa el idioma del teléfono: Español.');
   });
+  it('has «¿Ves fuego? Avisa» with the call buttons, between Alertas and Datos', () => {
+    const { host } = render();
+    const card = host.querySelector('app-emergency-help')!;
+    expect(card.querySelector('[role="heading"]')!.getAttribute('aria-level')).toBe('2');
+    expect([...card.querySelectorAll('a.call')].map((a) => a.getAttribute('href'))).toEqual(['tel:123', 'tel:119', 'tel:132', 'tel:144']);
+    expect(card.previousElementSibling!.getAttribute('aria-labelledby')).toBe('alerts-title');
+    expect(card.nextElementSibling!.getAttribute('aria-labelledby')).toBe('data-title');
+  });
 });
