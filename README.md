@@ -4,6 +4,8 @@ App móvil (Android) que muestra el **riesgo de incendio forestal** de los 64 mu
 Junta datos abiertos (focos de calor por satélite, clima e incendios reportados) y los resume en un puntaje
 de 0 a 100 por municipio, con un pronóstico a 72 h hecho con un modelo de machine learning.
 
+Repositorio: https://github.com/Gabrl0103/ATALAYA (antes `Willay-Firemap`; GitHub redirige el enlace anterior).
+
 Es un proyecto académico. El puntaje es un **indicador de riesgo, no una predicción exacta**, y el modelo
 estima **focos de calor** (anomalías térmicas que ve el satélite), no incendios confirmados.
 
@@ -150,7 +152,8 @@ npm run open:android       # abre Android Studio
 
 En Android Studio, **Run** la instala en un emulador o en un celular por USB, y **Build → Build APK(s)**
 genera el APK. En Android la app usa el backend desplegado en Render
-(`mobile/src/app/core/config/api-config.ts`), no el de tu PC.
+(`mobile/src/app/core/config/api-config.ts`), no el de tu PC. Su URL, `https://willay-api.onrender.com/api`,
+conserva el nombre original del proyecto: Render no cambia el subdominio al renombrar el servicio.
 
 ## Variables de entorno (`backend/.env`)
 
