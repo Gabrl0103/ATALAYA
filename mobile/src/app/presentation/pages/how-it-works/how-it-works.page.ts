@@ -58,8 +58,6 @@ export class HowItWorksPage {
   protected readonly sources = FLOW_SOURCES;
   protected readonly weights = SCORE_WEIGHTS;
   protected readonly levels = LEVEL_RANGES;
-  protected readonly notItems: readonly MessageKey[] = ['how.not.prediction', 'how.not.hotspots', 'how.not.authorities'];
-  protected readonly limits: readonly MessageKey[] = ['how.limit.history', 'how.limit.sources', 'how.limit.weather', 'how.limit.radius'];
 
   /** Back to where it was opened (Inicio or Ajustes); to Inicio if the app started here. */
   protected back(): void {
