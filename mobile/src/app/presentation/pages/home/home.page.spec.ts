@@ -85,7 +85,8 @@ describe('HomePage', () => {
     expect(step(withFavorites.querySelector('.favorites .zone'))).toBe('3');
     expect(step(topTitle(withFavorites))).toBe('4');
     expect([...withFavorites.querySelectorAll('.carousel:not(.favorites) .zone')].map(step)).toEqual(['5', '6']);
-    expect(step(withFavorites.querySelector('.note'))).toBe('7');
+    expect(step(withFavorites.querySelector('.how-link'))).toBe('7');
+    expect(withFavorites.querySelector('.note')).toBeNull();
 
     TestBed.resetTestingModule();
     const withoutFavorites = render().host;

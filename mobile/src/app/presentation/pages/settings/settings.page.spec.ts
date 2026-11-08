@@ -281,7 +281,7 @@ describe('SettingsPage', () => {
     const about = host.querySelector('[aria-labelledby="about-title"]')!;
     expect(text(about.querySelector('.version'))).toBe('Versión 0.30.0');
     expect(text(about)).toContain('clima seco (50 %)');
-    expect(text(about)).toContain('Es un indicador, no una predicción exacta.');
+    expect(text(about)).not.toContain('predicción exacta');
     expect([...about.querySelectorAll('.sources b')].map(text)).toEqual([
       'NASA FIRMS', 'Open-Meteo', 'ERA5 · Copernicus', 'NASA POWER', 'Gobernación de Nariño', 'OpenStreetMap',
     ]);

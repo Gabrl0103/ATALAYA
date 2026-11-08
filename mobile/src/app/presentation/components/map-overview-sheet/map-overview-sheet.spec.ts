@@ -47,13 +47,13 @@ describe('MapOverviewSheet', () => {
     expect(text(host.querySelector('.counts'))).toBe('Cargando municipios…');
   });
 
-  it('once up, adds the ranges, the hotspot key and the disclaimer', () => {
+  it('once up, adds the ranges, the hotspot key and when it was updated', () => {
     const { fixture, host } = setup({ zoneCount: 64, hotspotCount: 12 });
     toggle(fixture, host);
     expect([...host.querySelectorAll('app-risk-badge')].map(text)).toEqual(['Bajo', 'Medio', 'Alto', 'Extremo']);
     expect([...host.querySelectorAll('.range')].map(text)).toEqual(['0–24', '25–49', '50–74', '75–100']);
     expect(text(host.querySelector('.hotspot-key'))).toContain('Foco de calor');
-    expect(text(host.querySelector('.note'))).toContain('Estimación de riesgo, no predicción exacta');
+    expect(text(host.querySelector('.note'))).toBe('Actualizado 06:04 p. m.');
   });
 
   it('asks the map to zoom to Nariño, and hides the button when there is no map', () => {
