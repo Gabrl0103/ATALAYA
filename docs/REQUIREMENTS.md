@@ -6,7 +6,7 @@ Algunos identificadores internos conservan el nombre anterior y no se cambian: e
 subdominio al renombrar el servicio) y el paquete de Python `willay_ml`.)*
 
 > Documento vivo: describe el estado actual del proyecto. La historia de cada cambio está en la sección 13.
-> **Última actualización:** 2026-11-08 · **Versión:** 0.38 (renombre a Atalaya)
+> **Última actualización:** 2026-11-08 · **Versión:** 1.0.0 (primera versión publicada)
 
 ---
 
@@ -250,6 +250,18 @@ Detalle completo en [`docs/ML.md`](ML.md).
 - Confirmar con el profesor que los datos abiertos y las noticias cuentan como scraping válido.
 
 ## 13. Registro de cambios
+
+- **2026-11-08 (1.0.0, rama `release/1.0.0`):** primera versión publicada.
+  - App 1.0.0: `package.json`, Ajustes > Acerca de y el APK (`versionName "1.0.0"`, `versionCode 31`).
+  - Splash nativa en Android 12 o superior: el ojo blanco (`res/drawable/splash_icon.xml`, 288 dp, dentro del
+    círculo de 192 dp) sobre `#0B0604`, en lugar del icono naranja de la app.
+  - Permisos del APK: `INTERNET`, `ACCESS_COARSE_LOCATION` y `ACCESS_FINE_LOCATION` (Mi ubicación y compartir la
+    ubicación), `POST_NOTIFICATIONS` (alertas), `VIBRATE` (vibración) y `ACCESS_NETWORK_STATE` (lo agrega la
+    librería de ubicación de Ionic). Se quitan `RECEIVE_BOOT_COMPLETED` y `WAKE_LOCK`, que `local-notifications`
+    agrega para notificaciones programadas: Atalaya no programa ninguna. `SCHEDULE_EXACT_ALARM` ya estaba fuera.
+  - Firma del release con `mobile/android/keystore.properties` (fuera de git, igual que `*.jks` y `*.keystore`);
+    pasos en el README. Gradle 8.14 se corre con JDK 21.
+  - Sin cambios en la URL de la API ni en el `appId`.
 
 - **2026-11-08 (v0.38, rama `chore/renombre-atalaya`):** revisión del nombre Atalaya.
   - La UI ya decía Atalaya en todas partes (`appName`, título, `strings.xml`, introducción, Ajustes y textos
