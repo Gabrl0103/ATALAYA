@@ -18,6 +18,16 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
    del sistema y cada pantalla se aparta de ellas con --safe-*. Sin tamaños de un dispositivo en particular. */
 .app-stage { position: fixed; inset: 0; background: var(--bg); }
 .phone-shell { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+/* Bajo la barra de estado, una franja del fondo: el contenido que se desplaza por debajo nunca tapa sus iconos. */
+.phone-shell::after {
+  content: '';
+  position: absolute;
+  z-index: 200;
+  inset: 0 0 auto;
+  height: var(--safe-top);
+  background: linear-gradient(var(--bg), rgba(11, 6, 4, 0.75));
+  pointer-events: none;
+}
 
 /* Solo en una computadora (pantalla ancha con mouse): la app dentro de un marco de teléfono de 390 × 844. */
 @media (min-width: 600px) and (hover: hover) and (pointer: fine) {
