@@ -6,7 +6,6 @@ import { TranslatePipe } from '../../../i18n/t.pipe';
 import type { MessageKey } from '../../../i18n/translate';
 import { AppIcon, type IconName } from '../../components/app-icon/app-icon';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
-import { ModelMetricsCard } from '../../components/model-metrics/model-metrics';
 import { RiskBadge } from '../../components/risk-badge/risk-badge';
 
 interface FlowStep {
@@ -45,7 +44,7 @@ export const LEVEL_RANGES: readonly { readonly level: RiskLevel; readonly from: 
 /** «Cómo funciona»: opened from Inicio and from Ajustes > Acerca de; not a tab. */
 @Component({
   selector: 'app-how-it-works-page',
-  imports: [AppIcon, LavaBg, ModelMetricsCard, RiskBadge, TranslatePipe],
+  imports: [AppIcon, LavaBg, RiskBadge, TranslatePipe],
   templateUrl: './how-it-works.page.html',
   styleUrl: './how-it-works.page.css',
   host: { class: 'ion-page' },

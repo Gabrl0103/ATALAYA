@@ -228,11 +228,9 @@ describe('SettingsPage', () => {
     });
   });
 
-  it('sums up the real metrics of the model in Acerca de and opens «Cómo funciona»', () => {
+  it('opens «Cómo funciona» from Acerca de, without the model metrics', () => {
     const { host, navigate } = render();
-    expect(text(host.querySelector('.about .model-summary'))).toBe(
-      'Modelo v1.0.0: ROC-AUC 0,842 y PR-AUC 0,496 con el clima de Open-Meteo ajustado, evaluado con datos de 2025 a 2026.',
-    );
+    expect(host.querySelector('.about .model-summary')).toBeNull();
     host.querySelector<HTMLButtonElement>('.about .how-row button')!.click();
     expect(navigate).toHaveBeenCalledWith('/how-it-works');
   });
