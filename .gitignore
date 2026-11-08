@@ -12,3 +12,7 @@ ml/data/
 __pycache__/
 .pytest_cache/
 ml/models/*.joblib
+
+# Local tooling and work files
+.claude/skills/
+mobile/src/app/domain/util/prompt.md
