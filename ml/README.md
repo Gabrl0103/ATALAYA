@@ -1,4 +1,4 @@
-# Willay ML
+# Atalaya ML
 
 Modelo de machine learning que estima la **probabilidad de actividad de fuego** (focos de calor) por
 municipio de Nariño en las próximas 72 h. Se entrena con el historial de focos de NASA FIRMS y el clima
