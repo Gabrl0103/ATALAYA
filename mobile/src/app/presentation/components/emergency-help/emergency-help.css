@@ -1,0 +1,75 @@
+/* «¿Ves fuego? Avisa»: una tarjeta de vidrio compacta; ocupa su propio lugar en el flujo (no flota sobre nada). */
+:host { display: block; }
+.emergency { padding: 18px; }
+.emergency-head { display: flex; align-items: center; gap: 10px; }
+.emergency-icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: var(--ink);
+}
+.emergency-title { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+.intro { margin: 8px 0 0; font-size: 14px; line-height: 1.4; color: var(--text-2); }
+
+/* Las líneas, de a dos; cada botón mide al menos 44 px de alto. */
+.lines { margin: 14px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.call {
+  min-height: 52px;
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  background: var(--glass-bg);
+  color: var(--text);
+  text-decoration: none;
+}
+.call app-icon { grid-row: span 2; color: var(--amber); }
+.call-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.call b { font-size: 18px; font-weight: 700; }
+
+/* «Qué decir al llamar»: plegado, para que la tarjeta no crezca si nadie lo abre. */
+.tips { margin-top: 12px; border-top: 1px solid var(--glass-border); }
+.tips summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+}
+.tips ul { margin: 0 0 4px; padding-left: 20px; font-size: 14px; line-height: 1.45; }
+.tips li + li { margin-top: 4px; }
+
+.share { margin-top: 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.action {
+  min-height: 44px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+}
+.action.primary { border-color: transparent; background: var(--text); color: var(--ink); }
+.action:disabled { opacity: 0.7; }
+.error, .notice, .note { margin: 0; font-size: 13px; line-height: 1.4; }
+.error { color: var(--amber); }
+.note { color: var(--text-2); }
+.disclaimer { margin: 12px 0 0; font-size: 13px; font-weight: 600; line-height: 1.4; }
+
+/* Bajo 360 px el nombre del servicio no cabe al lado del número: una línea por fila. */
+@media (max-width: 359px) {
+  .lines { grid-template-columns: 1fr; }
+}

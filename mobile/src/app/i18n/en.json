@@ -347,5 +347,18 @@
   "emergency.share.viewed": "Municipality viewed: {name}",
   "emergency.share.coordinates": "Coordinates: {latitude}, {longitude}",
   "emergency.share.map": "Map: {url}",
-  "emergency.share.noLocation": "Location: not available"
+  "emergency.share.noLocation": "Location: not available",
+  "emergency.title": "See fire? Report it",
+  "emergency.intro": "If you see a fire, call one of these lines right away.",
+  "emergency.call": "Call {name}, {number}",
+  "emergency.tipsTitle": "What to say when you call",
+  "emergency.tip.place": "The municipality and the vereda (rural area), or a nearby landmark (a road, a school, a hill).",
+  "emergency.tip.what": "What you see: smoke or flames, how big it is and whether it is spreading.",
+  "emergency.tip.homes": "Whether there are homes, people or animals nearby.",
+  "emergency.tip.contact": "A contact number in case they need to call you back.",
+  "emergency.shareLocation": "Share my location",
+  "emergency.locating": "Finding your location…",
+  "emergency.shareWithout": "Share without location",
+  "emergency.shareNote": "It goes through your phone's share menu, to whoever you choose. Atalaya does not save it or send it to any server.",
+  "emergency.disclaimer": "Atalaya does not replace the authorities and does not report to anyone automatically. In an emergency, call."
 }

@@ -347,5 +347,18 @@
   "emergency.share.viewed": "Municipio consultado: {name}",
   "emergency.share.coordinates": "Coordenadas: {latitude}, {longitude}",
   "emergency.share.map": "Mapa: {url}",
-  "emergency.share.noLocation": "Ubicación: no disponible"
+  "emergency.share.noLocation": "Ubicación: no disponible",
+  "emergency.title": "¿Ves fuego? Avisa",
+  "emergency.intro": "Si ves un incendio, llama de inmediato a una de estas líneas.",
+  "emergency.call": "Llamar a {name}, {number}",
+  "emergency.tipsTitle": "Qué decir al llamar",
+  "emergency.tip.place": "El municipio y la vereda, o una referencia cercana (una vía, una escuela, un cerro).",
+  "emergency.tip.what": "Qué ves: humo o llamas, qué tan grande es y si avanza.",
+  "emergency.tip.homes": "Si hay viviendas, personas o animales cerca.",
+  "emergency.tip.contact": "Un número de contacto por si necesitan volver a llamarte.",
+  "emergency.shareLocation": "Compartir mi ubicación",
+  "emergency.locating": "Buscando tu ubicación…",
+  "emergency.shareWithout": "Compartir sin ubicación",
+  "emergency.shareNote": "Se envía con el menú de compartir de tu teléfono, a quien tú elijas. Atalaya no la guarda ni la manda a ningún servidor.",
+  "emergency.disclaimer": "Atalaya no reemplaza a las autoridades y no avisa a nadie automáticamente. Ante una emergencia, llama."
 }

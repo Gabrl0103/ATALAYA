@@ -1,3 +1,4 @@
+import { InjectionToken } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 import type { MessageKey } from '../../i18n/translate';
@@ -49,6 +50,15 @@ export async function getUserLocation(
     return { status: failureOf(error) };
   }
 }
+
+/**
+ * Reads the user's position (asking for the permission when needed). A token so a screen asks for it only
+ * when the user taps, and tests can answer without a real GPS.
+ */
+export const LOCATE_USER = new InjectionToken<() => Promise<LocationResult>>('LOCATE_USER', {
+  providedIn: 'root',
+  factory: () => () => getUserLocation(),
+});
 
 function failureOf(error: unknown): LocationFailure {
   const code = (error as { code?: unknown } | null)?.code;
