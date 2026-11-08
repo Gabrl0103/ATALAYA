@@ -33,6 +33,6 @@ export function shareText(
     }
   }
   if (updatedAt) lines.push(t('share.updated', { date: formatDateTime(updatedAt, language) }));
-  lines.push(t('share.disclaimer'), '', t('share.signature'));
+  lines.push('', t('share.signature'));
   return lines.join('\n');
 }

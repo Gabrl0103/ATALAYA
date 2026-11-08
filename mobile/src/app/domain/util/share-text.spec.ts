@@ -17,7 +17,7 @@ const MODEL: ZoneForecast = {
 };
 
 describe('shareText', () => {
-  it('sends the current risk, the 72 h forecast, when it was updated and the disclaimer', () => {
+  it('sends the current risk, the 72 h forecast, when it was updated and the signature', () => {
     expect(shareText(PASTO, MODEL, UPDATED)).toBe(
       [
         'Pasto: riesgo de incendio Bajo (20 de 100).',
@@ -26,7 +26,6 @@ describe('shareText', () => {
         '• 48 h (mañana): Medio, 45 %',
         '• 72 h (pasado mañana): Bajo, <1 %',
         'Actualizado: 24 oct. 2026, 5:07 p. m.',
-        'Estimación de riesgo, no predicción exacta.',
         '',
         'Atalaya · Riesgo de incendios en Nariño',
       ].join('\n'),
@@ -38,7 +37,6 @@ describe('shareText', () => {
       [
         'Pasto: riesgo de incendio Bajo (20 de 100).',
         'Actualizado: 24 oct. 2026, 5:07 p. m.',
-        'Estimación de riesgo, no predicción exacta.',
         '',
         'Atalaya · Riesgo de incendios en Nariño',
       ].join('\n'),
@@ -64,13 +62,12 @@ describe('shareText', () => {
         '• 48 h (tomorrow): Medium, 45%',
         '• 72 h (day after tomorrow): Low, <1%',
         'Updated: Oct 24, 2026, 5:07 PM',
-        'Risk estimate, not an exact prediction.',
         '',
         'Atalaya · Wildfire risk in Nariño',
       ].join('\n'),
     );
     expect(shareText(PASTO, null, null, 'en')).toBe(
-      ['Pasto: wildfire risk Low (20 of 100).', 'Risk estimate, not an exact prediction.', '', 'Atalaya · Wildfire risk in Nariño'].join('\n'),
+      ['Pasto: wildfire risk Low (20 of 100).', '', 'Atalaya · Wildfire risk in Nariño'].join('\n'),
     );
   });
 
