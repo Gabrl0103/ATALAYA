@@ -2,7 +2,7 @@
 :host(.is-dragging) { transition: none; }
 /* Baja por defecto para dejar ver el mapa: el padding inferior deja todo justo por encima de la barra flotante. */
 .overview {
-  --sheet-clearance: calc(var(--nav-height) + var(--nav-bottom) + 10px + env(safe-area-inset-bottom, 0px));
+  --sheet-clearance: calc(var(--nav-height) + var(--nav-bottom) + 10px + var(--safe-bottom));
   position: relative;
   padding: 20px 20px var(--sheet-clearance);
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;

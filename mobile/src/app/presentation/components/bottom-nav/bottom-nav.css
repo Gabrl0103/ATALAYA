@@ -1,9 +1,9 @@
 .bottom-nav {
   position: absolute;
   z-index: 75;
-  left: 20px;
-  right: 20px;
-  bottom: calc(var(--nav-bottom) + env(safe-area-inset-bottom, 0px));
+  left: calc(20px + var(--safe-left));
+  right: calc(20px + var(--safe-right));
+  bottom: calc(var(--nav-bottom) + var(--safe-bottom));
   height: var(--nav-height);
   display: flex;
   gap: 10px;

@@ -3,7 +3,7 @@
   position: absolute;
   z-index: 2;
   left: 20px;
-  top: calc(58px + env(safe-area-inset-top, 0px));
+  top: calc(58px + var(--safe-top));
 }
 /* «‹ Nariño» y el aviso («Copiado»): la misma píldora de vidrio. */
 .sheet-back, .notice-pill {
@@ -30,7 +30,7 @@
   position: absolute;
   z-index: 2;
   right: 20px;
-  top: calc(58px + env(safe-area-inset-top, 0px));
+  top: calc(58px + var(--safe-top));
   margin: 0;
   pointer-events: none;
 }

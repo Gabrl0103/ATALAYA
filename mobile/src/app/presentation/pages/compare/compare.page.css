@@ -65,7 +65,7 @@
   z-index: 90;
   left: 14px;
   right: 14px;
-  top: calc(12px + env(safe-area-inset-top, 0px));
+  top: calc(12px + var(--safe-top));
   padding: 10px;
   border: 1px solid var(--glass-border);
   border-radius: 30px;

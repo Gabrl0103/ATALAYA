@@ -51,7 +51,7 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
   inset: 0;
   z-index: 1;
   overflow-y: auto;
-  padding: calc(60px + env(safe-area-inset-top, 0px)) 24px var(--nav-clearance);
+  padding: calc(60px + var(--safe-top)) calc(24px + var(--safe-right)) var(--nav-clearance) calc(24px + var(--safe-left));
   scrollbar-width: none;
 }
 .page-scroll::-webkit-scrollbar { display: none; }

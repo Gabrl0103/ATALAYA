@@ -13,7 +13,7 @@
 .top {
   flex: none;
   height: 44px;
-  margin-top: calc(53px + env(safe-area-inset-top, 0px));
+  margin-top: calc(53px + var(--safe-top));
   padding: 0 14px;
   display: flex;
   justify-content: flex-end;
@@ -108,7 +108,7 @@
 
 .bottom {
   flex: none;
-  padding: 0 24px calc(48px + env(safe-area-inset-bottom, 0px));
+  padding: 0 24px calc(48px + var(--safe-bottom));
 }
 .dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 27px; }
 .dots i {
