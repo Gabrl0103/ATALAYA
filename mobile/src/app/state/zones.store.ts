@@ -209,10 +209,6 @@ export class ZonesStore {
     this.forecastStatus.set('idle');
   }
 
-  reportError(code: ApiErrorCode): void {
-    this.error.set(code);
-  }
-
   dismissError(): void {
     this.error.set(null);
   }

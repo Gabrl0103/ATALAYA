@@ -1,4 +1,4 @@
--- Willay: esquema para Neon (PostgreSQL + PostGIS).
+-- Atalaya: esquema para Neon (PostgreSQL + PostGIS).
 -- Lo usa el backend cuando DATABASE_URL está definido (backend/.env).
 -- Se aplica con `npm run db:schema` (o pegándolo en el SQL Editor de Neon). Es idempotente.
 

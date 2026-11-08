@@ -7,7 +7,7 @@ const container = buildContainer();
 const app = createApp(container);
 
 app.listen(env.port, '0.0.0.0', () => {
-  console.log(`Willay API listening on http://localhost:${env.port}/api`);
+  console.log(`Atalaya API listening on http://localhost:${env.port}/api`);
 });
 
 if (env.ingestionEnabled) startIngestionScheduler(container.ingestionJobs);
