@@ -27,7 +27,7 @@ export function labelPriority(zoneId: string, score: number, selectedId: string 
 const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 const escapeHtml = (text: string): string => text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char);
 
-/** Inner HTML of a Leaflet divIcon. Which parts show depends on CSS (map-markers.css). */
+/** Inner HTML of a zone's MapLibre marker element. Which parts show depends on CSS (map-markers.css). */
 export function zoneMarkerHtml(zone: ZoneRiskSummary, selected: boolean, language: Language = 'es'): string {
   return (
     `<div class="zone-marker risk-${zone.level}${selected ? ' is-selected' : ''}">` +
