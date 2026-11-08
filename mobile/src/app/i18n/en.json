@@ -85,7 +85,7 @@
   "sheet.latest": "latest: {ago}",
   "sheet.firesPerYear": "fires per year",
   "sheet.history": "View history of {name}",
-  "sheet.disclaimer": "Simulated data for academic purposes. The risk does not confirm that a fire will occur.",
+  "sheet.disclaimer": "Estimate from open satellite, weather and reported-fire data. The risk does not confirm that a fire will occur.",
   "forecast.title": "72 h forecast",
   "forecast.loading": "Calculating the forecast…",
   "forecast.error": "We couldn’t load the forecast.",

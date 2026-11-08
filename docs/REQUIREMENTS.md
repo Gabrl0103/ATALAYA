@@ -236,6 +236,8 @@ Detalle completo en [`docs/ML.md`](ML.md).
     siguen en disco. `.gitignore` ignora `.claude/skills/` y un prompt de trabajo local de `mobile`.
   - Se quita `ZonesStore.reportError()`, sin llamadas ni pruebas, y un comentario que hablaba de Leaflet.
   - El log del servidor, el esquema SQL y los títulos de los documentos dicen Atalaya.
+  - El aviso de la hoja de zona ya no dice «Datos simulados para fines académicos» (los datos de producción son
+    reales): «Estimación con datos abiertos de satélite, clima e incendios reportados», en español e inglés.
   - README reescrito (funciones, stack, arquitectura, fuentes y licencias, cómo correr, variables, APK y
     pruebas) y este documento puesto al día con lo implementado, las decisiones y los límites conocidos.
 - **2026-11-03 (v0.34, rama `feat/compare-replay-nearby`):** comparar municipios, historial de focos y

@@ -85,7 +85,7 @@
   "sheet.latest": "el último, {ago}",
   "sheet.firesPerYear": "incendios por año",
   "sheet.history": "Ver historial de {name}",
-  "sheet.disclaimer": "Datos simulados para fines académicos. El riesgo no confirma la ocurrencia de un incendio.",
+  "sheet.disclaimer": "Estimación con datos abiertos de satélite, clima e incendios reportados. El riesgo no confirma la ocurrencia de un incendio.",
   "forecast.title": "Pronóstico 72 h",
   "forecast.loading": "Calculando el pronóstico…",
   "forecast.error": "No pudimos cargar el pronóstico.",
