@@ -5,7 +5,7 @@ cambian: el id de Android `co.willay.app` (cambiarlo obliga a reinstalar), el se
 el paquete `willay-backend` y el paquete de Python `willay_ml`.)*
 
 > Documento vivo: describe el estado actual del proyecto. La historia de cada cambio está en la sección 13.
-> **Última actualización:** 2026-11-07 · **Versión:** 0.35 (cierre de documentación)
+> **Última actualización:** 2026-11-07 · **Versión:** 0.36 (ayuda ante incendios)
 
 ---
 
@@ -72,7 +72,8 @@ backend/src/
                    exportado), geo (límites del DANE), config (env y contenedor)
   presentation/    rutas HTTP, DTOs, middleware de errores
 mobile/src/app/
-  core/            configuración de la API, errores, alertas, ubicación, compartir, vibración, movimiento
+  core/            configuración de la API, errores, alertas, ubicación, compartir, vibración, movimiento,
+                   líneas de emergencia
   domain/          modelos, interfaces de repositorio y utilidades puras (comparar, cercanía, reproducción…)
   data/            repositorios HTTP
   state/           stores con signals
@@ -161,6 +162,7 @@ Detalle completo en [`docs/ML.md`](ML.md).
 | RF-14 | Historial de focos: reproducción día a día de los últimos 35 días en el mapa | v0.34 |
 | RF-15 | «Mi ubicación» y «Cerca de mí»: municipio, riesgo y foco más cercano (≤ 100 km) con distancia y rumbo | v0.34 |
 | RF-16 | Introducción de tres pantallas al primer uso, que se puede volver a ver desde Ajustes | rediseño |
+| RF-17 | «¿Ves fuego? Avisa»: llamar a las líneas de emergencia, qué decir, compartir la ubicación y prevención por nivel | v0.36 |
 
 ### Detalle de las funciones recientes
 
@@ -178,6 +180,23 @@ Detalle completo en [`docs/ML.md`](ML.md).
   permiso se pide solo al activarlas, después de explicarlo.
 - **Inglés:** todos los textos de la app; fechas y números con `Intl`. No se traducen los datos (municipios,
   lugares, nombres de fuentes ni la cita literal del DANE).
+- **¿Ves fuego? Avisa** (al final de la hoja de zona, después de «Ver historial», y en Ajustes entre Alertas y
+  Datos):
+  - Botones `tel:` de 44 px o más, con `aria-label`, para la Línea de emergencias 123, Bomberos 119, Cruz Roja
+    132 y Defensa Civil 144. Los números están en `mobile/src/app/core/emergency/emergency-lines.ts`
+    (`NATIONAL_LINES`); las líneas locales de Nariño se agregan en `LOCAL_LINES`, con su nombre en es/en. En
+    Android el enlace abre el marcador con el número; en un navegador de escritorio el número queda a la vista.
+  - «Qué decir al llamar», plegado: municipio y vereda o una referencia, qué se ve, si hay viviendas cerca y un
+    número de contacto.
+  - «Compartir mi ubicación»: la ubicación se pide solo al tocar el botón, con el permiso y los avisos de error
+    de «Mi ubicación». El texto lleva el municipio (por los límites del DANE, o el más cercano), las
+    coordenadas con 5 decimales y un enlace de OpenStreetMap, y sale por el menú de compartir del teléfono (o
+    el portapapeles en el navegador). Si la ubicación falla, la hoja de zona ofrece «Compartir sin ubicación»
+    con el municipio consultado. No se guarda ni se envía a ningún servidor.
+  - Aviso: Atalaya no reemplaza a las autoridades, no avisa a nadie automáticamente y ante una emergencia hay
+    que llamar.
+  - **Prevención** (solo en la hoja de zona, bajo el pronóstico): dos consejos fijos para el nivel actual, sin
+    normas ni cifras.
 
 ## 9. Requisitos no funcionales
 
@@ -230,6 +249,20 @@ Detalle completo en [`docs/ML.md`](ML.md).
 - Confirmar con el profesor que los datos abiertos y las noticias cuentan como scraping válido.
 
 ## 13. Registro de cambios
+
+- **2026-11-07 (v0.36, rama `feat/emergency-help`):** ayuda ante incendios.
+  - Tarjeta «¿Ves fuego? Avisa» (`emergency-help`) en la hoja de zona y en Ajustes: llamadas por `tel:` a 123,
+    119, 132 y 144 desde una constante editable con lugar para líneas locales, guía «Qué decir al llamar»,
+    «Compartir mi ubicación» y el aviso de que Atalaya no reporta a nadie.
+  - La ubicación se pide solo al tocar «Compartir mi ubicación» (token `LOCATE_USER`, con `getUserLocation`) y
+    se envía con el compartir que ya existía; sin datos personales ni servidor. El texto (`emergency-text.ts`)
+    tiene pruebas con y sin ubicación.
+  - «Prevención» (`prevention-tips`) en la hoja de zona: dos consejos por nivel, con el badge del nivel. Va en
+    un componente propio para que el CSS de la hoja siga dentro de su presupuesto de 4 kB.
+  - En Android, el Bridge de Capacitor abre los `tel:` con `Intent.ACTION_VIEW` (el marcador, sin el permiso
+    `CALL_PHONE`). Sin plugins nuevos; no cambian la URL de la API ni el `appId`.
+  - Verificado en el navegador a 390 × 844: hoja de zona sin secciones encimadas y Ajustes con los nombres de
+    las líneas completos (en dos renglones si hace falta).
 
 - **2026-11-07 (v0.35, rama `chore/cierre-docs`):** limpieza y documentación de cierre.
   - Dejan de versionarse los prompts del rediseño (`docs/design/FASE*_CLAUDE_CODE.md`, `PROMPT_REDISEÑO_ATALAYA`);

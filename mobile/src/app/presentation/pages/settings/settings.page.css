@@ -16,6 +16,7 @@
 .group { margin-top: 16px; padding: 18px; border-radius: 26px; }
 .head + .group { margin-top: 24px; }
 .group-title { margin: 0; font-size: 17px; font-weight: 700; }
+.settings-emergency { margin-top: 16px; }
 .group > .group-title { margin-bottom: 12px; }
 .hint { margin: 8px 0 0; font-size: 13px; line-height: 1.35; color: var(--text-2); }
 

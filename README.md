@@ -20,6 +20,10 @@ estima **focos de calor** (anomalías térmicas que ve el satélite), no incendi
 - **Historial de focos:** reproducción día a día de los focos de los últimos 35 días sobre el mapa.
 - **Cerca de mí:** tras «Mi ubicación», en qué municipio estás, su riesgo y el foco de calor más cercano
   (a 100 km o menos), con distancia, rumbo y antigüedad.
+- **¿Ves fuego? Avisa** (hoja de zona y Ajustes): botones para llamar a la Línea de emergencias 123, Bomberos
+  119, Cruz Roja 132 y Defensa Civil 144, qué decir al llamar y «Compartir mi ubicación» (municipio,
+  coordenadas y un enlace de OpenStreetMap, por el menú de compartir del teléfono). La hoja suma consejos de
+  **prevención** según el nivel de riesgo. Atalaya no avisa a nadie automáticamente.
 - **Historial:** incendios reportados por municipio (UNGRD y noticias), con reportes por año.
 - **Ajustes:** idioma (Automático, Español, **English**), unidades (°C/°F, km/h/mph), movimiento, vibración,
   **alertas locales** de los favoritos, borrar datos, ver la introducción otra vez y Acerca de (fuentes y
@@ -53,7 +57,7 @@ backend/src/
                    modelo de ML exportado, límites del DANE, configuración
   presentation/    rutas HTTP, DTOs y middleware de errores
 mobile/src/app/
-  core/            configuración de la API, errores, alertas, ubicación, compartir
+  core/            configuración de la API, errores, alertas, ubicación, compartir, líneas de emergencia
   domain/          modelos, interfaces de repositorio y utilidades puras
   data/            repositorios HTTP
   state/           stores con signals (zonas, favoritos, comparación, ajustes, historial)
