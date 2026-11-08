@@ -71,7 +71,7 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
 /* Cifra grande con su explicación (Inicio, hoja de zona). */
 .stat-tile { min-width: 0; padding: 16px 14px; border-radius: 22px; background: rgba(255, 255, 255, 0.07); }
 .stat-tile b { display: block; font-size: 30px; font-weight: 700; line-height: 1.1; }
-.stat-tile span { display: block; margin-top: 6px; font-size: 15px; line-height: 1.2; color: var(--text-2); }
+.stat-tile span { display: block; margin-top: 6px; font-size: 15px; line-height: 1.2; color: var(--text-2); hyphens: auto; }
 
 /* Mensaje de carga o error dentro de una tarjeta de vidrio. */
 .state-card { padding: 20px; text-align: center; font-size: 15px; color: var(--text-2); }
