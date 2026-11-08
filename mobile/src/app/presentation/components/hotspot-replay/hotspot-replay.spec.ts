@@ -36,13 +36,13 @@ function render(answer: () => Observable<HotspotHistory> = () => of(HISTORY)) {
 describe('HotspotReplay', () => {
   afterEach(() => vi.useRealTimers());
 
-  it('opens on the last day, with its date, its count and what the heat spots are', () => {
+  it('opens on the last day, with its date and its count', () => {
     const { host, shown, slider } = render();
     expect(parts(host.querySelector('.day'))).toBe('3 nov 2026 1 foco de calor');
     expect(slider().max).toBe('2');
     expect(slider().getAttribute('aria-valuetext')).toBe('3 nov 2026');
     expect(shown.at(-1)?.map((h) => h.satellite)).toEqual(['NOAA21']);
-    expect(text(host.querySelector('.note'))).toBe('Detecciones satelitales de calor (VIIRS), no incendios confirmados.');
+    expect(host.querySelector('.note')).toBeNull();
   });
 
   it('shows the heat spots of the day picked with the slider, also a quiet one', () => {

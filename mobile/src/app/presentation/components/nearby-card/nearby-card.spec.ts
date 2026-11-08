@@ -35,7 +35,7 @@ describe('NearbyCard', () => {
     expect(text(host.querySelector('.place'))).toBe('Estás en Pasto');
     expect(parts(host.querySelector('.risk'))).toBe('Bajo 20 de 100');
     expect(text(host.querySelector('.hotspot'))).toBe('Foco de calor más cercano: a 12 km al noreste, hace 3 h.');
-    expect(text(host.querySelector('.note'))).toContain('no incendios confirmados');
+    expect(host.querySelector('.note')).toBeNull();
   });
 
   it('says there is none instead of making one up, and offers no button for it', () => {

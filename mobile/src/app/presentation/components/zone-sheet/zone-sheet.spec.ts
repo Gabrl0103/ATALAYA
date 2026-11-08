@@ -271,11 +271,12 @@ describe('ZoneSheet', () => {
     expect(text(extreme, '.prevention li')[0]).toBe('No uses fuego al aire libre por ningún motivo.');
   });
 
-  it('ends with «¿Ves fuego? Avisa» for the zone, after «Ver historial»', () => {
+  it('ends with «¿Ves fuego? Avisa» for the zone, after «Ver historial», with no note under it', () => {
     const { host } = render();
     const content = host.querySelector('.zone-content')!;
     const order = [...content.children].map((el) => el.className.split(' ')[0] || el.tagName.toLowerCase());
-    expect(order.slice(-3)).toEqual(['history-cta', 'sheet-emergency', 'disclaimer']);
+    expect(order.slice(-2)).toEqual(['history-cta', 'sheet-emergency']);
+    expect(host.querySelector('.disclaimer:not(app-emergency-help *)')).toBeNull();
     expect(host.querySelectorAll('app-emergency-help a[href^="tel:"]').length).toBeGreaterThanOrEqual(4);
   });
 });
