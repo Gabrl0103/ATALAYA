@@ -334,5 +334,18 @@
   "replay.pause": "Pausar",
   "replay.speed": "Velocidad {speed}x",
   "replay.range": "Del {from} al {to}",
-  "replay.note": "Detecciones satelitales de calor (VIIRS), no incendios confirmados."
+  "replay.note": "Detecciones satelitales de calor (VIIRS), no incendios confirmados.",
+  "emergency.line.emergencies": "Línea de emergencias",
+  "emergency.line.firefighters": "Bomberos",
+  "emergency.line.redCross": "Cruz Roja",
+  "emergency.line.civilDefense": "Defensa Civil",
+  "emergency.share.title": "Aviso de posible incendio",
+  "emergency.share.heading": "Aviso de posible incendio forestal.",
+  "emergency.share.inside": "Municipio: {name}",
+  "emergency.share.outside": "Fuera de Nariño, cerca de {name}",
+  "emergency.share.nearest": "Municipio más cercano: {name}",
+  "emergency.share.viewed": "Municipio consultado: {name}",
+  "emergency.share.coordinates": "Coordenadas: {latitude}, {longitude}",
+  "emergency.share.map": "Mapa: {url}",
+  "emergency.share.noLocation": "Ubicación: no disponible"
 }
