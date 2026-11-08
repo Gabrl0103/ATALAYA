@@ -1,11 +1,12 @@
 # Atalaya — Requisitos y decisiones
 
-*(Antes llamado FIREMAP y luego Willay. Algunos identificadores internos conservan el nombre anterior y no se
-cambian: el id de Android `co.willay.app` (cambiarlo obliga a reinstalar), el servicio `willay-api` en Render,
-el paquete `willay-backend` y el paquete de Python `willay_ml`.)*
+*(Antes llamado FIREMAP y luego Willay. Repositorio: https://github.com/Gabrl0103/ATALAYA (antes `Willay-Firemap`).
+Algunos identificadores internos conservan el nombre anterior y no se cambian: el id de Android `co.willay.app`
+(cambiarlo obliga a reinstalar), la URL de la API `https://willay-api.onrender.com` (Render no cambia el
+subdominio al renombrar el servicio) y el paquete de Python `willay_ml`.)*
 
 > Documento vivo: describe el estado actual del proyecto. La historia de cada cambio está en la sección 13.
-> **Última actualización:** 2026-11-08 · **Versión:** 0.37 (textos quitados de la app)
+> **Última actualización:** 2026-11-08 · **Versión:** 0.38 (renombre a Atalaya)
 
 ---
 
@@ -249,6 +250,15 @@ Detalle completo en [`docs/ML.md`](ML.md).
 - Confirmar con el profesor que los datos abiertos y las noticias cuentan como scraping válido.
 
 ## 13. Registro de cambios
+
+- **2026-11-08 (v0.38, rama `chore/renombre-atalaya`):** revisión del nombre Atalaya.
+  - La UI ya decía Atalaya en todas partes (`appName`, título, `strings.xml`, introducción, Ajustes y textos
+    compartidos); no quedaban «Willay» ni «FIREMAP» visibles.
+  - Los paquetes pasan a `atalaya` (app, antes `mobile`) y `atalaya-backend` (antes `willay-backend`).
+  - Se quedan con el nombre anterior la URL de la API (`willay-api.onrender.com`: Render no cambia el subdominio
+    al renombrar el servicio), el `appId` `co.willay.app`, el paquete `willay_ml`, el User-Agent `WillayBot` del
+    scraping y la clave interna `willay.mapIntroPlayed` de la entrada del mapa (no se ven en la app).
+  - El repositorio pasa a https://github.com/Gabrl0103/ATALAYA.
 
 - **2026-11-08 (v0.37, rama `fix/quitar-textos`):** se quitan textos de la app por pedido del profesor, en español e
   inglés.
