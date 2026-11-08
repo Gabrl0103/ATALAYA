@@ -243,7 +243,6 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
             {{ 'sheet.history' | t: { name: risk().name } }}
           </button>
           <app-emergency-help class="sheet-emergency" [zoneName]="risk().name" [startIndex]="7" />
-          <p class="disclaimer">{{ 'sheet.disclaimer' | t }}</p>
         </div>
       </section>
     </div>

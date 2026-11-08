@@ -64,6 +64,3 @@ h3 { margin: 10px 0 0; font-size: 15px; font-weight: 700; }
 .levels li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 18px; background: rgba(255, 255, 255, 0.07); }
 .levels b { font-size: 14px; }
 
-.bullets { display: grid; gap: 10px; }
-.bullets li { position: relative; padding-left: 16px; font-size: 14px; line-height: 1.45; color: var(--text-2); }
-.bullets li::before { content: ''; position: absolute; left: 2px; top: 0.6em; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }

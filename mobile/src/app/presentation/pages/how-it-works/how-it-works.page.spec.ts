@@ -33,18 +33,12 @@ describe('HowItWorksPage', () => {
     expect(text(steps[2])).toContain('25 km o menos de la cabecera, de los últimos 5 días');
   });
 
-  it('explains the levels, what Atalaya is not and its limits, with the model metrics', () => {
+  it('explains the levels, without the sections taken out', () => {
     const { host } = render();
     expect([...host.querySelectorAll('.levels li')].map(parts)).toEqual(['Bajo 0–24', 'Medio 25–49', 'Alto 50–74', 'Extremo 75–100']);
-    const not = text(host.querySelector('[aria-labelledby="not-title"]'));
-    expect(not).toContain('no una predicción exacta de incendios');
-    expect(not).toContain('No son incendios confirmados');
-    expect(not).toContain('No reemplaza a las autoridades');
-    const limits = text(host.querySelector('[aria-labelledby="limits-title"]'));
-    expect(limits).toContain('poco historial');
-    expect(limits).toContain('Depende de sus fuentes');
-    expect(limits).toContain('NASA POWER');
-    expect(host.querySelector('app-model-metrics .metric')).not.toBeNull();
+    expect(host.querySelector('[aria-labelledby="not-title"]')).toBeNull();
+    expect(host.querySelector('[aria-labelledby="limits-title"]')).toBeNull();
+    expect(host.querySelector('app-model-metrics')).toBeNull();
   });
 
   it('is in English when the app is', async () => {

@@ -27,7 +27,6 @@ h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
 .risk { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
 .risk b { font-size: 15px; }
 .hotspot { margin: 10px 0 0; font-size: 14px; line-height: 1.4; }
-.note { margin: 4px 0 0; font-size: 12px; line-height: 1.35; color: var(--text-2); }
 .actions { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
 .action {
   min-height: 44px;

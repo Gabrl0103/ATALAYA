@@ -56,24 +56,4 @@
       }
     </ul>
   </section>
-
-  <section class="glass-card group anim-up" style="--i: 4" aria-labelledby="not-title">
-    <h2 id="not-title" class="group-title">{{ 'how.notTitle' | t }}</h2>
-    <ul class="bullets">
-      @for (item of notItems; track item) {
-        <li>{{ item | t }}</li>
-      }
-    </ul>
-  </section>
-
-  <app-model-metrics class="anim-up" style="--i: 5" />
-
-  <section class="glass-card group anim-up" style="--i: 6" aria-labelledby="limits-title">
-    <h2 id="limits-title" class="group-title">{{ 'how.limitsTitle' | t }}</h2>
-    <ul class="bullets">
-      @for (item of limits; track item) {
-        <li>{{ item | t }}</li>
-      }
-    </ul>
-  </section>
 </div>

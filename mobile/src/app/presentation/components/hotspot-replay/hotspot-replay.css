@@ -44,4 +44,3 @@ h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
   font-weight: 600;
 }
 .range { margin-left: auto; font-size: 12px; text-align: right; color: var(--text-2); }
-.note { margin: 10px 0 0; font-size: 12px; line-height: 1.35; color: var(--text-2); }

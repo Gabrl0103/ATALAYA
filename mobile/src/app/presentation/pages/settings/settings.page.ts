@@ -4,10 +4,9 @@ import { LocalAlerts } from '../../../core/alerts/local-alerts';
 import { APP_VERSION } from '../../../core/config/app-version';
 import { Haptic } from '../../../core/haptics';
 import { OnboardingFlag } from '../../../core/onboarding-flag';
-import { MODEL_METRICS } from '../../../domain/model/model-metrics';
 import { I18n } from '../../../i18n/i18n';
 import { TranslatePipe } from '../../../i18n/t.pipe';
-import { LOCALES, type MessageKey } from '../../../i18n/translate';
+import type { MessageKey } from '../../../i18n/translate';
 import { FavoritesStore } from '../../../state/favorites.store';
 import { SettingsStore, type Settings } from '../../../state/settings.store';
 import { ZonesStore } from '../../../state/zones.store';
@@ -100,22 +99,6 @@ export class SettingsPage implements OnDestroy {
   protected readonly cacheCleared = signal(false);
   private doneTimer?: ReturnType<typeof setTimeout>;
 
-  private readonly model = inject(MODEL_METRICS);
-  /** One line of «Acerca de» with the model's real metrics; left out if the file lacks any of them. */
-  protected readonly modelSummary = computed(() => {
-    const { version, periods, evaluation } = this.model;
-    const metrics = evaluation.openMeteoMapped;
-    if (!version || !periods.test || metrics?.rocAuc === undefined || metrics.prAuc === undefined) return null;
-    const decimal = (value: number) =>
-      value.toLocaleString(LOCALES[this.i18n.language()], { minimumFractionDigits: 3, maximumFractionDigits: 3 });
-    return this.i18n.t('about.modelSummary', {
-      version,
-      rocAuc: decimal(metrics.rocAuc),
-      prAuc: decimal(metrics.prAuc),
-      from: periods.test[0].slice(0, 4),
-      to: periods.test[1].slice(0, 4),
-    });
-  });
 
   constructor() {
     const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;

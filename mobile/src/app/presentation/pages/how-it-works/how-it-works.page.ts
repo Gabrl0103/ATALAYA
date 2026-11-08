@@ -6,7 +6,6 @@ import { TranslatePipe } from '../../../i18n/t.pipe';
 import type { MessageKey } from '../../../i18n/translate';
 import { AppIcon, type IconName } from '../../components/app-icon/app-icon';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
-import { ModelMetricsCard } from '../../components/model-metrics/model-metrics';
 import { RiskBadge } from '../../components/risk-badge/risk-badge';
 
 interface FlowStep {
@@ -45,7 +44,7 @@ export const LEVEL_RANGES: readonly { readonly level: RiskLevel; readonly from: 
 /** «Cómo funciona»: opened from Inicio and from Ajustes > Acerca de; not a tab. */
 @Component({
   selector: 'app-how-it-works-page',
-  imports: [AppIcon, LavaBg, ModelMetricsCard, RiskBadge, TranslatePipe],
+  imports: [AppIcon, LavaBg, RiskBadge, TranslatePipe],
   templateUrl: './how-it-works.page.html',
   styleUrl: './how-it-works.page.css',
   host: { class: 'ion-page' },
@@ -58,8 +57,6 @@ export class HowItWorksPage {
   protected readonly sources = FLOW_SOURCES;
   protected readonly weights = SCORE_WEIGHTS;
   protected readonly levels = LEVEL_RANGES;
-  protected readonly notItems: readonly MessageKey[] = ['how.not.prediction', 'how.not.hotspots', 'how.not.authorities'];
-  protected readonly limits: readonly MessageKey[] = ['how.limit.history', 'how.limit.sources', 'how.limit.weather', 'how.limit.radius'];
 
   /** Back to where it was opened (Inicio or Ajustes); to Inicio if the app started here. */
   protected back(): void {

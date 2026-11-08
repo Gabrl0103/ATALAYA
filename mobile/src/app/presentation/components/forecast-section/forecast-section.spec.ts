@@ -59,8 +59,10 @@ describe('ForecastSection', () => {
     expect(host.querySelector('.forecast-sizer')!.classList).not.toContain('is-loading');
   });
 
-  it('says it is an estimate', () => {
-    expect(text(render(MODEL, 'ready').host, '.forecast-note')[0]).toContain('estimación');
+  it('explains the probability without calling it an exact prediction', () => {
+    const note = text(render(MODEL, 'ready').host, '.forecast-note')[0];
+    expect(note).toContain('en las 72 h siguientes');
+    expect(note).not.toContain('predicción exacta');
   });
 
   // The note was a second child of the body, so it fell in the sizer's cell on top of the 24 h row.
@@ -72,7 +74,7 @@ describe('ForecastSection', () => {
     await TestBed.inject(SettingsStore).update({ language: 'en' });
     const english = render(MODEL, 'ready').host;
     expect(bodyChildren(english)).toEqual(['forecast-sizer', 'forecast-model']);
-    expect(text(english, '.forecast-model > .forecast-rows + .forecast-note')[0]).toContain('model estimate');
+    expect(text(english, '.forecast-model > .forecast-rows + .forecast-note')[0]).toContain('with the forecast weather.');
   });
 
   it('puts the loading, fallback and error states in a single child of the body too', () => {

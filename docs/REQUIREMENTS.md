@@ -5,7 +5,7 @@ cambian: el id de Android `co.willay.app` (cambiarlo obliga a reinstalar), el se
 el paquete `willay-backend` y el paquete de Python `willay_ml`.)*
 
 > Documento vivo: describe el estado actual del proyecto. La historia de cada cambio está en la sección 13.
-> **Última actualización:** 2026-11-07 · **Versión:** 0.36 (ayuda ante incendios)
+> **Última actualización:** 2026-11-08 · **Versión:** 0.37 (textos quitados de la app)
 
 ---
 
@@ -156,7 +156,7 @@ Detalle completo en [`docs/ML.md`](ML.md).
 | RF-08 | Favoritos («Mis municipios»), guardados solo en el teléfono | v0.29 |
 | RF-09 | Compartir el riesgo de un municipio como texto (sin enlaces ni ubicación) | v0.29 |
 | RF-10 | Ajustes: idioma (Automático, Español, English), unidades, movimiento, vibración, datos, ayuda y acerca de | v0.30 |
-| RF-11 | «Cómo funciona»: flujo de los datos, niveles, qué no es Atalaya, límites y métricas del modelo | v0.33 |
+| RF-11 | «Cómo funciona»: flujo de los datos y qué significa cada nivel | v0.33 (recortada en v0.37) |
 | RF-12 | Alertas locales cuando un favorito sube a Alto o Extremo | v0.33 |
 | RF-13 | Comparar 2 o 3 municipios lado a lado | v0.34 |
 | RF-14 | Historial de focos: reproducción día a día de los últimos 35 días en el mapa | v0.34 |
@@ -249,6 +249,20 @@ Detalle completo en [`docs/ML.md`](ML.md).
 - Confirmar con el profesor que los datos abiertos y las noticias cuentan como scraping válido.
 
 ## 13. Registro de cambios
+
+- **2026-11-08 (v0.37, rama `fix/quitar-textos`):** se quitan textos de la app por pedido del profesor, en español e
+  inglés.
+  - «Cómo funciona» pierde «Qué no es Atalaya», «Límites conocidos» y «Métricas del modelo»; Acerca de pierde el
+    resumen de métricas y su pista pasa a «Datos, modelo y niveles de riesgo». Se borran el componente de
+    métricas, `model-metrics.ts`, la copia `model-metrics-1.0.0.json` (con su prueba en el backend) y sus claves.
+  - Salen las frases de «no es una predicción exacta» de Inicio, Acerca de, la hoja del mapa, el texto de
+    compartir, la nota del pronóstico y la introducción (esas dos conservan el resto del texto).
+  - Salen los avisos de la hoja de zona («…no confirma la ocurrencia de un incendio») y de Cerca de mí y el
+    historial de focos («…no incendios confirmados»).
+  - Se quedan el aviso de «¿Ves fuego? Avisa», las atribuciones y licencias, y estos documentos (los límites y
+    las métricas siguen en las secciones 7 y 11 y en `docs/ML.md`).
+  - Verificado en el navegador a 390 × 844, en español e inglés: Inicio, mapa, hoja de zona, historial de
+    focos, introducción, Cómo funciona y Ajustes, sin huecos ni títulos vacíos.
 
 - **2026-11-07 (v0.36, rama `feat/emergency-help`):** ayuda ante incendios.
   - Tarjeta «¿Ves fuego? Avisa» (`emergency-help`) en la hoja de zona y en Ajustes: llamadas por `tel:` a 123,

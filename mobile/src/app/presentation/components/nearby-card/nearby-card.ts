@@ -31,7 +31,6 @@ const PLACE_KEYS: Record<NearbySummary['place'], MessageKey> = {
         <b class="mono">{{ 'common.scoreOf100' | t: { score: summary().zone.score } }}</b>
       </div>
       <p class="hotspot">{{ hotspotText() }}</p>
-      <p class="note">{{ 'nearby.note' | t }}</p>
       <div class="actions">
         <button type="button" class="action primary" (click)="openZone.emit(summary().zone.id)">{{ 'nearby.openZone' | t }}</button>
         @if (summary().hotspot) {

@@ -4,7 +4,6 @@ import { RISK_RANGES } from '../../../domain/util/risk-labels';
 import { I18n } from '../../../i18n/i18n';
 import { TranslatePipe } from '../../../i18n/t.pipe';
 import { translate, type Language } from '../../../i18n/translate';
-import { AppIcon } from '../app-icon/app-icon';
 import { RiskBadge } from '../risk-badge/risk-badge';
 import { FLICK_VELOCITY } from '../zone-sheet/sheet-snap';
 
@@ -51,7 +50,7 @@ export function overviewCounts(zoneCount: number, hotspotCount: number, language
  */
 @Component({
   selector: 'app-map-overview-sheet',
-  imports: [AppIcon, RiskBadge, TranslatePipe],
+  imports: [RiskBadge, TranslatePipe],
   // While dragged the whole sheet follows the finger (the section's entry animation owns its own transform).
   host: { '[style.transform]': 'dragTransform()', '[class.is-dragging]': 'dragOffset() !== null' },
   template: `
@@ -93,13 +92,8 @@ export function overviewCounts(zoneCount: number, hotspotCount: number, language
       @if (canZoom()) {
         <button type="button" class="zoom" (click)="zoomRequested.emit()">{{ 'overview.zoom' | t }}</button>
       }
-      @if (open()) {
-        <p class="note">
-          <span><app-icon name="alert" [size]="12" />{{ 'common.disclaimer' | t }}</span>
-          @if (updatedLabel()) {
-            <span class="mono">{{ updatedLabel() }}</span>
-          }
-        </p>
+      @if (open() && updatedLabel()) {
+        <p class="note"><span class="mono">{{ updatedLabel() }}</span></p>
       }
     </section>
   `,

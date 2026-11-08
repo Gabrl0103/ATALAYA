@@ -68,7 +68,6 @@ type Status = 'loading' | 'ready' | 'error';
           }
         }
       }
-      <p class="note">{{ 'replay.note' | t }}</p>
     </section>
   `,
   styleUrl: './hotspot-replay.css',

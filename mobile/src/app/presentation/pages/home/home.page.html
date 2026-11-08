@@ -68,10 +68,7 @@
       }
     </div>
 
-    <p class="note anim-up" [style.--i]="topStart() + 3">
-      {{ 'home.note' | t }}
-    </p>
-    <button type="button" class="how-link anim-up" [style.--i]="topStart() + 4" (click)="openHowItWorks()">
+    <button type="button" class="how-link anim-up" [style.--i]="topStart() + 3" (click)="openHowItWorks()">
       <span>{{ 'home.howLink' | t }}</span>
       <app-icon name="chevron-right" [size]="18" />
     </button>
