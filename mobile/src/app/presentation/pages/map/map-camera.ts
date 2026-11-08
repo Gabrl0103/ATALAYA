@@ -86,6 +86,30 @@ export function narinoPadding(sheetHeight: number): Padding {
 /** sessionStorage key: the intro already played in this session (it survives a reload of the page). */
 export const INTRO_KEY = 'willay.mapIntroPlayed';
 
+/** What followContainerSize needs of ResizeObserver (a parameter so tests can trigger it). */
+export type ResizeObserverLike = new (callback: () => void) => { observe(target: Element): void; disconnect(): void };
+
+/**
+ * Keeps the map the size of its container. MapLibre only follows the window, but the container also changes
+ * without it: the system bars or the keyboard of the phone. Returns the function that stops following it.
+ */
+export function followContainerSize(
+  element: HTMLElement,
+  map: { resize(): void },
+  Observer: ResizeObserverLike = ResizeObserver,
+): () => void {
+  const sizeOf = (): string => `${element.clientWidth}x${element.clientHeight}`;
+  let last = sizeOf();
+  const observer = new Observer(() => {
+    const size = sizeOf();
+    if (size === last) return;
+    last = size;
+    map.resize();
+  });
+  observer.observe(element);
+  return () => observer.disconnect();
+}
+
 /** False when the storage is unavailable (private mode, blocked site data): the intro then plays. */
 export function readIntroPlayed(win: Window): boolean {
   try {

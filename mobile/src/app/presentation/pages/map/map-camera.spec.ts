@@ -1,6 +1,6 @@
 import {
   GLOBE_MARGIN, GLOBE_START_CENTER, GLOBE_TOP, GLOW_END_ZOOM, INTRO_KEY, MAX_BOUNDS, NARINO_BOUNDS, NARINO_PADDING, PITCH,
-  SPIN_DEGREES_PER_SECOND, globeHalo, globeStart, hasWebGL, introPlan, narinoPadding, readIntroPlayed,
+  SPIN_DEGREES_PER_SECOND, followContainerSize, globeHalo, globeStart, hasWebGL, introPlan, narinoPadding, readIntroPlayed,
   TAP_FLY_MS, ZONE_FLY_MS, ZONE_ZOOM, rememberIntroPlayed, spinCenter,
 } from './map-camera';
 import { NAME_MIN_ZOOM } from './zone-marker';
@@ -111,5 +111,42 @@ describe('map camera: environment', () => {
     const canvas = { getContext: (kind: string) => (kind === 'webgl' ? {} : null) };
     expect(hasWebGL({ createElement: () => canvas } as unknown as Document)).toBe(true);
     expect(hasWebGL({ createElement: () => ({ getContext: () => null }) } as unknown as Document)).toBe(false);
+  });
+});
+
+describe('followContainerSize', () => {
+  /** A ResizeObserver the test triggers by hand. */
+  function fakeObserver() {
+    const state: { callback?: () => void; observed?: Element; disconnected: boolean } = { disconnected: false };
+    class Observer {
+      constructor(callback: () => void) {
+        state.callback = callback;
+      }
+      observe(target: Element): void {
+        state.observed = target;
+      }
+      disconnect(): void {
+        state.disconnected = true;
+      }
+    }
+    return { Observer, state };
+  }
+
+  it('resizes the map when its container changes size, e.g. with the system bars or the keyboard', () => {
+    const element = { clientWidth: 412, clientHeight: 915 } as HTMLElement;
+    const map = { resize: vi.fn() };
+    const { Observer, state } = fakeObserver();
+    const stop = followContainerSize(element, map, Observer);
+    expect(state.observed).toBe(element);
+
+    state.callback!();
+    expect(map.resize).not.toHaveBeenCalled(); // same size: nothing to do
+
+    (element as { clientHeight: number }).clientHeight = 600;
+    state.callback!();
+    expect(map.resize).toHaveBeenCalledTimes(1);
+
+    stop();
+    expect(state.disconnected).toBe(true);
   });
 });
