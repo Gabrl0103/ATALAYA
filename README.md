@@ -28,8 +28,7 @@ estima **focos de calor** (anomalías térmicas que ve el satélite), no incendi
 - **Ajustes:** idioma (Automático, Español, **English**), unidades (°C/°F, km/h/mph), movimiento, vibración,
   **alertas locales** de los favoritos, borrar datos, ver la introducción otra vez y Acerca de (fuentes y
   licencias).
-- **Cómo funciona** (`/how-it-works`): el camino de los datos, los niveles, lo que Atalaya no es, sus límites
-  y las métricas reales del modelo.
+- **Cómo funciona** (`/how-it-works`): el camino de los datos y qué significa cada nivel.
 
 ## Stack
 
