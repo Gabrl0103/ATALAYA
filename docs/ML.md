@@ -1,4 +1,4 @@
-# Willay — Modelo de machine learning (v1.0.0)
+# Atalaya — Modelo de machine learning (v1.0.0)
 
 > Estado: **fases 1–3 terminadas** (datos, variables, entrenamiento y evaluación), 2026-10-03, y **fase 4**
 > (integración en el backend, sección 7), 2026-10-18. El puntaje del mapa **sigue siendo el modelo de pesos**
