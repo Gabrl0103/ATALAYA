@@ -1,5 +1,5 @@
 * { box-sizing: border-box; border-color: var(--border); }
-html, body { min-height: 100%; }
+html, body { height: 100%; }
 body {
   margin: 0;
   background: var(--bg);
@@ -14,22 +14,37 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
 /* Cifras, fechas, años, hectáreas y badges van en Roboto Mono. */
 .mono { font-family: var(--font-mono); }
 
-.app-stage {
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(circle at 50% 10%, #2a120a, var(--bg) 60%);
+/* En el celular la app ocupa la ventana entera, de borde a borde: el fondo oscuro llega debajo de las barras
+   del sistema y cada pantalla se aparta de ellas con --safe-*. Sin tamaños de un dispositivo en particular. */
+.app-stage { position: fixed; inset: 0; background: var(--bg); }
+.phone-shell { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+/* Bajo la barra de estado, una franja del fondo: el contenido que se desplaza por debajo nunca tapa sus iconos. */
+.phone-shell::after {
+  content: '';
+  position: absolute;
+  z-index: 200;
+  inset: 0 0 auto;
+  height: var(--safe-top);
+  background: linear-gradient(var(--bg), rgba(11, 6, 4, 0.75));
+  pointer-events: none;
 }
-.phone-shell {
-  position: relative;
-  width: min(100vw, 390px);
-  height: min(100dvh, 844px);
-  overflow: hidden;
-  background: var(--bg);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-}
-@media (min-width: 600px) {
-  .phone-shell { border-radius: 24px; outline: 8px solid #1a1210; }
+
+/* Solo en una computadora (pantalla ancha con mouse): la app dentro de un marco de teléfono de 390 × 844. */
+@media (min-width: 600px) and (hover: hover) and (pointer: fine) {
+  .app-stage {
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 50% 10%, #2a120a, var(--bg) 60%);
+  }
+  .phone-shell {
+    position: relative;
+    inset: auto;
+    width: 390px;
+    height: min(100%, 844px);
+    border-radius: 24px;
+    outline: 8px solid #1a1210;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  }
 }
 
 /* Tarjeta de vidrio sobre el fondo de lava. */
@@ -46,7 +61,7 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
   inset: 0;
   z-index: 1;
   overflow-y: auto;
-  padding: calc(60px + env(safe-area-inset-top, 0px)) 24px var(--nav-clearance);
+  padding: calc(60px + var(--safe-top)) calc(24px + var(--safe-right)) var(--nav-clearance) calc(24px + var(--safe-left));
   scrollbar-width: none;
 }
 .page-scroll::-webkit-scrollbar { display: none; }
@@ -56,7 +71,7 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
 /* Cifra grande con su explicación (Inicio, hoja de zona). */
 .stat-tile { min-width: 0; padding: 16px 14px; border-radius: 22px; background: rgba(255, 255, 255, 0.07); }
 .stat-tile b { display: block; font-size: 30px; font-weight: 700; line-height: 1.1; }
-.stat-tile span { display: block; margin-top: 6px; font-size: 15px; line-height: 1.2; color: var(--text-2); }
+.stat-tile span { display: block; margin-top: 6px; font-size: 15px; line-height: 1.2; color: var(--text-2); hyphens: auto; }
 
 /* Mensaje de carga o error dentro de una tarjeta de vidrio. */
 .state-card { padding: 20px; text-align: center; font-size: 15px; color: var(--text-2); }

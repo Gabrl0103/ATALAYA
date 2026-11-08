@@ -1,12 +1,12 @@
 {
   "name": "atalaya",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "node --test scripts/layout-css.test.mjs && ng test",
     "build:android": "ng build && cap sync android",
     "open:android": "cap open android",
     "assets": "node scripts/brand-assets.mjs"

@@ -12,7 +12,7 @@
 }
 
 .map-header {
-  position: absolute; z-index: 50; inset: 0 0 auto; padding: calc(14px + env(safe-area-inset-top)) 14px 0; pointer-events: none;
+  position: absolute; z-index: 50; inset: 0 0 auto; padding: calc(14px + var(--safe-top)) calc(14px + var(--safe-right)) 0 calc(14px + var(--safe-left)); pointer-events: none;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .map-header > * { pointer-events: auto; }
@@ -25,13 +25,13 @@ h1 { margin: 0; padding: 4px 10px 0; color: var(--text); font-family: var(--font
 /* Capa de vidrio del buscador: se abre con la lupa de la barra y se cierra al elegir o cancelar. */
 .search-backdrop { position: absolute; z-index: 85; inset: 0; background: rgba(11, 6, 4, 0.45); }
 .search-layer {
-  position: absolute; z-index: 90; left: 14px; right: 14px; top: calc(12px + env(safe-area-inset-top));
+  position: absolute; z-index: 90; left: calc(14px + var(--safe-left)); right: calc(14px + var(--safe-right)); top: calc(12px + var(--safe-top));
   padding: 10px; border-radius: 30px; border: 1px solid var(--glass-border); background: var(--glass-strong);
   backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--shadow-soft);
 }
 
 .error-banner {
-  position: absolute; z-index: 80; left: 14px; right: 14px; top: calc(84px + env(safe-area-inset-top)); display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  position: absolute; z-index: 80; left: calc(14px + var(--safe-left)); right: calc(14px + var(--safe-right)); top: calc(84px + var(--safe-top)); display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 10px 12px; border-radius: 10px; background: var(--risk-extreme); color: #fff; font-size: 11px; box-shadow: var(--shadow-soft);
 }
 .error-banner button { padding: 4px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.2); font-size: 10px; font-weight: 700; }

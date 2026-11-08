@@ -16,6 +16,8 @@
   border-top: 1px solid var(--glass-border);
   box-shadow: 0 -16px 38px rgba(0, 0, 0, 0.5);
   transition: transform 0.32s cubic-bezier(0.22, 0.75, 0.2, 1);
+  /* En pantallas bajas el 85 % llegaría a «‹ Nariño» (58 px + 44 px bajo la barra de estado): se detiene 10 px antes. */
+  max-height: calc(100% - var(--safe-top) - 112px);
 }
 .zone-sheet.is-dragging { transition: none; }
 .sheet-drag-area { position: relative; flex: none; touch-action: none; user-select: none; }

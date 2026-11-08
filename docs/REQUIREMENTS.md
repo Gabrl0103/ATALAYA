@@ -6,7 +6,7 @@ Algunos identificadores internos conservan el nombre anterior y no se cambian: e
 subdominio al renombrar el servicio) y el paquete de Python `willay_ml`.)*
 
 > Documento vivo: describe el estado actual del proyecto. La historia de cada cambio está en la sección 13.
-> **Última actualización:** 2026-11-08 · **Versión:** 1.0.0 (primera versión publicada)
+> **Última actualización:** 2026-11-08 · **Versión:** 1.0.1 (pantalla completa en Android)
 
 ---
 
@@ -250,6 +250,25 @@ Detalle completo en [`docs/ML.md`](ML.md).
 - Confirmar con el profesor que los datos abiertos y las noticias cuentan como scraping válido.
 
 ## 13. Registro de cambios
+
+- **2026-11-08 (1.0.1, rama `fix/layout-android`):** la app ocupa toda la pantalla en cualquier celular.
+  - Causa: `.phone-shell`, el marco de teléfono de 390 × 844 pensado para la computadora, también se aplicaba en
+    el celular. En pantallas de más de 390 de ancho o 844 de alto dejaba franjas del degradado naranja alrededor y
+    la barra inferior y el final de cada pantalla quedaban contra el borde del marco, no de la pantalla. Además,
+    detrás de las barras del sistema se veía el fondo del tema de la plantilla (gris, blanco o azul).
+  - En el celular la app llena la ventana (el marco solo queda con pantalla ancha y mouse). Tokens
+    `--safe-top/right/bottom/left` unen `env(safe-area-inset-*)` con los insets que inyecta Capacitor (SystemBars,
+    `insetsHandling: css`); la barra inferior, el contenido, las hojas y los controles del mapa los usan, también
+    los laterales.
+  - Android: edge-to-edge en todas las versiones con iconos claros, `#0B0604` detrás de las barras, zona de la
+    cámara ocupada y orientación vertical. Una franja del fondo bajo la barra de estado mantiene sus iconos legibles.
+  - Pantallas bajas y letra grande: la introducción escala espacios y textos con la altura (`svh`, con px de
+    respaldo) y se desplaza si no entra; la hoja de zona expandida se detiene antes de «‹ Nariño».
+  - El mapa llama a `resize()` cuando cambia su contenedor (barras, teclado).
+  - `scripts/layout-css.test.mjs` vigila esas reglas en `npm test`.
+  - Probado en el emulador (Pixel 7, 412 × 915, Android 17 preliminar) con 3 botones y gestos, y en 360 × 640 con
+    letra al 130 %: Inicio, Mapa con hoja, búsqueda con teclado, hoja de zona, Historial, Ajustes, introducción y
+    splash. Android 10–14 no se pudo probar (no hay imagen de teléfono instalada). App 1.0.1 (`versionCode 32`).
 
 - **2026-11-08 (1.0.0, rama `release/1.0.0`):** primera versión publicada.
   - App 1.0.0: `package.json`, Ajustes > Acerca de y el APK (`versionName "1.0.0"`, `versionCode 31`).

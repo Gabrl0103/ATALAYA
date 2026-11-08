@@ -155,6 +155,15 @@ genera el APK. En Android la app usa el backend desplegado en Render
 (`mobile/src/app/core/config/api-config.ts`), no el de tu PC. Su URL, `https://willay-api.onrender.com/api`,
 conserva el nombre original del proyecto: Render no cambia el subdominio al renombrar el servicio.
 
+#### Pantalla completa en Android
+
+La app va de borde a borde en todas las versiones: `MainActivity` activa edge-to-edge con iconos claros, el tema
+pinta `#0B0604` detrás de las barras del sistema y la actividad queda en vertical. La página se aparta de las
+barras solo con `--safe-top/right/bottom/left` (`theme/tokens.css`, que une `env(safe-area-inset-*)` con los
+`--safe-area-inset-*` que inyecta Capacitor), y todo el contenido deja `--nav-clearance` bajo la barra inferior.
+El marco de teléfono de 390 × 844 solo aparece en una computadora. `npm test` corre antes
+`scripts/layout-css.test.mjs`, que falla si vuelven `100vh`/`100vw` o un `env(safe-area-inset-*)` directo.
+
 #### APK desde la terminal
 
 Gradle 8.14 necesita **JDK 21** (el JDK que trae Android Studio es el 25 y Gradle no lo soporta). En Git Bash:

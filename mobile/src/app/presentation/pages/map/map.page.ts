@@ -33,7 +33,7 @@ import { ZoneSheet } from '../../components/zone-sheet/zone-sheet';
 import {
   FLY_MS, MAX_BOUNDS, MAX_ZOOM, MIN_ZOOM_OVER_NARINO, NARINO_BOUNDS, NO_PADDING, PITCH, SPIN_MS, TAP_FLY_MS,
   ZONE_FLY_MS, ZONE_ZOOM,
-  globeHalo, globeStart, hasWebGL, introPlan, narinoPadding, readIntroPlayed, rememberIntroPlayed, spinCenter,
+  followContainerSize, globeHalo, globeStart, hasWebGL, introPlan, narinoPadding, readIntroPlayed, rememberIntroPlayed, spinCenter,
 } from './map-camera';
 import {
   BOUNDARIES_SOURCE, DEPARTMENT_SOURCE, HIGHLIGHT_SOURCE, HOTSPOTS_SOURCE, HOTSPOT_LAYER_IDS, REPLAY_SOURCE, ZONE_FILL_LAYER,
@@ -92,6 +92,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
   private readonly glow = viewChild.required<ElementRef<HTMLDivElement>>('glow');
   private readonly header = viewChild.required<ElementRef<HTMLElement>>('header');
   private map?: MapLibreMap;
+  private stopFollowingSize?: () => void;
   /** The map credits: rebuilt when the boundaries arrive and when the language changes. */
   private credits?: AttributionControl;
   private colors?: MapColors;
@@ -237,6 +238,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
       touchPitch: false,
     });
     this.map = map;
+    this.stopFollowingSize = followContainerSize(element, map);
     map.touchZoomRotate.disableRotation();
     this.showCredits(map);
 
@@ -272,6 +274,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     clearTimeout(this.noticeTimer);
     this.endIntro();
     this.stopSpin();
+    this.stopFollowingSize?.();
     this.map?.remove();
   }
 

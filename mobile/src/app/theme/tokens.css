@@ -36,11 +36,19 @@
   --risk-high: #ff7a1a;
   --risk-extreme: #ff3b3b;
 
-  /* Barra inferior flotante */
+  /* Bordes que tapa el sistema (barra de estado, navegación de 3 botones o gestos, cámara perforada).
+     env() sale del WebView con viewport-fit=cover; --safe-area-inset-* lo inyecta Capacitor (SystemBars)
+     y sirve de respaldo si env() llega en 0. Ninguna otra regla usa env(safe-area-inset-*) directamente. */
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --safe-right: max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  --safe-left: max(env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+
+  /* Barra inferior flotante: siempre a --nav-bottom por encima de la navegación del sistema. */
   --nav-height: 72px;
   --nav-bottom: 28px;
   /* Padding inferior que debe dejar todo el contenido para no quedar bajo la barra. */
-  --nav-clearance: calc(var(--nav-height) + var(--nav-bottom) + 24px + env(safe-area-inset-bottom, 0px));
+  --nav-clearance: calc(var(--nav-height) + var(--nav-bottom) + 24px + var(--safe-bottom));
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.45);
