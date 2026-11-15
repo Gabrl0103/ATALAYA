@@ -15,7 +15,8 @@
 }
 /* Arriba de la hoja: se arrastra para subirla o bajarla (el asa también la alterna con un toque). */
 .drag-area { margin: -20px -20px 0; padding: 20px 20px 0; touch-action: none; cursor: grab; }
-.handle { position: absolute; top: 0; left: 50%; width: 72px; height: 24px; display: grid; place-items: center; transform: translateX(-50%); }
+/* Objetivo de 72 × 44 px; la raya se queda donde estaba (10 px del borde). */
+.handle { position: absolute; top: 0; left: 50%; width: 72px; height: 44px; padding-top: 10px; display: grid; place-items: start center; transform: translateX(-50%); }
 .handle span { width: 40px; height: 4px; border-radius: 2px; background: rgba(255, 243, 234, 0.3); }
 h2 { margin: 0; font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.1; color: var(--text); }
 .counts { margin: 4px 0 0; font-size: 13px; color: var(--text-2); }

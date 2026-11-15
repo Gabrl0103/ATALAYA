@@ -147,3 +147,23 @@ describe('text contrast', () => {
     assert.ok(contrast(over(credits.color, credits.alpha, deep), deep) >= 4.5, 'credits');
   });
 });
+
+describe('touch targets and focus', () => {
+  it('gives the sheet handles, the search clear button and the map notices 44 px targets', () => {
+    const targets = [
+      ['presentation/components/zone-sheet/sheet-frame.css', /\.sheet-handle \{[^}]*height: (\d+)px/],
+      ['presentation/components/map-overview-sheet/map-overview-sheet.css', /\.handle \{[^}]*height: (\d+)px/],
+      ['presentation/components/search-box/search-box.css', /\.clear \{[^}]*min-height: (\d+)px/],
+      ['presentation/pages/map/map.page.css', /\.error-banner button \{[^}]*min-height: (\d+)px/],
+    ];
+    for (const [path, pattern] of targets) {
+      const match = pattern.exec(read(path));
+      assert.ok(match, path);
+      assert.ok(Number(match[1]) >= 44, `${path}: ${match[1]}px`);
+    }
+  });
+
+  it('shows where the focus is when moving with a keyboard or switch access', () => {
+    assert.match(base, /:where\(button, a, input, select, textarea, \[tabindex\]\):focus-visible \{\s*outline: 2px solid/);
+  });
+});

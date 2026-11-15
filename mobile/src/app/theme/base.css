@@ -85,6 +85,14 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
   font-weight: 700;
 }
 
+/* Foco visible al navegar con teclado, switch access o TalkBack con teclado (no al tocar). */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+/* Una hoja o diálogo que recibe el foco al abrirse no se enmarca entero. */
+[tabindex='-1']:focus-visible { outline: none; }
+
 /* Solo para lectores de pantalla (TalkBack): no ocupa lugar en la pantalla. */
 .sr-only {
   position: absolute;
