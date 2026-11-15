@@ -85,6 +85,12 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
   font-weight: 700;
 }
 
+/* Estado presionado común: el control se hunde un poco al tocarlo. Con «scale» (no transform), para no
+   pisar las animaciones de entrada; sin especificidad (:where), cada componente puede ajustarlo. El velo
+   de la hoja no, porque ocupa toda la pantalla. */
+:where(button, a, [role='button']):not(:disabled):not(.sheet-backdrop) { transition: scale 0.15s var(--ease-out); }
+:where(button, a, [role='button']):not(:disabled):not(.sheet-backdrop):active { scale: 0.96; }
+
 /* Foco visible al navegar con teclado, switch access o TalkBack con teclado (no al tocar). */
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--amber);
