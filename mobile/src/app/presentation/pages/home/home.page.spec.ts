@@ -12,11 +12,11 @@ const ZONES: ZoneRiskSummary[] = [
   { id: 'pasto', name: 'Pasto', latitude: 1.21, longitude: -77.28, score: 62, level: 'high' },
 ];
 
-function render(favoriteIds: string[] = []) {
+function render(favoriteIds: string[] = [], zones: ZoneRiskSummary[] = ZONES, loading = false) {
   const store = {
-    zones: signal(ZONES),
+    zones: signal(zones),
     hotspots: signal([]),
-    loading: signal(false),
+    loading: signal(loading),
     error: signal<string | null>(null),
     load: vi.fn(),
     select: vi.fn(),
@@ -110,6 +110,36 @@ describe('HomePage', () => {
     expect(host.querySelector('.zone p')?.textContent).toBe('62 of 100');
     expect(host.querySelector('.average strong')?.textContent).toBe('High'); // average 52
     expect(host.querySelector('.zone .badge')?.textContent).toBe('High');
+  });
+
+  it('waits with a skeleton shaped like the summary and the carousel, without the real content', () => {
+    const { host } = render([], [], true);
+    const skeleton = host.querySelector('.home-skeleton');
+    expect(skeleton?.getAttribute('aria-hidden')).toBe('true');
+    expect(skeleton?.querySelectorAll('.summary .stat-tile')).toHaveLength(2);
+    expect(skeleton?.querySelectorAll('.carousel .zone')).toHaveLength(3);
+    expect(host.querySelector('.loading-note')?.getAttribute('role')).toBe('status');
+    expect(host.querySelector('.loading-note')?.textContent?.trim()).toBe('Cargando datos…');
+    expect(host.querySelector('app-state-message')).toBeNull();
+  });
+
+  it('names a failure with an icon and asks for the zones again', () => {
+    const { fixture, host, store } = render([], [], false);
+    store.load.mockClear();
+    store.error.set('network');
+    fixture.detectChanges();
+    const message = host.querySelector('app-state-message');
+    expect(message?.getAttribute('role')).toBe('alert');
+    expect(message?.textContent).toContain('Revisa tu conexión a internet');
+    message?.querySelector<HTMLButtonElement>('button')?.click();
+    expect(store.load).toHaveBeenCalledTimes(1);
+  });
+
+  it('says there is no data yet when the zone list arrived empty', () => {
+    const { host } = render([], [], false);
+    const message = host.querySelector('app-state-message');
+    expect(message?.textContent).toContain('Todavía no hay datos de riesgo');
+    expect(message?.querySelector('button')).toBeNull();
   });
 
   it('opens Ajustes from the gear of the header', () => {

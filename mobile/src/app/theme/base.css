@@ -85,6 +85,16 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
   font-weight: 700;
 }
 
+/* Solo para lectores de pantalla (TalkBack): no ocupa lugar en la pantalla. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Colores de riesgo reutilizables */
 .risk-low { --risk: var(--risk-low); }
 .risk-medium { --risk: var(--risk-medium); }

@@ -73,11 +73,45 @@
       <app-icon name="chevron-right" [size]="18" />
     </button>
   } @else if (store.error(); as code) {
-    <div class="glass-card state-card error anim-up" style="--i: 1">
-      <span>{{ errorKeys[code] | t }}</span>
-      <button type="button" (click)="store.load()">{{ 'common.retry' | t }}</button>
-    </div>
+    <app-state-message class="state-card anim-up" style="--i: 1" kind="error" [error]="code" (retry)="store.load()" />
+  } @else if (!store.loading()) {
+    <app-state-message class="state-card anim-up" style="--i: 1" kind="empty" icon="map" [text]="'home.empty' | t" />
   } @else {
-    <div class="glass-card state-card anim-up" style="--i: 1">{{ 'common.loading' | t }}</div>
+    <!-- Shaped like the summary and the carousel (same lines and sizes), so nothing jumps when they arrive. -->
+    <div class="home-skeleton" aria-hidden="true">
+      <section class="glass-card summary">
+        <p class="label"><span class="skeleton skeleton-text">{{ 'home.average' | t }}</span></p>
+        <div class="average">
+          <strong class="skeleton skeleton-text">{{ riskName('medium') }}</strong>
+          <span class="skeleton badge-skeleton"></span>
+        </div>
+        <div class="stats">
+          <div class="stat-tile">
+            <b class="mono"><span class="skeleton skeleton-text">00</span></b>
+            <span><span class="skeleton skeleton-text">{{ 'home.hotspots' | t }}</span></span>
+          </div>
+          <div class="stat-tile">
+            <b class="mono"><span class="skeleton skeleton-text">00</span></b>
+            <span><span class="skeleton skeleton-text">{{ 'home.zones' | t }}</span></span>
+          </div>
+        </div>
+      </section>
+      <h2 class="section-title"><span class="skeleton skeleton-text">{{ 'home.topZones' | t }}</span></h2>
+      <div class="carousel">
+        @for (card of skeletonCards; track card) {
+          <div class="glass-card zone">
+            <span class="skeleton badge-skeleton"></span>
+            <h3><span class="skeleton skeleton-text">Pasto</span></h3>
+            <p class="mono"><span class="skeleton skeleton-text">{{ 'common.scoreOf100' | t: { score: '00' } }}</span></p>
+          </div>
+        }
+      </div>
+    </div>
+    <p class="loading-note" role="status">
+      <span class="sr-only">{{ 'common.loading' | t }}</span>
+      @if (connection.waking()) {
+        {{ 'state.waking' | t }}
+      }
+    </p>
   }
 </div>

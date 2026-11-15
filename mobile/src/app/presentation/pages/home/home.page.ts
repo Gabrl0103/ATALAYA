@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { API_ERROR_KEYS } from '../../../core/error/api-error';
+import { ConnectionStatus } from '../../../core/network/connection-status';
 import type { RiskLevel } from '../../../domain/model/risk';
 import { summarizeDepartment, topZones } from '../../../domain/util/department-summary';
 import { favoriteZones } from '../../../domain/util/favorites';
@@ -12,6 +12,7 @@ import { ZonesStore } from '../../../state/zones.store';
 import { AppIcon } from '../../components/app-icon/app-icon';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
 import { RiskBadge } from '../../components/risk-badge/risk-badge';
+import { StateMessage } from '../../components/state-message/state-message';
 
 /** Cuántas zonas muestra el carrusel "Zonas con mayor riesgo". */
 const TOP_ZONE_COUNT = 5;
@@ -20,14 +21,17 @@ const MAX_STAGGER = 3;
 
 @Component({
   selector: 'app-home-page',
-  imports: [AppIcon, LavaBg, RiskBadge, TranslatePipe],
+  imports: [AppIcon, LavaBg, RiskBadge, StateMessage, TranslatePipe],
   templateUrl: './home.page.html',
   styleUrl: './home.page.css',
   host: { class: 'ion-page' },
 })
 export class HomePage {
   protected readonly store = inject(ZonesStore);
-  protected readonly errorKeys = API_ERROR_KEYS;
+  /** While the server wakes up the skeleton adds «Conectando con el servidor…». */
+  protected readonly connection = inject(ConnectionStatus);
+  /** Placeholder cards of the carousel while loading: about the two and a half that fit. */
+  protected readonly skeletonCards = [0, 1, 2] as const;
   private readonly router = inject(Router);
   private readonly favorites = inject(FavoritesStore);
   private readonly i18n = inject(I18n);
