@@ -20,10 +20,10 @@
 .handle span { width: 40px; height: 4px; border-radius: 2px; background: rgba(255, 243, 234, 0.3); }
 h2 { margin: 0; font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.1; color: var(--text); }
 .counts { margin: 4px 0 0; font-size: 13px; color: var(--text-2); }
-/* Los 4 niveles en una fila; subida, cada uno con su rango debajo. */
+/* Los 4 niveles en una fila (en dos si la letra del sistema es grande); subida, cada uno con su rango debajo. */
 .legend {
   --badge-pad: 6px 8px; --badge-font: 10px; --badge-track: 0.08em;
-  margin: 10px 0 0; padding: 0; list-style: none; display: flex; justify-content: space-between; gap: 4px;
+  margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px;
 }
 .legend li { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .range { font-size: 11px; color: var(--text-2); }
