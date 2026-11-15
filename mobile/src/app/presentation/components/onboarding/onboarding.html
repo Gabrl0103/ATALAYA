@@ -1,21 +1,26 @@
 <app-lava-bg />
 
+<!-- «Omitir» in every page: the introduction can be left at any moment. -->
 <header class="top">
-  @if (!isLast()) {
-    <button type="button" class="skip" (click)="finish()">{{ 'onboarding.skip' | t }}</button>
-  }
+  <button type="button" class="skip" (click)="finish()">{{ 'onboarding.skip' | t }}</button>
 </header>
 
 <div class="track" #track (scroll)="onScroll()">
+  <!-- 1. The risk map: municipalities filled by level, with the badge that names it. -->
   <section class="page" [attr.aria-roledescription]="'onboarding.slide' | t" [attr.aria-label]="'onboarding.slideOf' | t: { n: 1, total: 3 }" [attr.aria-hidden]="index() !== 0">
     <div class="visual">
-      <div class="glass-card example anim-up">
-        <div class="card-head">
-          <span>{{ 'onboarding.example' | t }}</span>
-          <app-risk-badge level="high" />
+      <div class="glass-card mini-map anim-up" aria-hidden="true">
+        <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid meet">
+          @for (zone of mapZones; track zone.name) {
+            <path [attr.d]="zone.path" [class]="'zone risk-' + zone.level" />
+          }
+        </svg>
+        <!-- Under the map, not on it: with large text they wrap instead of covering each other. -->
+        <div class="map-badges">
+          @for (zone of badgeZones; track zone.name; let i = $index) {
+            <app-risk-badge class="anim-up" [style.--i]="2 + i" [level]="zone.level" [label]="zone.name + ' ' + zone.score" />
+          }
         </div>
-        <p class="score"><b class="mono">62</b><span class="mono">{{ 'common.outOf100' | t }}</span></p>
-        <div class="bar"><span class="anim-growx" style="--i: 4; width: 62%"></span></div>
       </div>
     </div>
     <div class="copy">
@@ -24,14 +29,17 @@
     </div>
   </section>
 
+  <!-- 2. The 72 h forecast, as the zone sheet shows it. -->
   <section class="page" [attr.aria-roledescription]="'onboarding.slide' | t" [attr.aria-label]="'onboarding.slideOf' | t: { n: 2, total: 3 }" [attr.aria-hidden]="index() !== 1">
     <div class="visual">
-      <div class="glass-card factors">
-        <span class="card-label">{{ 'onboarding.howTitle' | t }}</span>
-        @for (factor of factors; track factor.label) {
-          <div class="factor">
-            <div class="factor-row"><span>{{ factor.label | t }}</span><b class="mono">{{ factor.weight }}&nbsp;%</b></div>
-            <div class="bar"><span [style.width.%]="factor.weight"></span></div>
+      <div class="glass-card forecast" aria-hidden="true">
+        <span class="card-label">{{ 'onboarding.forecastCard' | t }}</span>
+        @for (row of forecast; track row.when) {
+          <div class="forecast-row">
+            <span class="when">{{ row.when | t }}</span>
+            <app-risk-badge [level]="row.level" />
+            <b class="mono">{{ row.score }}</b>
+            <div class="bar"><span [style.width.%]="row.score"></span></div>
           </div>
         }
       </div>
@@ -42,24 +50,19 @@
     </div>
   </section>
 
+  <!-- 3. Favorites and alerts, and the location that stays optional. -->
   <section class="page" [attr.aria-roledescription]="'onboarding.slide' | t" [attr.aria-label]="'onboarding.slideOf' | t: { n: 3, total: 3 }" [attr.aria-hidden]="index() !== 2">
     <div class="visual">
-      <div class="glass-card permissions">
-        <app-logo class="permissions-logo" variant="eye" [size]="56" />
-        <div class="permission">
-          <span class="permission-icon"><app-icon name="map-pin" [size]="20" /></span>
-          <div>
-            <b>{{ 'onboarding.location' | t }}</b>
-            <span>{{ 'onboarding.locationText' | t }}</span>
+      <div class="glass-card features">
+        @for (feature of features; track feature.title) {
+          <div class="feature">
+            <span class="feature-icon" aria-hidden="true"><app-icon [name]="feature.icon" [size]="20" /></span>
+            <div>
+              <b>{{ feature.title | t }}</b>
+              <span>{{ feature.text | t }}</span>
+            </div>
           </div>
-        </div>
-        <div class="permission">
-          <span class="permission-icon"><app-icon name="wifi" [size]="20" /></span>
-          <div>
-            <b>{{ 'onboarding.internet' | t }}</b>
-            <span>{{ 'onboarding.internetText' | t }}</span>
-          </div>
-        </div>
+        }
       </div>
     </div>
     <div class="copy">
@@ -75,5 +78,5 @@
       <i [class.active]="page === index()"></i>
     }
   </div>
-  <button type="button" class="cta" (click)="next()">{{ 'onboarding.continue' | t }}</button>
+  <button type="button" class="cta" (click)="next()">{{ (isLast() ? 'onboarding.start' : 'onboarding.continue') | t }}</button>
 </footer>

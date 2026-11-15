@@ -3,6 +3,7 @@
 .head { padding-top: 6px; }
 .period { margin: 8px 0 0; font-size: 15px; line-height: 1.35; color: var(--text-2); }
 .period .mono { margin: 0 2px; white-space: nowrap; }
+.refresh-row { margin-top: 4px; }
 
 .filter-row {
   margin: 16px -24px 0;
@@ -58,5 +59,10 @@
   font-weight: 600;
 }
 
-.state-card { margin-top: 16px; }
+.state-card { display: block; margin-top: 16px; }
+
+/* Esqueleto de carga: el resumen, las barras y tres reportes del mismo alto que los reales. */
+.history-skeleton .bar { background: rgba(255, 255, 255, 0.1); }
+.event-skeleton { min-height: 84px; border-radius: 26px; }
+.loading-note { margin: 16px 0 0; font-size: 14px; line-height: 1.45; text-align: center; color: var(--text-2); }
 .sources { margin: 16px 0 12px; font-size: 12px; line-height: 1.4; color: var(--text-2); }

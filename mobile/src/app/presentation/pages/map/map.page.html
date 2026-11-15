@@ -1,5 +1,5 @@
 <div class="map-canvas">
-  <div #mapElement class="map-element"></div>
+  <div #mapElement class="map-element" role="region" [attr.aria-label]="'map.aria' | t"></div>
   <div #glow class="globe-glow" aria-hidden="true"></div>
   @if (mapUnavailable()) {
     <p class="map-unavailable" role="status">
@@ -63,7 +63,9 @@
       #overview
       [zoneCount]="store.zones().length"
       [hotspotCount]="store.hotspots().length"
-      [updatedLabel]="updatedLabel()"
+      [updatedAt]="store.updatedAt()"
+      [loading]="store.loading()"
+      (refreshRequested)="store.load()"
       [canZoom]="!mapUnavailable()"
       (zoomRequested)="zoomToNarino()"
     />
@@ -73,7 +75,7 @@
 @if (store.error(); as code) {
   <div class="error-banner" role="alert">
     <span>{{ errorKeys[code] | t }}</span>
-    <button type="button" (click)="store.load(); store.dismissError()">{{ 'common.retry' | t }}</button>
+    <button type="button" (click)="store.load()">{{ 'common.retry' | t }}</button>
   </div>
 } @else if (locationError(); as key) {
   <div class="error-banner location-error" role="alert">
@@ -97,6 +99,8 @@
   <app-zone-sheet
     [zone]="zone"
     [detail]="store.detail()"
+    [detailFailed]="store.detailStatus() === 'error'"
+    (detailRetry)="store.retryDetail()"
     [updatedAt]="store.updatedAt()"
     [firesPerYear]="firesPerYear()"
     [firesLoading]="store.firesStatus() === 'loading'"

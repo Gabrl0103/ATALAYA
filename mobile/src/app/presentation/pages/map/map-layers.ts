@@ -41,8 +41,13 @@ export function readMapColors(element: Element): MapColors {
   };
 }
 
-/** Light 1 px outline shared by neighbours, so two risk colors never fight on the same edge. */
+/** Light outline shared by neighbours, so two risk colors never fight on the same edge. */
 const OUTLINE = 'rgba(255, 243, 234, 0.6)';
+/**
+ * Edge width (px) by level: the riskier the zone, the thicker its edge, so the level does not depend on
+ * colour alone (over Nariño the labels only say the name). Below the department edge; 1 px without a score.
+ */
+export const LEVEL_EDGE_WIDTH = { low: 0.75, medium: 1, high: 1.5, extreme: 2.25, none: 1 } as const;
 /** The department's own edge, thicker than the municipal ones. */
 const DEPARTMENT_OUTLINE = '#fff3ea';
 export const DEPARTMENT_WIDTH = 2.5;
@@ -114,7 +119,14 @@ export function boundaryLayers(colors: MapColors): AddLayerObject[] {
     id: ZONE_OUTLINE_LAYER,
     type: 'line',
     source: BOUNDARIES_SOURCE,
-    paint: { 'line-color': OUTLINE, 'line-width': 1 },
+    paint: {
+      'line-color': OUTLINE,
+      'line-width': [
+        'match', levelState(),
+        'low', LEVEL_EDGE_WIDTH.low, 'medium', LEVEL_EDGE_WIDTH.medium, 'high', LEVEL_EDGE_WIDTH.high,
+        'extreme', LEVEL_EDGE_WIDTH.extreme, LEVEL_EDGE_WIDTH.none,
+      ],
+    },
   };
   const department: LayerOf<'line'> = {
     id: DEPARTMENT_LAYER,

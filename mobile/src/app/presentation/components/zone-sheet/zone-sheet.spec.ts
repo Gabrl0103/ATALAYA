@@ -1,5 +1,7 @@
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ZoneDetail, ZoneRiskSummary } from '../../../domain/model/risk';
+import { Haptic } from '../../../core/haptics';
 import { SettingsStore } from '../../../state/settings.store';
 import { ZoneSheet } from './zone-sheet';
 
@@ -22,7 +24,7 @@ const ZONE: ZoneRiskSummary = {
 
 function render(
   detail: ZoneDetail | null = DETAIL,
-  inputs: { firesPerYear?: number | null; updatedAt?: Date | null; firesLoading?: boolean } = {},
+  inputs: { firesPerYear?: number | null; updatedAt?: Date | null; firesLoading?: boolean; detailFailed?: boolean } = {},
   zone: ZoneRiskSummary = ZONE,
 ) {
   const fixture = TestBed.createComponent(ZoneSheet);
@@ -66,6 +68,31 @@ describe('ZoneSheet', () => {
     expect(sheet.style.transform).toBe('translateY(100%)');
     expect(closed).toBe(0);
 
+    vi.advanceTimersByTime(400);
+    expect(closed).toBe(1);
+  });
+
+  it('is a dialog named by the zone and its risk, takes the focus and gives it back when it closes', () => {
+    const opener = document.body.appendChild(document.createElement('button'));
+    opener.focus();
+    const { fixture, sheet } = render();
+    TestBed.inject(ApplicationRef).tick();
+    expect(sheet.getAttribute('role')).toBe('dialog');
+    expect(document.getElementById(sheet.getAttribute('aria-labelledby')!)?.textContent).toBe('Pasto');
+    expect(document.getElementById(sheet.getAttribute('aria-describedby')!)?.textContent).toBe('Puntaje 42 de 100, Medio');
+    expect(document.activeElement).toBe(sheet);
+
+    fixture.destroy();
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it('closes with Escape', () => {
+    vi.useFakeTimers();
+    const { fixture, sheet } = render();
+    let closed = 0;
+    fixture.componentInstance.closed.subscribe(() => closed++);
+    sheet.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     vi.advanceTimersByTime(400);
     expect(closed).toBe(1);
   });
@@ -116,6 +143,17 @@ describe('ZoneSheet', () => {
     fixture.detectChanges();
     expect(host.querySelector('.stat-skeleton')).toBeNull();
     expect(text(host, '.hotspots-stat b')).toEqual(['2']);
+  });
+
+  it('says when the detail failed, with a retry, instead of a placeholder that never fills', () => {
+    const { fixture, host } = render(null, { detailFailed: true });
+    let retries = 0;
+    fixture.componentInstance.detailRetry.subscribe(() => retries++);
+    expect(host.querySelector('.stat-skeleton')).toBeNull();
+    expect(text(host, '.detail-error .text')).toEqual(['No pudimos cargar los focos y el clima de este municipio.']);
+    host.querySelector<HTMLButtonElement>('.detail-error button')!.click();
+    expect(retries).toBe(1);
+    expect(text(host, '.score-ring strong')).toEqual(['42']); // the rest of the sheet stays
   });
 
   it('keeps the factors as placeholders until the detail brings them (backends before v0.28)', () => {
@@ -173,6 +211,14 @@ describe('ZoneSheet', () => {
     fixture.detectChanges();
     expect(button.getAttribute('aria-label')).toBe('Pasto ya está en la comparación: verla');
     expect(button.classList).toContain('is-on');
+  });
+
+  it('taps the phone lightly on «Compartir» and «Comparar»', () => {
+    const tap = vi.spyOn(TestBed.inject(Haptic), 'tap').mockImplementation(() => undefined);
+    const { host } = render();
+    host.querySelector<HTMLButtonElement>('.share-button')!.click();
+    host.querySelector<HTMLButtonElement>('.compare-button')!.click();
+    expect(tap).toHaveBeenCalledTimes(2);
   });
 
   it('lifts the share arrow again on every tap', () => {

@@ -21,7 +21,8 @@
 }
 .zone-sheet.is-dragging { transition: none; }
 .sheet-drag-area { position: relative; flex: none; touch-action: none; user-select: none; }
-.sheet-handle { position: absolute; z-index: 3; top: 0; left: 50%; width: 72px; height: 26px; display: grid; place-items: center; transform: translateX(-50%); }
+/* Objetivo de 72 × 44 px; la raya se queda donde estaba (11 px del borde). */
+.sheet-handle { position: absolute; z-index: 3; top: 0; left: 50%; width: 72px; height: 44px; padding-top: 11px; display: grid; place-items: start center; transform: translateX(-50%); }
 .sheet-handle span { width: 40px; height: 4px; border-radius: 2px; background: rgba(255, 243, 234, 0.3); }
 /* El padding inferior deja el último elemento por encima de la barra flotante. */
 .zone-content {

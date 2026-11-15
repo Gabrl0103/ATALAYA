@@ -1,6 +1,8 @@
 import {
   Component, ElementRef, OnDestroy, afterNextRender, computed, inject, input, output, signal, viewChild,
 } from '@angular/core';
+import { rememberFocus } from '../../../core/a11y/focus-return';
+import { Haptic } from '../../../core/haptics';
 import type { ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../../../domain/model/risk';
 import { formatDecimal, formatPercent, formatTimeAgo, formatUpdatedDay } from '../../../domain/util/format';
 import { riskLabel } from '../../../domain/util/risk-labels';
@@ -15,6 +17,7 @@ import { EmergencyHelp } from '../emergency-help/emergency-help';
 import { ForecastSection } from '../forecast-section/forecast-section';
 import { PreventionTips } from '../prevention-tips/prevention-tips';
 import { RiskBadge } from '../risk-badge/risk-badge';
+import { StateMessage } from '../state-message/state-message';
 import { FULL_HEIGHT, clampOffset, resolveSnap, snapOffset, type SheetSnap } from './sheet-snap';
 
 /** Movement (px) below which a press on the handle is a tap, not a drag. */
@@ -58,7 +61,7 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
 
 @Component({
   selector: 'app-zone-sheet',
-  imports: [AppIcon, EmergencyHelp, ForecastSection, PreventionTips, RiskBadge, TranslatePipe],
+  imports: [AppIcon, EmergencyHelp, ForecastSection, PreventionTips, RiskBadge, StateMessage, TranslatePipe],
   template: `
     <div class="sheet-layer" [class.is-closing]="snap() === 'closed'">
       <button type="button" class="sheet-backdrop" [attr.aria-label]="'sheet.close' | t" (click)="close()"></button>
@@ -77,7 +80,11 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
         [class.is-expanded]="snap() === 'full'"
         [style.height.%]="fullHeightPct"
         [style.transform]="transform()"
-        [attr.aria-label]="'sheet.label' | t"
+        role="dialog"
+        aria-labelledby="zone-sheet-title"
+        aria-describedby="zone-sheet-summary"
+        tabindex="-1"
+        (keydown.escape)="close()"
       >
         <div
           class="sheet-drag-area"
@@ -98,7 +105,8 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
 
           <header class="zone-heading">
             <div class="zone-title">
-              <h2>{{ risk().name }}</h2>
+              <h2 id="zone-sheet-title">{{ risk().name }}</h2>
+              <span id="zone-sheet-summary" class="sr-only">{{ 'sheet.scoreAria' | t: { score: risk().score, level: riskLabel() } }}</span>
               <p>Nariño{{ updated() }}</p>
               <div class="zone-meta">
                 <app-risk-badge [level]="risk().level" />
@@ -121,7 +129,7 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
                   class="icon-action compare-button"
                   [class.is-on]="compared()"
                   [attr.aria-label]="(compared() ? 'compare.inComparison' : 'compare.openAria') | t: { name: risk().name }"
-                  (click)="compareRequested.emit()"
+                  (click)="compare()"
                 >
                   <app-icon name="columns" [size]="20" />
                 </button>
@@ -213,6 +221,14 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
                     <small>{{ latestHotspot() ? ('sheet.latest' | t: { ago: latestHotspot() }) : '\u00a0' }}</small>
                   </div>
                 }
+              } @else if (detailFailed()) {
+                <app-state-message
+                  class="stat-tile detail-error"
+                  kind="error"
+                  [card]="false"
+                  [text]="'sheet.detailError' | t"
+                  (retry)="detailRetry.emit()"
+                />
               } @else {
                 <div class="stat-tile hotspots-stat stat-skeleton" aria-hidden="true">
                   <b class="mono skeleton skeleton-text">00</b>
@@ -254,6 +270,9 @@ export class ZoneSheet implements OnDestroy {
   readonly zone = input.required<ZoneRiskSummary>();
   /** Arrives a moment later (GET /zones/:id): the nearby hotspots, and the factors if the zone had none. */
   readonly detail = input<ZoneDetail | null>(null);
+  /** The detail failed: its card says so with «Reintentar» instead of waiting forever. */
+  readonly detailFailed = input(false);
+  readonly detailRetry = output<void>();
   /** When the zones were loaded; null leaves the "actualizado" text out. */
   readonly updatedAt = input<Date | null>(null);
   /** Average fires per year of the zone (from its records); null leaves the card out. */
@@ -296,11 +315,19 @@ export class ZoneSheet implements OnDestroy {
   private closeTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
-    afterNextRender(() => requestAnimationFrame(() => this.snap.set('mid')));
+    afterNextRender(() => {
+      requestAnimationFrame(() => this.snap.set('mid'));
+      // TalkBack reads the dialog (the zone and its risk) as it opens; Escape or «‹ Nariño» close it.
+      this.sheet().nativeElement.focus({ preventScroll: true });
+    });
   }
+
+  /** The marker or card that opened the sheet gets the focus back when it closes. */
+  private readonly restoreFocus = rememberFocus();
 
   ngOnDestroy(): void {
     clearTimeout(this.closeTimer);
+    this.restoreFocus();
   }
 
   /** The heart was tapped in this sheet: from now on marking and unmarking animate it. */
@@ -313,9 +340,18 @@ export class ZoneSheet implements OnDestroy {
     this.favoriteToggled.emit();
   }
 
+  /** A light tap on the phone (when «Vibración» is on) for the sheet's main actions. */
+  private readonly haptic = inject(Haptic);
+
   protected share(): void {
     this.shareTaps.update((taps) => taps + 1);
+    this.haptic.tap();
     this.shareRequested.emit();
+  }
+
+  protected compare(): void {
+    this.haptic.tap();
+    this.compareRequested.emit();
   }
 
   protected toggle(): void {

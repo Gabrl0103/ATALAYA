@@ -15,18 +15,19 @@
 }
 /* Arriba de la hoja: se arrastra para subirla o bajarla (el asa también la alterna con un toque). */
 .drag-area { margin: -20px -20px 0; padding: 20px 20px 0; touch-action: none; cursor: grab; }
-.handle { position: absolute; top: 0; left: 50%; width: 72px; height: 24px; display: grid; place-items: center; transform: translateX(-50%); }
+/* Objetivo de 72 × 44 px; la raya se queda donde estaba (10 px del borde). */
+.handle { position: absolute; top: 0; left: 50%; width: 72px; height: 44px; padding-top: 10px; display: grid; place-items: start center; transform: translateX(-50%); }
 .handle span { width: 40px; height: 4px; border-radius: 2px; background: rgba(255, 243, 234, 0.3); }
 h2 { margin: 0; font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.6px; line-height: 1.1; color: var(--text); }
 .counts { margin: 4px 0 0; font-size: 13px; color: var(--text-2); }
-/* Los 4 niveles en una fila; subida, cada uno con su rango debajo. */
+/* Los 4 niveles en una fila (en dos si la letra del sistema es grande); subida, cada uno con su rango debajo. */
 .legend {
   --badge-pad: 6px 8px; --badge-font: 10px; --badge-track: 0.08em;
-  margin: 10px 0 0; padding: 0; list-style: none; display: flex; justify-content: space-between; gap: 4px;
+  margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px;
 }
 .legend li { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.range { font-size: 10px; color: var(--text-2); }
-.hotspot-key { margin: 10px 0 0; display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-2); }
+.range { font-size: 11px; color: var(--text-2); }
+.hotspot-key { margin: 10px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 3px rgba(221, 84, 0, 0.3); }
 .zoom {
   width: 100%;
@@ -39,5 +40,4 @@ h2 { margin: 0; font-family: var(--font-display); font-size: 22px; font-weight: 
   font-size: 15px;
   font-weight: 700;
 }
-.note { margin: 8px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px; font-size: 10px; color: var(--text-2); }
-.note span { display: inline-flex; align-items: center; gap: 6px; }
+.note { margin: 8px 0 0; }

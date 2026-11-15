@@ -27,8 +27,8 @@ const HISTORY: FireHistory = {
 const text = (host: HTMLElement, selector: string): string[] =>
   [...host.querySelectorAll(selector)].map((el) => el.textContent!.replace(/\s+/g, ' ').trim());
 
-function render(zoneId?: string) {
-  const historyStore = { history: signal(HISTORY), loading: signal(false), error: signal<string | null>(null), load: vi.fn() };
+function render(zoneId?: string, history: FireHistory | null = HISTORY, loading = false) {
+  const historyStore = { history: signal(history), loading: signal(loading), error: signal<string | null>(null), updatedAt: signal<Date | null>(null), load: vi.fn() };
   const zonesStore = { zones: signal(ZONES), load: vi.fn() };
   TestBed.configureTestingModule({
     providers: [
@@ -88,5 +88,33 @@ describe('HistoryPage', () => {
     const { host } = render('pasto');
     expect(text(host, '.sources')).toEqual([`Fuentes: UNGRD (2019–${WORD_JOINER}2025). Sin datos de 2020, 2022 y 2024.`]);
     expect(host.querySelector('app-data-attribution')).not.toBeNull();
+  });
+  it('waits with a skeleton shaped like the summary and three reports', () => {
+    const { host } = render('pasto', null, true);
+    const skeleton = host.querySelector('.history-skeleton');
+    expect(skeleton?.getAttribute('aria-hidden')).toBe('true');
+    expect(skeleton?.querySelectorAll('.event-skeleton')).toHaveLength(3);
+    expect(host.querySelector('.loading-note')?.textContent?.trim()).toBe('Cargando registros…');
+    expect(host.querySelector('.overview:not(.history-skeleton .overview)')).toBeNull();
+  });
+
+  it('says there are no records instead of an empty chart, for a zone or for all of Nariño', () => {
+    const empty: FireHistory = { events: [], summary: { count: 0, totalHectares: 0, lastDate: null } };
+    const zone = render('pasto', empty);
+    expect(zone.host.querySelector('.chart')).toBeNull();
+    expect(text(zone.host, 'app-state-message .text')).toEqual(['No hay incendios registrados para este municipio.']);
+    TestBed.resetTestingModule();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    const all = render(undefined, empty);
+    expect(text(all.host, 'app-state-message .text')).toEqual(['No hay incendios registrados en Nariño en este periodo.']);
+  });
+
+  it('names a failure and asks for the same filter again', () => {
+    const { fixture, host, historyStore } = render('pasto');
+    historyStore.load.mockClear();
+    historyStore.error.set('server');
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('app-state-message button')!.click();
+    expect(historyStore.load).toHaveBeenCalledWith('pasto');
   });
 });

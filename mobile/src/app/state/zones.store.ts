@@ -41,6 +41,8 @@ export class ZonesStore {
   /** The selected zone as the map has it: enough to open its sheet before ZoneDetail arrives. */
   readonly selected = computed(() => this.zones().find((zone) => zone.id === this.selectedId()) ?? null);
   readonly detail = signal<ZoneDetail | null>(null);
+  /** Whether the detail is on its way or failed: only the sheet shows that failure, with its own retry. */
+  readonly detailStatus = signal<ForecastStatus>('idle');
   /** Fire records of the selected zone (its "incendios por año"); null until they arrive or if they fail. */
   readonly detailFires = signal<FireHistory | null>(null);
   /** Whether the fire records are still on their way (the sheet keeps the room of their card meanwhile). */
@@ -121,14 +123,26 @@ export class ZonesStore {
     this.detailRequest?.unsubscribe();
     const cached = fresh(this.details, zoneId);
     this.detail.set(cached ?? null);
+    this.detailStatus.set(cached ? 'ready' : 'loading');
     if (cached) return;
     this.detailRequest = this.zoneRepository.detail(zoneId).subscribe({
       next: (detail) => {
         this.details.set(zoneId, { value: detail, at: Date.now() });
-        if (this.selectedId() === zoneId) this.detail.set(detail);
+        if (this.selectedId() !== zoneId) return;
+        this.detail.set(detail);
+        this.detailStatus.set('ready');
       },
-      error: (error: unknown) => this.error.set(apiErrorCode(error)),
+      // A partial failure: the map and the rest of the sheet keep working (the zone list is not lost).
+      error: () => {
+        if (this.selectedId() === zoneId) this.detailStatus.set('error');
+      },
     });
+  }
+
+  /** Asks again for the detail of the selected zone (the sheet's "Reintentar"). */
+  retryDetail(): void {
+    const zoneId = this.selectedId();
+    if (zoneId) this.loadDetail(zoneId);
   }
 
   private loadFires(zoneId: string): void {
@@ -203,6 +217,7 @@ export class ZonesStore {
     this.firesRequest?.unsubscribe();
     this.selectedId.set(null);
     this.detail.set(null);
+    this.detailStatus.set('idle');
     this.detailFires.set(null);
     this.firesStatus.set('idle');
     this.detailForecast.set(null);

@@ -15,8 +15,8 @@ import { SearchRequest } from '../../../core/search-request';
 import type { HistoryHotspot, ZoneBoundaries, ZoneRiskSummary } from '../../../domain/model/risk';
 import { averagePerYear } from '../../../domain/util/fire-history';
 import { nearbySummary, type NearbySummary } from '../../../domain/util/nearby';
-import { formatTime } from '../../../domain/util/format';
 import { shareText } from '../../../domain/util/share-text';
+import { riskLabel } from '../../../domain/util/risk-labels';
 import { I18n } from '../../../i18n/i18n';
 import { TranslatePipe } from '../../../i18n/t.pipe';
 import type { MessageKey } from '../../../i18n/translate';
@@ -125,11 +125,6 @@ export class MapPage implements AfterViewInit, OnDestroy {
   protected readonly errorKeys = API_ERROR_KEYS;
   protected readonly shareNotice = signal<string | null>(null);
   private noticeTimer?: ReturnType<typeof setTimeout>;
-
-  protected readonly updatedLabel = computed(() => {
-    const date = this.store.updatedAt();
-    return date ? this.i18n.t('map.updated', { time: formatTime(date, this.i18n.language()) }) : this.i18n.t('map.loading');
-  });
 
   /** Fires per year of the selected zone, from its records (null until they arrive). */
   protected readonly firesPerYear = computed(() => {
@@ -515,10 +510,19 @@ export class MapPage implements AfterViewInit, OnDestroy {
     // Its label shows once placeLabels finds room for it.
     element.className = 'zone-icon label-hidden';
     element.title = zone.name;
-    element.addEventListener('click', (event) => {
+    // A button for TalkBack and the keyboard: it says the zone, its level and score, not only a colour.
+    element.setAttribute('role', 'button');
+    element.tabIndex = 0;
+    const open = (event: Event): void => {
       event.stopPropagation();
       const current = this.store.zones().find((z) => z.id === zoneId);
       if (current) this.selectZone(current, TAP_FLY_MS);
+    };
+    element.addEventListener('click', open);
+    element.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      open(event);
     });
     const marker = new Marker({ element });
     this.paintZoneMarker(marker, zoneId);
@@ -531,6 +535,11 @@ export class MapPage implements AfterViewInit, OnDestroy {
     const selected = zone.id === this.store.selectedId();
     const element = marker.getElement();
     element.innerHTML = zoneMarkerHtml(zone, selected, this.i18n.language());
+    element.setAttribute(
+      'aria-label',
+      this.i18n.t('map.markerAria', { name: zone.name, level: riskLabel(zone.level, this.i18n.language()), score: zone.score }),
+    );
+    element.setAttribute('aria-pressed', String(selected));
     // The selected marker goes on top, so its name is not hidden under its neighbours.
     element.style.zIndex = selected ? '2' : '';
   }

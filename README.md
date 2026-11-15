@@ -164,6 +164,17 @@ barras solo con `--safe-top/right/bottom/left` (`theme/tokens.css`, que une `env
 El marco de teléfono de 390 × 844 solo aparece en una computadora. `npm test` corre antes
 `scripts/layout-css.test.mjs`, que falla si vuelven `100vh`/`100vw` o un `env(safe-area-inset-*)` directo.
 
+#### Estados, accesibilidad y letra grande
+
+Cada pantalla tiene su estado de carga (esqueleto del mismo tamaño que el contenido), vacío y error
+(`components/state-message`, con icono y «Reintentar»). El interceptor HTTP repite un GET que no llegó al servidor
+con esperas de 1, 2, 4, 8 y 16 s, y tras 4 s sin respuesta la pantalla avisa «Conectando con el servidor…» (Render
+dormido). Inicio, Historial y la hoja del mapa muestran «Actualizado …» con un botón «Actualizar»; en Inicio e
+Historial también se puede deslizar hacia abajo. La hoja de zona es un diálogo que toma y devuelve el foco, los
+marcadores del mapa son botones con nombre, nivel y puntaje, y el borde de cada municipio engrosa con su nivel.
+`npm test` corre también `scripts/i18n-keys.test.mjs` (sin claves huérfanas) y comprueba en
+`scripts/layout-css.test.mjs` el contraste de 4,5:1 y los objetivos de 44 px.
+
 #### APK desde la terminal
 
 Gradle 8.14 necesita **JDK 21** (el JDK que trae Android Studio es el 25 y Gradle no lo soporta). En Git Bash:

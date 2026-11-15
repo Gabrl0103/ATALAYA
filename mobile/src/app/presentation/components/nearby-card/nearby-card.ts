@@ -30,7 +30,11 @@ const PLACE_KEYS: Record<NearbySummary['place'], MessageKey> = {
         <app-risk-badge [level]="summary().zone.level" />
         <b class="mono">{{ 'common.scoreOf100' | t: { score: summary().zone.score } }}</b>
       </div>
-      <p class="hotspot">{{ hotspotText() }}</p>
+      <!-- With none nearby it reads as good news (no alarm colour), not as missing data. -->
+      <p class="hotspot" [class.is-clear]="!summary().hotspot">
+        <app-icon name="flame" [size]="16" />
+        <span>{{ hotspotText() }}</span>
+      </p>
       <div class="actions">
         <button type="button" class="action primary" (click)="openZone.emit(summary().zone.id)">{{ 'nearby.openZone' | t }}</button>
         @if (summary().hotspot) {

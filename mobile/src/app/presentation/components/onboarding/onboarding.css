@@ -28,7 +28,7 @@
   color: rgba(255, 243, 234, 0.8);
 }
 
-/* Carrusel con scroll-snap: deslizar con el dedo o con "Continuar". */
+/* Carrusel con scroll-snap: deslizar con el dedo o con «Continuar». */
 .track {
   flex: 1;
   min-height: 0;
@@ -60,6 +60,8 @@
 }
 .copy h1 {
   margin: 0;
+  /* Con letra grande una palabra larga («municipality») se parte con guion, no a ciegas. */
+  hyphens: auto;
   font-size: 36px;
   font-size: clamp(26px, 5svh, 36px);
   font-weight: 800;
@@ -76,11 +78,7 @@
 
 /* Tarjetas de vidrio */
 .glass-card { padding: 23px; padding: clamp(16px, 3svh, 23px); border-radius: 30px; }
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.card-head > span, .card-label { font-size: 15px; font-weight: 600; color: var(--text-2); }
-.score { margin: 30px 0 0; margin: clamp(12px, 3.5svh, 30px) 0 0; display: flex; align-items: baseline; gap: 12px; }
-.score b { font-size: 72px; font-size: clamp(48px, 9svh, 72px); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
-.score span { font-size: 16px; color: var(--text-2); }
+.card-label { font-size: 15px; font-weight: 600; color: var(--text-2); }
 .bar {
   height: 8px;
   overflow: hidden;
@@ -88,17 +86,31 @@
   background: rgba(255, 255, 255, 0.14);
 }
 .bar span { display: block; height: 100%; border-radius: inherit; background: var(--gradient-primary); }
-.example .bar { margin-top: 26px; }
 
-.factors { display: grid; gap: 18px; }
-.factor { display: grid; gap: 9px; }
-.factor-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; }
-.factor-row b { font-size: 15px; color: var(--amber); }
+/* 1. Mapa de muestra: municipios con el relleno y el borde de su nivel (como el mapa real) y, debajo, tres
+   badges que con letra grande pasan a otra fila en vez de taparse. */
+.mini-map { padding: 12px; }
+.mini-map svg { display: block; width: 100%; height: auto; max-height: 26svh; }
+.zone { fill: var(--risk); fill-opacity: 0.42; stroke: rgba(255, 243, 234, 0.6); stroke-linejoin: round; }
+.zone.risk-low { stroke-width: 0.75; }
+.zone.risk-medium { stroke-width: 1; }
+.zone.risk-high { stroke-width: 1.5; }
+.zone.risk-extreme { stroke-width: 2.25; }
+.map-badges { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.map-badges app-risk-badge { --badge-pad: 6px 9px; --badge-font: 10px; --badge-track: 0.08em; }
 
-.permissions { display: grid; gap: 18px; }
-.permissions-logo { color: var(--amber); }
-.permission { display: flex; gap: 14px; align-items: flex-start; }
-.permission-icon {
+/* 2. Pronóstico: en una línea si cabe; con letra grande el nivel y la cifra bajan bajo el día, sin aplastarlo. */
+.forecast { display: grid; gap: 14px; }
+.forecast-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.when { flex: 1 1 10em; min-width: 0; font-size: 16px; font-weight: 600; }
+.when::first-letter { text-transform: uppercase; }
+.forecast-row b { min-width: 2.2em; font-size: 18px; text-align: right; }
+.forecast-row .bar { flex: 1 0 100%; }
+
+/* 3. Favoritos, alertas y ubicación. */
+.features { display: grid; gap: 18px; }
+.feature { display: flex; gap: 14px; align-items: flex-start; }
+.feature-icon {
   flex: none;
   width: 40px;
   height: 40px;
@@ -108,8 +120,9 @@
   background: rgba(255, 255, 255, 0.1);
   color: var(--amber);
 }
-.permission b { display: block; font-size: 16px; font-weight: 700; }
-.permission div > span { display: block; margin-top: 3px; font-size: 14px; line-height: 1.4; color: var(--text-2); }
+.feature div { min-width: 0; }
+.feature b { display: block; font-size: 16px; font-weight: 700; }
+.feature div > span { display: block; margin-top: 3px; font-size: 14px; line-height: 1.4; color: var(--text-2); }
 
 .bottom {
   flex: none;

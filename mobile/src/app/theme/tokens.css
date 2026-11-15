@@ -7,7 +7,8 @@
   /* Base */
   --bg: #0b0604;
   --text: #fff3ea;
-  --text-2: rgba(255, 243, 234, 0.65);
+  /* Texto secundario: 0,82 pasa 4,5:1 sobre vidrio aun en lo más claro del brillo de lava (layout-css.test.mjs). */
+  --text-2: rgba(255, 243, 234, 0.82);
   /* Tinta oscura sobre fondos crema (botón principal, logo oscuro). */
   --ink: #1a0a03;
 
@@ -35,6 +36,8 @@
   --risk-medium: #facc15;
   --risk-high: #ff7a1a;
   --risk-extreme: #ff3b3b;
+  /* Fondo de avisos de error con texto blanco: el rojo de «Extremo» daba 3,5:1; este, 5,6:1. */
+  --danger-bg: #c62828;
 
   /* Bordes que tapa el sistema (barra de estado, navegación de 3 botones o gestos, cámara perforada).
      env() sale del WebView con viewport-fit=cover; --safe-area-inset-* lo inyecta Capacitor (SystemBars)

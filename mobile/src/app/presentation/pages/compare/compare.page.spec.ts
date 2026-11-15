@@ -32,11 +32,12 @@ const forecast = (zoneId: string): ZoneForecast =>
       }
     : { zoneId, source: 'fallback', reason: 'weather_unavailable', generatedAt: '2026-11-03T15:00:00Z', current: { score: 61, level: 'high' } };
 
-function render(ids: string[] = []) {
+function render(ids: string[] = [], zones: ZoneRiskSummary[] = ZONES) {
+  const zonesStore = { zones: signal(zones), loading: signal(false), error: signal<string | null>(null), load: vi.fn() };
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
-      { provide: ZonesStore, useValue: { zones: signal(ZONES), loading: signal(false), load: vi.fn() } },
+      { provide: ZonesStore, useValue: zonesStore },
       { provide: ForecastRepository, useValue: { forecast: (id: string) => of(forecast(id)) } },
     ],
   });
@@ -48,7 +49,7 @@ function render(ids: string[] = []) {
   const host = fixture.nativeElement as HTMLElement;
   const row = (label: string) => [...host.querySelectorAll('.row')].find((r) => text(r.querySelector('.row-label')) === label)!;
   const values = (label: string) => [...row(label).querySelectorAll('.cell .mono')].map(text);
-  return { fixture, host, compare, navigate, row, values };
+  return { fixture, host, compare, navigate, row, values, zonesStore };
 }
 
 describe('ComparePage', () => {
@@ -58,6 +59,19 @@ describe('ComparePage', () => {
     host.querySelector<HTMLButtonElement>('.empty .action')!.click();
     fixture.detectChanges();
     expect(host.querySelector('.picker app-search-box')).not.toBeNull();
+    expect(host.querySelector('.picker')!.getAttribute('role')).toBe('dialog');
+    expect(host.querySelector('.picker')!.getAttribute('aria-label')).toBe('Agregar un municipio a la comparación');
+  });
+
+  it('waits for the zone list instead of a dead button, and asks for it again when it failed', () => {
+    const { fixture, host, zonesStore } = render([], []);
+    expect(host.querySelector('.empty .action')).toBeNull();
+    expect(text(host.querySelector('.loading-zones'))).toBe('Cargando municipios…');
+    zonesStore.load.mockClear();
+    zonesStore.error.set('network');
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('.zones-error button')!.click();
+    expect(zonesStore.load).toHaveBeenCalledTimes(1);
   });
 
   it('adds from the picker and shows the zones side by side, the riskiest highlighted', () => {

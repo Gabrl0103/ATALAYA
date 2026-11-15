@@ -85,6 +85,52 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
   font-weight: 700;
 }
 
+/* Estado presionado común: el control se hunde un poco al tocarlo. Con «scale» (no transform), para no
+   pisar las animaciones de entrada; sin especificidad (:where), cada componente puede ajustarlo. El velo
+   de la hoja no, porque ocupa toda la pantalla. */
+:where(button, a, [role='button']):not(:disabled):not(.sheet-backdrop) { transition: scale 0.15s var(--ease-out); }
+:where(button, a, [role='button']):not(:disabled):not(.sheet-backdrop):active { scale: 0.96; }
+
+/* Foco visible al navegar con teclado, switch access o TalkBack con teclado (no al tocar). */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+/* Una hoja o diálogo que recibe el foco al abrirse no se enmarca entero. */
+[tabindex='-1']:focus-visible { outline: none; }
+
+/* Deslizar hacia abajo para actualizar (directives/pull-to-refresh.ts da --pull y --pull-ratio): la flecha
+   baja con el dedo, aparece y gira; en ámbar cuando al soltar ya actualiza. Solo transform y opacity. */
+.pull-indicator {
+  position: absolute;
+  z-index: 2;
+  top: calc(var(--safe-top) + 8px);
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--glass-strong);
+  color: var(--text);
+  opacity: var(--pull-ratio, 0);
+  transform: translateY(calc(var(--pull, 0px) - 48px)) rotate(calc(var(--pull-ratio, 0) * 270deg));
+  pointer-events: none;
+}
+.is-armed > .pull-indicator { color: var(--amber); }
+
+/* Solo para lectores de pantalla (TalkBack): no ocupa lugar en la pantalla. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Colores de riesgo reutilizables */
 .risk-low { --risk: var(--risk-low); }
 .risk-medium { --risk: var(--risk-medium); }

@@ -3,15 +3,19 @@ import { Router } from '@angular/router';
 import {
   averagePerYear, countsByYear, coverageNote, keepYearRangesTogether, peakYear, recordPeriod, sortByDateDesc,
 } from '../../../domain/util/fire-history';
-import { API_ERROR_KEYS } from '../../../core/error/api-error';
+import { ConnectionStatus } from '../../../core/network/connection-status';
 import { formatDecimal } from '../../../domain/util/format';
 import { I18n } from '../../../i18n/i18n';
 import { TranslatePipe } from '../../../i18n/t.pipe';
 import { HistoryStore } from '../../../state/history.store';
 import { ZonesStore } from '../../../state/zones.store';
+import { AppIcon } from '../../components/app-icon/app-icon';
 import { DataAttribution } from '../../components/data-attribution/data-attribution';
 import { FireEventTile } from '../../components/fire-event-tile/fire-event-tile';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
+import { RefreshControl } from '../../components/refresh-control/refresh-control';
+import { StateMessage } from '../../components/state-message/state-message';
+import { PullToRefresh } from '../../directives/pull-to-refresh';
 
 /** Reports listed before "Ver los N reportes". */
 const RECENT_COUNT = 3;
@@ -21,7 +25,7 @@ const BAR_MIN_PX = 4;
 
 @Component({
   selector: 'app-history-page',
-  imports: [DataAttribution, FireEventTile, LavaBg, TranslatePipe],
+  imports: [AppIcon, DataAttribution, FireEventTile, LavaBg, PullToRefresh, RefreshControl, StateMessage, TranslatePipe],
   templateUrl: './history.page.html',
   styleUrl: './history.page.css',
   host: { class: 'ion-page' },
@@ -36,7 +40,11 @@ export class HistoryPage {
   private readonly router = inject(Router);
   private readonly now = new Date();
   private readonly i18n = inject(I18n);
-  protected readonly errorKeys = API_ERROR_KEYS;
+  /** While the server wakes up the skeleton adds «Conectando con el servidor…». */
+  protected readonly connection = inject(ConnectionStatus);
+  /** Placeholder bars (px) and report rows while the records load. */
+  protected readonly skeletonBars = [40, 64, 28, 88, 52, 100, 36, 60] as const;
+  protected readonly skeletonRows = [0, 1, 2] as const;
 
   protected readonly period = computed(() => recordPeriod(this.now, this.i18n.language()));
   /** "Pasto · ", or "Nariño · " without a filter ('' while the zone names load). */

@@ -1,0 +1,20 @@
+/* «Actualizado …» y el botón de 44 px que vuelve a pedir los datos. */
+:host { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.updated { min-width: 0; font-size: 13px; line-height: 1.35; color: var(--text-2); }
+.refresh {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--glass-bg);
+  color: var(--text);
+}
+/* Mientras pide: la flecha gira (solo transform); con movimiento reducido se queda quieta (base.css). */
+.refresh.is-busy app-icon { animation: refresh-spin 0.9s linear infinite; }
+@keyframes refresh-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .refresh.is-busy app-icon { animation: none; }
+}

@@ -16,6 +16,17 @@
 .head + .group, .head + .notice { margin-top: 24px; }
 .empty { display: grid; gap: 14px; justify-items: start; }
 .empty p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--text-2); }
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+.empty .zones-error { justify-self: stretch; padding: 4px 0 0; }
 .action {
   min-height: 44px;
   padding: 0 18px;

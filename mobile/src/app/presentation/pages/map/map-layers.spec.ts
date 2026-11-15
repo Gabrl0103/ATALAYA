@@ -1,6 +1,6 @@
 import type { ZoneBoundaries, ZoneRiskSummary } from '../../../domain/model/risk';
 import {
-  DEPARTMENT_SOURCE, DEPARTMENT_WIDTH, FILL_OPACITY, NO_RISK_FILL, ZONE_FILL_LAYER, ZONE_SELECTED_LAYER,
+  DEPARTMENT_SOURCE, DEPARTMENT_WIDTH, FILL_OPACITY, LEVEL_EDGE_WIDTH, NO_RISK_FILL, ZONE_FILL_LAYER, ZONE_SELECTED_LAYER,
   ZONE_SELECTED_LAYERS, boundariesSource, boundaryLayers, departmentOutline, departmentSource, hotspotLayers, hotspotsSource, readMapColors, selectedZoneFilter, zoneStates, type MapColors,
 } from './map-layers';
 
@@ -57,8 +57,16 @@ describe('map layers: municipal polygons', () => {
     expect(ids.at(-1)).toBe(ZONE_SELECTED_LAYER);
   });
 
-  it('draws 1 px municipal edges and a thicker department edge', () => {
-    expect(layer('zone-outline')?.paint?.['line-width']).toBe(1);
+  it('draws thicker municipal edges the higher the risk, all below the department edge', () => {
+    expect(layer('zone-outline')?.paint?.['line-width']).toEqual([
+      'match', ['to-string', ['feature-state', 'level']],
+      'low', LEVEL_EDGE_WIDTH.low, 'medium', LEVEL_EDGE_WIDTH.medium, 'high', LEVEL_EDGE_WIDTH.high,
+      'extreme', LEVEL_EDGE_WIDTH.extreme, LEVEL_EDGE_WIDTH.none,
+    ]);
+    const levels = [LEVEL_EDGE_WIDTH.low, LEVEL_EDGE_WIDTH.medium, LEVEL_EDGE_WIDTH.high, LEVEL_EDGE_WIDTH.extreme];
+    expect(levels).toEqual([...levels].sort((a, b) => a - b));
+    expect(new Set(levels).size).toBe(4);
+    expect(LEVEL_EDGE_WIDTH.extreme).toBeLessThan(DEPARTMENT_WIDTH);
     expect(layer('department-outline')?.paint?.['line-width']).toBe(DEPARTMENT_WIDTH);
     expect(DEPARTMENT_WIDTH).toBeGreaterThan(1);
     expect(departmentSource(BOUNDARIES)).toMatchObject({ type: 'geojson' });

@@ -4,6 +4,7 @@ import { RISK_RANGES } from '../../../domain/util/risk-labels';
 import { I18n } from '../../../i18n/i18n';
 import { TranslatePipe } from '../../../i18n/t.pipe';
 import { translate, type Language } from '../../../i18n/translate';
+import { RefreshControl } from '../refresh-control/refresh-control';
 import { RiskBadge } from '../risk-badge/risk-badge';
 import { FLICK_VELOCITY } from '../zone-sheet/sheet-snap';
 
@@ -50,7 +51,7 @@ export function overviewCounts(zoneCount: number, hotspotCount: number, language
  */
 @Component({
   selector: 'app-map-overview-sheet',
-  imports: [RiskBadge, TranslatePipe],
+  imports: [RefreshControl, RiskBadge, TranslatePipe],
   // While dragged the whole sheet follows the finger (the section's entry animation owns its own transform).
   host: { '[style.transform]': 'dragTransform()', '[class.is-dragging]': 'dragOffset() !== null' },
   template: `
@@ -92,8 +93,8 @@ export function overviewCounts(zoneCount: number, hotspotCount: number, language
       @if (canZoom()) {
         <button type="button" class="zoom" (click)="zoomRequested.emit()">{{ 'overview.zoom' | t }}</button>
       }
-      @if (open() && updatedLabel()) {
-        <p class="note"><span class="mono">{{ updatedLabel() }}</span></p>
+      @if (open()) {
+        <app-refresh-control class="note" [updatedAt]="updatedAt()" [loading]="loading()" (refresh)="refreshRequested.emit()" />
       }
     </section>
   `,
@@ -103,7 +104,10 @@ export class MapOverviewSheet {
   /** Zones with a score; 0 while they load. */
   readonly zoneCount = input.required<number>();
   readonly hotspotCount = input.required<number>();
-  readonly updatedLabel = input<string>('');
+  /** When the zones arrived («Actualizado …», with «Actualizar» beside it once the sheet is up). */
+  readonly updatedAt = input<Date | null>(null);
+  readonly loading = input(false);
+  readonly refreshRequested = output<void>();
   /** False without a map (no WebGL): then there is nothing to zoom. */
   readonly canZoom = input(true);
   readonly zoomRequested = output<void>();

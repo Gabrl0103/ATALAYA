@@ -1,6 +1,8 @@
 import { Location } from '@angular/common';
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, Injector, afterNextRender, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
+import { rememberFocus } from '../../../core/a11y/focus-return';
+import { Haptic } from '../../../core/haptics';
 import type { ZoneRiskSummary } from '../../../domain/model/risk';
 import { MISSING, compareRows, type CompareRow, type CompareRowId } from '../../../domain/util/compare';
 import { I18n } from '../../../i18n/i18n';
@@ -15,6 +17,7 @@ import { WHEN_KEYS } from '../../components/forecast-section/forecast-section';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
 import { RiskBadge } from '../../components/risk-badge/risk-badge';
 import { SearchBox } from '../../components/search-box/search-box';
+import { StateMessage } from '../../components/state-message/state-message';
 
 const ROW_LABELS: Partial<Record<CompareRowId, MessageKey>> = {
   level: 'compare.level',
@@ -40,7 +43,7 @@ const GROUPS: readonly { readonly title: MessageKey; readonly rows: readonly Com
 /** «Comparar»: 2 or 3 municipalities side by side (/compare, not a tab). */
 @Component({
   selector: 'app-compare-page',
-  imports: [AppIcon, LavaBg, RiskBadge, SearchBox, TranslatePipe],
+  imports: [AppIcon, LavaBg, RiskBadge, SearchBox, StateMessage, TranslatePipe],
   templateUrl: './compare.page.html',
   styleUrl: './compare.page.css',
   host: { class: 'ion-page' },
@@ -104,20 +107,38 @@ export class ComparePage {
     else void this.router.navigateByUrl('/map');
   }
 
+  /** A light tap on the phone (when «Vibración» is on) when a zone goes in or out of the comparison. */
+  private readonly haptic = inject(Haptic);
+
   protected remove(zone: ZoneRiskSummary): void {
+    this.haptic.tap();
     this.compare.remove(zone.id);
   }
 
+  private readonly injector = inject(Injector);
+  /** Gives the focus back to the button that opened the picker (if it is still there) once it closes. */
+  private restorePickerFocus?: () => void;
+
   protected openPicker(): void {
+    this.restorePickerFocus = rememberFocus();
     this.pickerOpen.set(true);
   }
 
-  protected pick(zone: ZoneRiskSummary): void {
+  protected closePicker(): void {
     this.pickerOpen.set(false);
+    const restore = this.restorePickerFocus;
+    this.restorePickerFocus = undefined;
+    if (restore) afterNextRender(restore, { injector: this.injector });
+  }
+
+  protected pick(zone: ZoneRiskSummary): void {
+    this.haptic.tap();
+    this.closePicker();
     this.compare.add(zone.id);
   }
 
   protected addPending(zone: ZoneRiskSummary): void {
+    this.haptic.tap();
     this.compare.add(zone.id);
   }
 }

@@ -1,25 +1,70 @@
 <app-lava-bg />
 
-<div class="page-scroll">
+<div class="page-scroll" appPullToRefresh (pullRefresh)="store.load(zoneId())">
+  <div class="pull-indicator" aria-hidden="true"><app-icon name="refresh" [size]="20" /></div>
   <header class="head anim-up">
     <h1 class="page-title">{{ 'nav.history' | t }}</h1>
     <p class="period">{{ placePrefix() }}{{ 'history.period' | t: { from: period().from, to: period().to } }}</p>
+    <!-- Also while loading («Cargando…»), so nothing below moves when the records arrive. -->
+    <app-refresh-control
+      class="refresh-row"
+      [updatedAt]="store.updatedAt()"
+      [loading]="store.loading()"
+      (refresh)="store.load(zoneId())"
+    />
   </header>
 
   <div class="filter-row anim-up" style="--i: 1" role="group" [attr.aria-label]="'history.filter' | t">
-    <button type="button" [class.is-active]="!zoneId()" (click)="filterBy()">{{ 'history.all' | t }}</button>
+    <button type="button" [class.is-active]="!zoneId()" [attr.aria-pressed]="!zoneId()" (click)="filterBy()">{{ 'history.all' | t }}</button>
     @for (zone of zones(); track zone.id) {
-      <button type="button" [class.is-active]="zoneId() === zone.id" (click)="filterBy(zone.id)">{{ zone.name }}</button>
+      <button type="button" [class.is-active]="zoneId() === zone.id" [attr.aria-pressed]="zoneId() === zone.id" (click)="filterBy(zone.id)">{{ zone.name }}</button>
     }
   </div>
 
   @if (store.error(); as code) {
-    <div class="glass-card state-card error anim-up" style="--i: 2">
-      <span>{{ errorKeys[code] | t }}</span>
-      <button type="button" (click)="store.load(zoneId())">{{ 'common.retry' | t }}</button>
-    </div>
+    <app-state-message class="state-card anim-up" style="--i: 2" kind="error" [error]="code" (retry)="store.load(zoneId())" />
   } @else if (store.loading() && !store.history()) {
-    <div class="glass-card state-card anim-up" style="--i: 2">{{ 'history.loading' | t }}</div>
+    <!-- Shaped like the summary and the first reports, so nothing jumps when they arrive. -->
+    <div class="history-skeleton" aria-hidden="true">
+      <section class="glass-card overview">
+        <div class="totals">
+          <div class="count">
+            <strong class="mono"><span class="skeleton skeleton-text">00</span></strong>
+            <span><span class="skeleton skeleton-text">{{ 'history.reportsIn' | t: { count: 20, years: 8 } }}</span></span>
+          </div>
+        </div>
+        <div class="chart">
+          @for (bar of skeletonBars; track $index) {
+            <div class="bar-col">
+              <span class="bar skeleton" [style.height.px]="bar"></span>
+              <span class="bar-year mono"><span class="skeleton skeleton-text">2019</span></span>
+            </div>
+          }
+        </div>
+      </section>
+      <div class="list-heading">
+        <h2 class="section-title"><span class="skeleton skeleton-text">{{ 'history.recent' | t }}</span></h2>
+      </div>
+      <div class="event-list">
+        @for (row of skeletonRows; track row) {
+          <div class="glass-card skeleton event-skeleton"></div>
+        }
+      </div>
+    </div>
+    <p class="loading-note" role="status">
+      <span class="sr-only">{{ 'history.loading' | t }}</span>
+      @if (connection.waking()) {
+        {{ 'state.waking' | t }}
+      }
+    </p>
+  } @else if (events().length === 0) {
+    <app-state-message
+      class="state-card anim-up"
+      style="--i: 2"
+      kind="empty"
+      icon="flame"
+      [text]="(zoneId() ? 'history.empty' : 'history.emptyAll') | t"
+    />
   } @else {
     <section class="glass-card overview anim-up" style="--i: 2" [attr.aria-label]="'history.perYearTitle' | t">
       <div class="totals">
@@ -49,19 +94,15 @@
       <h2 class="section-title">{{ 'history.recent' | t }}</h2>
       <span class="mono">{{ 'history.shownOf' | t: { shown: shownEvents().length, total: events().length } }}</span>
     </div>
-    @if (events().length) {
-      <div class="event-list">
-        @for (event of shownEvents(); track event.id; let i = $index) {
-          <app-fire-event-tile class="anim-up" [style.--i]="4 + i" [event]="event" />
-        }
-      </div>
-      @if (events().length > shownEvents().length) {
-        <button type="button" class="show-all" (click)="showAll.set(true)">
-          {{ 'history.showAllBefore' | t }} <span class="mono">{{ events().length }}</span> {{ 'history.showAllAfter' | t }}
-        </button>
+    <div class="event-list">
+      @for (event of shownEvents(); track event.id; let i = $index) {
+        <app-fire-event-tile class="anim-up" [style.--i]="4 + i" [event]="event" />
       }
-    } @else {
-      <div class="glass-card state-card">{{ 'history.empty' | t }}</div>
+    </div>
+    @if (events().length > shownEvents().length) {
+      <button type="button" class="show-all" (click)="showAll.set(true)">
+        {{ 'history.showAllBefore' | t }} <span class="mono">{{ events().length }}</span> {{ 'history.showAllAfter' | t }}
+      </button>
     }
   }
 
