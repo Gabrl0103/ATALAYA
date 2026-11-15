@@ -2,6 +2,7 @@ import { Location } from '@angular/common';
 import { Component, Injector, afterNextRender, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { rememberFocus } from '../../../core/a11y/focus-return';
+import { Haptic } from '../../../core/haptics';
 import type { ZoneRiskSummary } from '../../../domain/model/risk';
 import { MISSING, compareRows, type CompareRow, type CompareRowId } from '../../../domain/util/compare';
 import { I18n } from '../../../i18n/i18n';
@@ -106,7 +107,11 @@ export class ComparePage {
     else void this.router.navigateByUrl('/map');
   }
 
+  /** A light tap on the phone (when «Vibración» is on) when a zone goes in or out of the comparison. */
+  private readonly haptic = inject(Haptic);
+
   protected remove(zone: ZoneRiskSummary): void {
+    this.haptic.tap();
     this.compare.remove(zone.id);
   }
 
@@ -127,11 +132,13 @@ export class ComparePage {
   }
 
   protected pick(zone: ZoneRiskSummary): void {
+    this.haptic.tap();
     this.closePicker();
     this.compare.add(zone.id);
   }
 
   protected addPending(zone: ZoneRiskSummary): void {
+    this.haptic.tap();
     this.compare.add(zone.id);
   }
 }

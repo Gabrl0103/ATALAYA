@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { Haptic } from '../../../core/haptics';
 import type { ZoneRiskSummary } from '../../../domain/model/risk';
 import { FavoritesStore } from '../../../state/favorites.store';
 import { SettingsStore } from '../../../state/settings.store';
@@ -47,9 +48,11 @@ describe('HomePage', () => {
 
   it('opens the zone sheet on the map when a card is tapped', () => {
     const { host, store, navigate } = render();
+    const tap = vi.spyOn(TestBed.inject(Haptic), 'tap').mockImplementation(() => undefined);
     host.querySelector<HTMLButtonElement>('.zone')!.click();
     expect(store.select).toHaveBeenCalledWith('pasto');
     expect(navigate).toHaveBeenCalledWith('/map');
+    expect(tap).toHaveBeenCalledTimes(1);
   });
 
   it('shows «Mis municipios» above the riskiest zones, skipping favorites that no longer exist', () => {

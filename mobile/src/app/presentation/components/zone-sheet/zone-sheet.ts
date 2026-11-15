@@ -2,6 +2,7 @@ import {
   Component, ElementRef, OnDestroy, afterNextRender, computed, inject, input, output, signal, viewChild,
 } from '@angular/core';
 import { rememberFocus } from '../../../core/a11y/focus-return';
+import { Haptic } from '../../../core/haptics';
 import type { ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../../../domain/model/risk';
 import { formatDecimal, formatPercent, formatTimeAgo, formatUpdatedDay } from '../../../domain/util/format';
 import { riskLabel } from '../../../domain/util/risk-labels';
@@ -128,7 +129,7 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
                   class="icon-action compare-button"
                   [class.is-on]="compared()"
                   [attr.aria-label]="(compared() ? 'compare.inComparison' : 'compare.openAria') | t: { name: risk().name }"
-                  (click)="compareRequested.emit()"
+                  (click)="compare()"
                 >
                   <app-icon name="columns" [size]="20" />
                 </button>
@@ -339,9 +340,18 @@ export class ZoneSheet implements OnDestroy {
     this.favoriteToggled.emit();
   }
 
+  /** A light tap on the phone (when «Vibración» is on) for the sheet's main actions. */
+  private readonly haptic = inject(Haptic);
+
   protected share(): void {
     this.shareTaps.update((taps) => taps + 1);
+    this.haptic.tap();
     this.shareRequested.emit();
+  }
+
+  protected compare(): void {
+    this.haptic.tap();
+    this.compareRequested.emit();
   }
 
   protected toggle(): void {

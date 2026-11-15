@@ -1,6 +1,7 @@
 import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ZoneDetail, ZoneRiskSummary } from '../../../domain/model/risk';
+import { Haptic } from '../../../core/haptics';
 import { SettingsStore } from '../../../state/settings.store';
 import { ZoneSheet } from './zone-sheet';
 
@@ -210,6 +211,14 @@ describe('ZoneSheet', () => {
     fixture.detectChanges();
     expect(button.getAttribute('aria-label')).toBe('Pasto ya está en la comparación: verla');
     expect(button.classList).toContain('is-on');
+  });
+
+  it('taps the phone lightly on «Compartir» and «Comparar»', () => {
+    const tap = vi.spyOn(TestBed.inject(Haptic), 'tap').mockImplementation(() => undefined);
+    const { host } = render();
+    host.querySelector<HTMLButtonElement>('.share-button')!.click();
+    host.querySelector<HTMLButtonElement>('.compare-button')!.click();
+    expect(tap).toHaveBeenCalledTimes(2);
   });
 
   it('lifts the share arrow again on every tap', () => {
