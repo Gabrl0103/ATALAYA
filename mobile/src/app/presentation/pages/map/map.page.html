@@ -73,7 +73,7 @@
 @if (store.error(); as code) {
   <div class="error-banner" role="alert">
     <span>{{ errorKeys[code] | t }}</span>
-    <button type="button" (click)="store.load(); store.dismissError()">{{ 'common.retry' | t }}</button>
+    <button type="button" (click)="store.load()">{{ 'common.retry' | t }}</button>
   </div>
 } @else if (locationError(); as key) {
   <div class="error-banner location-error" role="alert">
@@ -97,6 +97,8 @@
   <app-zone-sheet
     [zone]="zone"
     [detail]="store.detail()"
+    [detailFailed]="store.detailStatus() === 'error'"
+    (detailRetry)="store.retryDetail()"
     [updatedAt]="store.updatedAt()"
     [firesPerYear]="firesPerYear()"
     [firesLoading]="store.firesStatus() === 'loading'"

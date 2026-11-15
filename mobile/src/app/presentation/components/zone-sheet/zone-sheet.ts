@@ -15,6 +15,7 @@ import { EmergencyHelp } from '../emergency-help/emergency-help';
 import { ForecastSection } from '../forecast-section/forecast-section';
 import { PreventionTips } from '../prevention-tips/prevention-tips';
 import { RiskBadge } from '../risk-badge/risk-badge';
+import { StateMessage } from '../state-message/state-message';
 import { FULL_HEIGHT, clampOffset, resolveSnap, snapOffset, type SheetSnap } from './sheet-snap';
 
 /** Movement (px) below which a press on the handle is a tap, not a drag. */
@@ -58,7 +59,7 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
 
 @Component({
   selector: 'app-zone-sheet',
-  imports: [AppIcon, EmergencyHelp, ForecastSection, PreventionTips, RiskBadge, TranslatePipe],
+  imports: [AppIcon, EmergencyHelp, ForecastSection, PreventionTips, RiskBadge, StateMessage, TranslatePipe],
   template: `
     <div class="sheet-layer" [class.is-closing]="snap() === 'closed'">
       <button type="button" class="sheet-backdrop" [attr.aria-label]="'sheet.close' | t" (click)="close()"></button>
@@ -213,6 +214,14 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
                     <small>{{ latestHotspot() ? ('sheet.latest' | t: { ago: latestHotspot() }) : '\u00a0' }}</small>
                   </div>
                 }
+              } @else if (detailFailed()) {
+                <app-state-message
+                  class="stat-tile detail-error"
+                  kind="error"
+                  [card]="false"
+                  [text]="'sheet.detailError' | t"
+                  (retry)="detailRetry.emit()"
+                />
               } @else {
                 <div class="stat-tile hotspots-stat stat-skeleton" aria-hidden="true">
                   <b class="mono skeleton skeleton-text">00</b>
@@ -254,6 +263,9 @@ export class ZoneSheet implements OnDestroy {
   readonly zone = input.required<ZoneRiskSummary>();
   /** Arrives a moment later (GET /zones/:id): the nearby hotspots, and the factors if the zone had none. */
   readonly detail = input<ZoneDetail | null>(null);
+  /** The detail failed: its card says so with «Reintentar» instead of waiting forever. */
+  readonly detailFailed = input(false);
+  readonly detailRetry = output<void>();
   /** When the zones were loaded; null leaves the "actualizado" text out. */
   readonly updatedAt = input<Date | null>(null);
   /** Average fires per year of the zone (from its records); null leaves the card out. */

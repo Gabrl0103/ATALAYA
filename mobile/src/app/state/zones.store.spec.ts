@@ -115,6 +115,32 @@ describe('ZonesStore zone detail and fire records', () => {
   });
 });
 
+describe('ZonesStore partial failures', () => {
+  it('marks only the zone detail as failed, keeps the map without a banner and retries it', () => {
+    let fail = true;
+    const { store, zoneRepository } = setup(
+      () => of(FORECAST),
+      undefined,
+      () => (fail ? throwError(() => new Error('down')) : of(DETAIL)),
+    );
+    store.select('pasto');
+    expect(store.detailStatus()).toBe('error');
+    expect(store.detail()).toBeNull();
+    expect(store.error()).toBeNull(); // the map banner is only for the zone list
+    expect(store.forecastStatus()).toBe('ready');
+    expect(store.firesStatus()).toBe('ready');
+
+    fail = false;
+    store.retryDetail();
+    expect(zoneRepository.detail).toHaveBeenCalledTimes(2);
+    expect(store.detailStatus()).toBe('ready');
+    expect(store.detail()).toEqual(DETAIL);
+
+    store.clearSelection();
+    expect(store.detailStatus()).toBe('idle');
+  });
+});
+
 describe('ZonesStore forecast', () => {
   it('asks for the forecast of the selected zone', () => {
     const { store, repository } = setup(() => of(FORECAST));

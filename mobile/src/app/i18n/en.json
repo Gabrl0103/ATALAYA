@@ -79,6 +79,7 @@
   "sheet.removeFavorite": "Remove from my municipalities",
   "sheet.share": "Share",
   "sheet.factorsTitle": "What the score depends on",
+  "sheet.detailError": "We couldn’t load the hotspots and weather for this municipality.",
   "sheet.hotspotsNear.one": "heat spot within 25 km",
   "sheet.hotspotsNear.other": "heat spots within 25 km",
   "sheet.latest": "latest: {ago}",

@@ -79,6 +79,7 @@
   "sheet.removeFavorite": "Quitar de mis municipios",
   "sheet.share": "Compartir",
   "sheet.factorsTitle": "De qué depende el puntaje",
+  "sheet.detailError": "No pudimos cargar los focos y el clima de este municipio.",
   "sheet.hotspotsNear.one": "foco a menos de 25 km",
   "sheet.hotspotsNear.other": "focos a menos de 25 km",
   "sheet.latest": "el último, {ago}",

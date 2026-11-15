@@ -106,6 +106,7 @@ h2 { margin: 0; font-size: 36px; font-weight: 800; line-height: 1.1; letter-spac
 .stats .stat-tile { border-radius: 26px; }
 /* Factors on an older backend, while GET /zones/:id answers. */
 .factor-value-skeleton { width: 26px; height: 15px; border-radius: 6px; }
+.stats .detail-error { grid-column: 1 / -1; padding: 18px 16px; }
 .hotspots-stat small { display: block; margin-top: 6px; font-size: 12px; color: var(--text-2); }
 
 .history-cta {
