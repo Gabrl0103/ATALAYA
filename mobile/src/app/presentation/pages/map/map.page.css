@@ -32,9 +32,9 @@ h1 { margin: 0; padding: 4px 10px 0; color: var(--text); font-family: var(--font
 
 .error-banner {
   position: absolute; z-index: 80; left: calc(14px + var(--safe-left)); right: calc(14px + var(--safe-right)); top: calc(84px + var(--safe-top)); display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 10px 12px; border-radius: 10px; background: var(--risk-extreme); color: #fff; font-size: 11px; box-shadow: var(--shadow-soft);
+  padding: 10px 12px; border-radius: 10px; background: var(--danger-bg); color: #fff; font-size: 13px; line-height: 1.35; box-shadow: var(--shadow-soft);
 }
-.error-banner button { padding: 4px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.2); font-size: 10px; font-weight: 700; }
+.error-banner button { padding: 4px 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.24); font-size: 10px; font-weight: 700; }
 .banner-actions { display: flex; flex-shrink: 0; gap: 6px; }
 /* «Mi ubicación»: botón redondo de vidrio arriba a la derecha. */
 .location-button {
