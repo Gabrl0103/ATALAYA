@@ -59,6 +59,8 @@ describe('ComparePage', () => {
     host.querySelector<HTMLButtonElement>('.empty .action')!.click();
     fixture.detectChanges();
     expect(host.querySelector('.picker app-search-box')).not.toBeNull();
+    expect(host.querySelector('.picker')!.getAttribute('role')).toBe('dialog');
+    expect(host.querySelector('.picker')!.getAttribute('aria-label')).toBe('Agregar un municipio a la comparación');
   });
 
   it('waits for the zone list instead of a dead button, and asks for it again when it failed', () => {

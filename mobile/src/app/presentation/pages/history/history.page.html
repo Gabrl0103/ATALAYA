@@ -7,9 +7,9 @@
   </header>
 
   <div class="filter-row anim-up" style="--i: 1" role="group" [attr.aria-label]="'history.filter' | t">
-    <button type="button" [class.is-active]="!zoneId()" (click)="filterBy()">{{ 'history.all' | t }}</button>
+    <button type="button" [class.is-active]="!zoneId()" [attr.aria-pressed]="!zoneId()" (click)="filterBy()">{{ 'history.all' | t }}</button>
     @for (zone of zones(); track zone.id) {
-      <button type="button" [class.is-active]="zoneId() === zone.id" (click)="filterBy(zone.id)">{{ zone.name }}</button>
+      <button type="button" [class.is-active]="zoneId() === zone.id" [attr.aria-pressed]="zoneId() === zone.id" (click)="filterBy(zone.id)">{{ zone.name }}</button>
     }
   </div>
 

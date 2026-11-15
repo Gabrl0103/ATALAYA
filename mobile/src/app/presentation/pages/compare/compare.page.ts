@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, Injector, afterNextRender, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
+import { rememberFocus } from '../../../core/a11y/focus-return';
 import type { ZoneRiskSummary } from '../../../domain/model/risk';
 import { MISSING, compareRows, type CompareRow, type CompareRowId } from '../../../domain/util/compare';
 import { I18n } from '../../../i18n/i18n';
@@ -109,12 +110,24 @@ export class ComparePage {
     this.compare.remove(zone.id);
   }
 
+  private readonly injector = inject(Injector);
+  /** Gives the focus back to the button that opened the picker (if it is still there) once it closes. */
+  private restorePickerFocus?: () => void;
+
   protected openPicker(): void {
+    this.restorePickerFocus = rememberFocus();
     this.pickerOpen.set(true);
   }
 
-  protected pick(zone: ZoneRiskSummary): void {
+  protected closePicker(): void {
     this.pickerOpen.set(false);
+    const restore = this.restorePickerFocus;
+    this.restorePickerFocus = undefined;
+    if (restore) afterNextRender(restore, { injector: this.injector });
+  }
+
+  protected pick(zone: ZoneRiskSummary): void {
+    this.closePicker();
     this.compare.add(zone.id);
   }
 

@@ -85,8 +85,8 @@
 </div>
 
 @if (pickerOpen()) {
-  <div class="picker-backdrop" (click)="pickerOpen.set(false)"></div>
-  <div class="picker anim-up" role="search">
-    <app-search-box [zones]="candidates()" [favoriteIds]="favorites.ids()" (selected)="pick($event)" (cancelled)="pickerOpen.set(false)" />
+  <div class="picker-backdrop" (click)="closePicker()"></div>
+  <div class="picker anim-up" role="dialog" [attr.aria-label]="'compare.addAria' | t">
+    <app-search-box [zones]="candidates()" [favoriteIds]="favorites.ids()" (selected)="pick($event)" (cancelled)="closePicker()" />
   </div>
 }

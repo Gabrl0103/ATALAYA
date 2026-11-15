@@ -1,5 +1,5 @@
 <div class="map-canvas">
-  <div #mapElement class="map-element"></div>
+  <div #mapElement class="map-element" role="region" [attr.aria-label]="'map.aria' | t"></div>
   <div #glow class="globe-glow" aria-hidden="true"></div>
   @if (mapUnavailable()) {
     <p class="map-unavailable" role="status">

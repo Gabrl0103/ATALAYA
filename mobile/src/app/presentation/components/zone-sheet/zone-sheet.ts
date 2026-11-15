@@ -1,6 +1,7 @@
 import {
   Component, ElementRef, OnDestroy, afterNextRender, computed, inject, input, output, signal, viewChild,
 } from '@angular/core';
+import { rememberFocus } from '../../../core/a11y/focus-return';
 import type { ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../../../domain/model/risk';
 import { formatDecimal, formatPercent, formatTimeAgo, formatUpdatedDay } from '../../../domain/util/format';
 import { riskLabel } from '../../../domain/util/risk-labels';
@@ -78,7 +79,11 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
         [class.is-expanded]="snap() === 'full'"
         [style.height.%]="fullHeightPct"
         [style.transform]="transform()"
-        [attr.aria-label]="'sheet.label' | t"
+        role="dialog"
+        aria-labelledby="zone-sheet-title"
+        aria-describedby="zone-sheet-summary"
+        tabindex="-1"
+        (keydown.escape)="close()"
       >
         <div
           class="sheet-drag-area"
@@ -99,7 +104,8 @@ const WEATHER_PLACEHOLDERS: readonly WeatherItem[] = [
 
           <header class="zone-heading">
             <div class="zone-title">
-              <h2>{{ risk().name }}</h2>
+              <h2 id="zone-sheet-title">{{ risk().name }}</h2>
+              <span id="zone-sheet-summary" class="sr-only">{{ 'sheet.scoreAria' | t: { score: risk().score, level: riskLabel() } }}</span>
               <p>Nariño{{ updated() }}</p>
               <div class="zone-meta">
                 <app-risk-badge [level]="risk().level" />
@@ -308,11 +314,19 @@ export class ZoneSheet implements OnDestroy {
   private closeTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
-    afterNextRender(() => requestAnimationFrame(() => this.snap.set('mid')));
+    afterNextRender(() => {
+      requestAnimationFrame(() => this.snap.set('mid'));
+      // TalkBack reads the dialog (the zone and its risk) as it opens; Escape or «‹ Nariño» close it.
+      this.sheet().nativeElement.focus({ preventScroll: true });
+    });
   }
+
+  /** The marker or card that opened the sheet gets the focus back when it closes. */
+  private readonly restoreFocus = rememberFocus();
 
   ngOnDestroy(): void {
     clearTimeout(this.closeTimer);
+    this.restoreFocus();
   }
 
   /** The heart was tapped in this sheet: from now on marking and unmarking animate it. */

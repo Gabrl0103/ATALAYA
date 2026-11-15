@@ -1,3 +1,4 @@
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ZoneDetail, ZoneRiskSummary } from '../../../domain/model/risk';
 import { SettingsStore } from '../../../state/settings.store';
@@ -66,6 +67,31 @@ describe('ZoneSheet', () => {
     expect(sheet.style.transform).toBe('translateY(100%)');
     expect(closed).toBe(0);
 
+    vi.advanceTimersByTime(400);
+    expect(closed).toBe(1);
+  });
+
+  it('is a dialog named by the zone and its risk, takes the focus and gives it back when it closes', () => {
+    const opener = document.body.appendChild(document.createElement('button'));
+    opener.focus();
+    const { fixture, sheet } = render();
+    TestBed.inject(ApplicationRef).tick();
+    expect(sheet.getAttribute('role')).toBe('dialog');
+    expect(document.getElementById(sheet.getAttribute('aria-labelledby')!)?.textContent).toBe('Pasto');
+    expect(document.getElementById(sheet.getAttribute('aria-describedby')!)?.textContent).toBe('Puntaje 42 de 100, Medio');
+    expect(document.activeElement).toBe(sheet);
+
+    fixture.destroy();
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it('closes with Escape', () => {
+    vi.useFakeTimers();
+    const { fixture, sheet } = render();
+    let closed = 0;
+    fixture.componentInstance.closed.subscribe(() => closed++);
+    sheet.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     vi.advanceTimersByTime(400);
     expect(closed).toBe(1);
   });
