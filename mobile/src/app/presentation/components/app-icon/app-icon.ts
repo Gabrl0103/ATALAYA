@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 
 export type IconName =
   | 'search' | 'crosshair' | 'map' | 'history' | 'flame' | 'x' | 'chevron-right' | 'chevron-left'
-  | 'map-pin' | 'calendar' | 'alert' | 'wind' | 'thermometer' | 'droplet' | 'home' | 'bars' | 'wifi'
+  | 'map-pin' | 'calendar' | 'alert' | 'wind' | 'thermometer' | 'droplet' | 'home' | 'bars' | 'wifi' | 'wifi-off'
   | 'heart' | 'heart-filled' | 'share' | 'settings' | 'columns' | 'play' | 'pause' | 'phone';
 
 /** Small inline SVG icon set (24x24, stroke). Keeps the APK free of icon fonts. */
@@ -33,6 +33,9 @@ export type IconName =
         @case ('bars') { <path d="M5 21v-6M12 21V3M19 21V9" /> }
         @case ('wifi') {
           <path d="M12 20h.01M2 8.82a15 15 0 0 1 20 0M5 12.86a10 10 0 0 1 14 0M8.5 16.43a5 5 0 0 1 7 0" />
+        }
+        @case ('wifi-off') {
+          <path d="M12 20h.01M8.5 16.43a5 5 0 0 1 7 0M5 12.86a10 10 0 0 1 5.17-2.69M19 12.86a10 10 0 0 0-2.01-1.52M2 8.82a15 15 0 0 1 4.18-2.65M10.66 5c4.01-.36 8.14.9 11.34 3.76M2 2l20 20" />
         }
         @case ('flame') {
           <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z" />

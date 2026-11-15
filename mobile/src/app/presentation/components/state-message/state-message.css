@@ -1,0 +1,54 @@
+/* Cargando, vacío o error: icono sencillo, una línea clara y, en un error, «Reintentar». */
+:host {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.icon,
+.spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+.icon {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+}
+:host(.is-error) .icon { color: var(--risk-high); }
+
+/* Solo transform: el anillo gira; con movimiento reducido queda quieto (base.css). */
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-top-color: var(--text);
+  animation: state-spin 0.9s linear infinite;
+}
+@keyframes state-spin { to { transform: rotate(360deg); } }
+
+.text,
+.hint {
+  margin: 0;
+  max-width: 34ch;
+  overflow-wrap: anywhere;
+}
+.text { font-size: 15px; line-height: 1.4; color: var(--text); }
+.hint { font-size: 13px; line-height: 1.45; color: var(--text-2); }
+
+.action {
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: var(--radius-pill);
+  background: var(--text);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
