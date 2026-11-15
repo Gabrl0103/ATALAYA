@@ -6,7 +6,7 @@ Algunos identificadores internos conservan el nombre anterior y no se cambian: e
 subdominio al renombrar el servicio) y el paquete de Python `willay_ml`.)*
 
 > Documento vivo: describe el estado actual del proyecto. La historia de cada cambio está en la sección 13.
-> **Última actualización:** 2026-11-08 · **Versión:** 1.0.1 (pantalla completa en Android)
+> **Última actualización:** 2026-11-15 · **Versión:** 1.1.0 (pulido de UI/UX y accesibilidad)
 
 ---
 
@@ -250,6 +250,25 @@ Detalle completo en [`docs/ML.md`](ML.md).
 - Confirmar con el profesor que los datos abiertos y las noticias cuentan como scraping válido.
 
 ## 13. Registro de cambios
+
+- **2026-11-15 (1.1.0, rama `feat/pulido-ux`):** pulido de diseño en estados, accesibilidad, detalles e introducción.
+  - Estados: reintentos automáticos con espera creciente para un GET sin respuesta (0, 502–504) y aviso «Conectando
+    con el servidor…» a los 4 s. Componente `state-message` (cargando, vacío, error con icono y «Reintentar»).
+    Esqueletos con el tamaño final en Inicio e Historial; vacíos con sentido en Inicio, Historial, Comparar y Cerca
+    de mí. Si falla el detalle de una zona solo su tarjeta lo dice; el banner del mapa queda para la lista de zonas.
+  - Accesibilidad: `--text-2` sube a 0,82 y los avisos usan `--danger-bg` (4,5:1 comprobado por test); etiquetas y
+    créditos del mapa de 9–11 px; asas, botón de borrar y avisos de 44 px; foco visible en ámbar. La hoja de zona
+    es un diálogo (Escape la cierra, el foco vuelve a lo que la abrió), los marcadores son botones con nombre, nivel
+    y puntaje, y el borde de cada municipio engrosa con su nivel. Con letra al 200 % la leyenda y «Clima ahora»
+    pasan a más filas.
+  - Detalles: transición propia de pantalla (240 ms, instantánea con movimiento reducido), estado presionado común,
+    vibración ligera en compartir, comparar y abrir municipios, y «Actualizado …» con «Actualizar» (y deslizar
+    hacia abajo en Inicio e Historial).
+  - Introducción de 3 pantallas: mapa de riesgo, pronóstico a 72 h y Mis municipios con alertas; «Omitir» en todas
+    y «Empezar» al final.
+  - `scripts/i18n-keys.test.mjs` falla con claves sin uso; se quitaron `common.outOf100` y `compare.open`.
+  - Probado en el navegador a 360 y 390 px, con letra al 200 % y en inglés, sin backend (error y «Reintentar») y con
+    respuestas lentas («Conectando…»). App 1.1.0 (`versionCode 33`).
 
 - **2026-11-08 (1.0.1, rama `fix/layout-android`):** la app ocupa toda la pantalla en cualquier celular.
   - Causa: `.phone-shell`, el marco de teléfono de 390 × 844 pensado para la computadora, también se aplicaba en
