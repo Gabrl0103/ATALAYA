@@ -20,10 +20,16 @@
 
   @if (zones().length === 0) {
     <section class="glass-card group empty anim-up" style="--i: 1">
+      <span class="empty-icon" aria-hidden="true"><app-icon name="columns" [size]="24" /></span>
       <p>{{ 'compare.empty' | t }}</p>
-      <button type="button" class="action primary" [disabled]="candidates().length === 0" (click)="openPicker()">
-        {{ 'compare.pick' | t }}
-      </button>
+      <!-- The picker needs the zone list: a failure asks for it again instead of a button that does nothing. -->
+      @if (candidates().length > 0) {
+        <button type="button" class="action primary" (click)="openPicker()">{{ 'compare.pick' | t }}</button>
+      } @else if (zonesStore.error(); as code) {
+        <app-state-message class="zones-error" kind="error" [card]="false" [error]="code" (retry)="zonesStore.load()" />
+      } @else {
+        <p class="loading-zones" role="status">{{ 'overview.loadingZones' | t }}</p>
+      }
     </section>
   } @else {
     <section class="glass-card group anim-up" style="--i: 1" [style.--count]="zones().length" [attr.aria-label]="'compare.title' | t">

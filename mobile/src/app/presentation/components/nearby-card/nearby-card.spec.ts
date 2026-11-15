@@ -42,6 +42,8 @@ describe('NearbyCard', () => {
     const { host } = render({ ...SUMMARY, hotspot: null });
     expect(text(host.querySelector('.hotspot'))).toBe('No hay focos de calor a menos de 100 km en los últimos 5 días.');
     expect([...host.querySelectorAll('.action')].map(text)).toEqual(['Ver municipio']);
+    expect(host.querySelector('.hotspot')!.classList).toContain('is-clear'); // good news, not an alarm
+    expect(render().host.querySelector('.hotspot')!.classList).not.toContain('is-clear');
   });
 
   it('says it is outside Nariño, or only the closest seat when the boundaries did not load', () => {

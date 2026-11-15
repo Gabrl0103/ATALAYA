@@ -15,6 +15,7 @@ import { WHEN_KEYS } from '../../components/forecast-section/forecast-section';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
 import { RiskBadge } from '../../components/risk-badge/risk-badge';
 import { SearchBox } from '../../components/search-box/search-box';
+import { StateMessage } from '../../components/state-message/state-message';
 
 const ROW_LABELS: Partial<Record<CompareRowId, MessageKey>> = {
   level: 'compare.level',
@@ -40,7 +41,7 @@ const GROUPS: readonly { readonly title: MessageKey; readonly rows: readonly Com
 /** «Comparar»: 2 or 3 municipalities side by side (/compare, not a tab). */
 @Component({
   selector: 'app-compare-page',
-  imports: [AppIcon, LavaBg, RiskBadge, SearchBox, TranslatePipe],
+  imports: [AppIcon, LavaBg, RiskBadge, SearchBox, StateMessage, TranslatePipe],
   templateUrl: './compare.page.html',
   styleUrl: './compare.page.css',
   host: { class: 'ion-page' },
