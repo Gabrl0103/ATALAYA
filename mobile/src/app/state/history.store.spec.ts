@@ -24,6 +24,7 @@ describe('HistoryStore', () => {
     expect(requests[0]!.observed).toBe(false);
     requests[1]!.next(records(2));
     expect(store.history()?.summary.count).toBe(2);
+    expect(store.updatedAt()).toBeInstanceOf(Date);
     expect(store.loading()).toBe(false);
   });
 

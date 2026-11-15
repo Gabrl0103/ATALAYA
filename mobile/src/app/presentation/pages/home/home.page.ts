@@ -12,8 +12,10 @@ import { FavoritesStore } from '../../../state/favorites.store';
 import { ZonesStore } from '../../../state/zones.store';
 import { AppIcon } from '../../components/app-icon/app-icon';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
+import { RefreshControl } from '../../components/refresh-control/refresh-control';
 import { RiskBadge } from '../../components/risk-badge/risk-badge';
 import { StateMessage } from '../../components/state-message/state-message';
+import { PullToRefresh } from '../../directives/pull-to-refresh';
 
 /** Cuántas zonas muestra el carrusel "Zonas con mayor riesgo". */
 const TOP_ZONE_COUNT = 5;
@@ -22,7 +24,7 @@ const MAX_STAGGER = 3;
 
 @Component({
   selector: 'app-home-page',
-  imports: [AppIcon, LavaBg, RiskBadge, StateMessage, TranslatePipe],
+  imports: [AppIcon, LavaBg, PullToRefresh, RefreshControl, RiskBadge, StateMessage, TranslatePipe],
   templateUrl: './home.page.html',
   styleUrl: './home.page.css',
   host: { class: 'ion-page' },

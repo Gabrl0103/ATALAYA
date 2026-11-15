@@ -9,10 +9,13 @@ import { I18n } from '../../../i18n/i18n';
 import { TranslatePipe } from '../../../i18n/t.pipe';
 import { HistoryStore } from '../../../state/history.store';
 import { ZonesStore } from '../../../state/zones.store';
+import { AppIcon } from '../../components/app-icon/app-icon';
 import { DataAttribution } from '../../components/data-attribution/data-attribution';
 import { FireEventTile } from '../../components/fire-event-tile/fire-event-tile';
 import { LavaBg } from '../../components/lava-bg/lava-bg';
+import { RefreshControl } from '../../components/refresh-control/refresh-control';
 import { StateMessage } from '../../components/state-message/state-message';
+import { PullToRefresh } from '../../directives/pull-to-refresh';
 
 /** Reports listed before "Ver los N reportes". */
 const RECENT_COUNT = 3;
@@ -22,7 +25,7 @@ const BAR_MIN_PX = 4;
 
 @Component({
   selector: 'app-history-page',
-  imports: [DataAttribution, FireEventTile, LavaBg, StateMessage, TranslatePipe],
+  imports: [AppIcon, DataAttribution, FireEventTile, LavaBg, PullToRefresh, RefreshControl, StateMessage, TranslatePipe],
   templateUrl: './history.page.html',
   styleUrl: './history.page.css',
   host: { class: 'ion-page' },

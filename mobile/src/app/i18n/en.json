@@ -68,6 +68,7 @@
   "overview.loadingZones": "Loading municipalities…",
   "overview.hotspotKey": "Heat spot (NASA FIRMS, last 5 days)",
   "overview.zoom": "Zoom to Nariño",
+  "refresh.action": "Refresh",
   "search.clear": "Clear search",
   "search.cancel": "Cancel",
   "search.empty": "We couldn’t find that municipality.",

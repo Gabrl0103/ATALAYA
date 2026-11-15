@@ -68,6 +68,7 @@
   "overview.loadingZones": "Cargando municipios…",
   "overview.hotspotKey": "Foco de calor (NASA FIRMS, últimos 5 días)",
   "overview.zoom": "Acercar a Nariño",
+  "refresh.action": "Actualizar",
   "search.clear": "Borrar búsqueda",
   "search.cancel": "Cancelar",
   "search.empty": "No encontramos ese municipio.",

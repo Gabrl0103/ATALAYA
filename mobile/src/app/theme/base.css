@@ -99,6 +99,28 @@ button { cursor: pointer; border: 0; background: none; color: inherit; padding: 
 /* Una hoja o diálogo que recibe el foco al abrirse no se enmarca entero. */
 [tabindex='-1']:focus-visible { outline: none; }
 
+/* Deslizar hacia abajo para actualizar (directives/pull-to-refresh.ts da --pull y --pull-ratio): la flecha
+   baja con el dedo, aparece y gira; en ámbar cuando al soltar ya actualiza. Solo transform y opacity. */
+.pull-indicator {
+  position: absolute;
+  z-index: 2;
+  top: calc(var(--safe-top) + 8px);
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--glass-strong);
+  color: var(--text);
+  opacity: var(--pull-ratio, 0);
+  transform: translateY(calc(var(--pull, 0px) - 48px)) rotate(calc(var(--pull-ratio, 0) * 270deg));
+  pointer-events: none;
+}
+.is-armed > .pull-indicator { color: var(--amber); }
+
 /* Solo para lectores de pantalla (TalkBack): no ocupa lugar en la pantalla. */
 .sr-only {
   position: absolute;

@@ -63,7 +63,9 @@
       #overview
       [zoneCount]="store.zones().length"
       [hotspotCount]="store.hotspots().length"
-      [updatedLabel]="updatedLabel()"
+      [updatedAt]="store.updatedAt()"
+      [loading]="store.loading()"
+      (refreshRequested)="store.load()"
       [canZoom]="!mapUnavailable()"
       (zoomRequested)="zoomToNarino()"
     />

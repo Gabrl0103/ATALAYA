@@ -5,7 +5,7 @@ function setup(inputs: { zoneCount: number; hotspotCount: number; canZoom?: bool
   const fixture = TestBed.createComponent(MapOverviewSheet);
   fixture.componentRef.setInput('zoneCount', inputs.zoneCount);
   fixture.componentRef.setInput('hotspotCount', inputs.hotspotCount);
-  fixture.componentRef.setInput('updatedLabel', 'Actualizado 06:04 p. m.');
+  fixture.componentRef.setInput('updatedAt', new Date(2026, 10, 14, 18, 4));
   if (inputs.canZoom !== undefined) fixture.componentRef.setInput('canZoom', inputs.canZoom);
   fixture.detectChanges();
   return { fixture, host: fixture.nativeElement as HTMLElement };
@@ -53,7 +53,11 @@ describe('MapOverviewSheet', () => {
     expect([...host.querySelectorAll('app-risk-badge')].map(text)).toEqual(['Bajo', 'Medio', 'Alto', 'Extremo']);
     expect([...host.querySelectorAll('.range')].map(text)).toEqual(['0–24', '25–49', '50–74', '75–100']);
     expect(text(host.querySelector('.hotspot-key'))).toContain('Foco de calor');
-    expect(text(host.querySelector('.note'))).toBe('Actualizado 06:04 p. m.');
+    expect(text(host.querySelector('.note .updated'))).toMatch(/^Actualizado 06:04 p\. ?m\.$/);
+    let refreshes = 0;
+    fixture.componentInstance.refreshRequested.subscribe(() => refreshes++);
+    host.querySelector<HTMLButtonElement>('.note .refresh')!.click();
+    expect(refreshes).toBe(1);
   });
 
   it('asks the map to zoom to Nariño, and hides the button when there is no map', () => {

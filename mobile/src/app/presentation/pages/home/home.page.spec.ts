@@ -18,6 +18,7 @@ function render(favoriteIds: string[] = [], zones: ZoneRiskSummary[] = ZONES, lo
     zones: signal(zones),
     hotspots: signal([]),
     loading: signal(loading),
+    updatedAt: signal<Date | null>(null),
     error: signal<string | null>(null),
     load: vi.fn(),
     select: vi.fn(),
@@ -143,6 +144,18 @@ describe('HomePage', () => {
     const message = host.querySelector('app-state-message');
     expect(message?.textContent).toContain('Todavía no hay datos de riesgo');
     expect(message?.querySelector('button')).toBeNull();
+  });
+
+  it('says when the data arrived and asks for it again from «Actualizar»', () => {
+    const { fixture, host, store } = render();
+    vi.spyOn(TestBed.inject(Haptic), 'tap').mockImplementation(() => undefined);
+    store.updatedAt.set(new Date(2026, 10, 14, 9, 30));
+    fixture.detectChanges();
+    expect(host.querySelector('.refresh-row .updated')?.textContent).toMatch(/^Actualizado 09:30 a\. ?m\.$/);
+    store.load.mockClear();
+    host.querySelector<HTMLButtonElement>('.refresh-row .refresh')!.click();
+    expect(store.load).toHaveBeenCalledTimes(1);
+    expect(host.querySelector('.page-scroll')?.hasAttribute('appPullToRefresh')).toBe(true);
   });
 
   it('opens Ajustes from the gear of the header', () => {

@@ -15,7 +15,6 @@ import { SearchRequest } from '../../../core/search-request';
 import type { HistoryHotspot, ZoneBoundaries, ZoneRiskSummary } from '../../../domain/model/risk';
 import { averagePerYear } from '../../../domain/util/fire-history';
 import { nearbySummary, type NearbySummary } from '../../../domain/util/nearby';
-import { formatTime } from '../../../domain/util/format';
 import { shareText } from '../../../domain/util/share-text';
 import { riskLabel } from '../../../domain/util/risk-labels';
 import { I18n } from '../../../i18n/i18n';
@@ -126,11 +125,6 @@ export class MapPage implements AfterViewInit, OnDestroy {
   protected readonly errorKeys = API_ERROR_KEYS;
   protected readonly shareNotice = signal<string | null>(null);
   private noticeTimer?: ReturnType<typeof setTimeout>;
-
-  protected readonly updatedLabel = computed(() => {
-    const date = this.store.updatedAt();
-    return date ? this.i18n.t('map.updated', { time: formatTime(date, this.i18n.language()) }) : this.i18n.t('map.loading');
-  });
 
   /** Fires per year of the selected zone, from its records (null until they arrive). */
   protected readonly firesPerYear = computed(() => {

@@ -3,7 +3,7 @@ import { Component, input } from '@angular/core';
 export type IconName =
   | 'search' | 'crosshair' | 'map' | 'history' | 'flame' | 'x' | 'chevron-right' | 'chevron-left'
   | 'map-pin' | 'calendar' | 'alert' | 'wind' | 'thermometer' | 'droplet' | 'home' | 'bars' | 'wifi' | 'wifi-off'
-  | 'heart' | 'heart-filled' | 'share' | 'settings' | 'columns' | 'play' | 'pause' | 'phone';
+  | 'heart' | 'heart-filled' | 'share' | 'settings' | 'columns' | 'play' | 'pause' | 'phone' | 'refresh';
 
 /** Small inline SVG icon set (24x24, stroke). Keeps the APK free of icon fonts. */
 @Component({
@@ -39,6 +39,9 @@ export type IconName =
         }
         @case ('flame') {
           <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+        }
+        @case ('refresh') {
+          <path d="M21 12a9 9 0 1 1-2.64-6.36L21 8" /><path d="M21 3v5h-5" />
         }
         @case ('x') { <path d="M18 6 6 18M6 6l12 12" /> }
         @case ('chevron-right') { <path d="m9 18 6-6-6-6" /> }

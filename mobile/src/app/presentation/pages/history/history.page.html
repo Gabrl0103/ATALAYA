@@ -1,9 +1,17 @@
 <app-lava-bg />
 
-<div class="page-scroll">
+<div class="page-scroll" appPullToRefresh (pullRefresh)="store.load(zoneId())">
+  <div class="pull-indicator" aria-hidden="true"><app-icon name="refresh" [size]="20" /></div>
   <header class="head anim-up">
     <h1 class="page-title">{{ 'nav.history' | t }}</h1>
     <p class="period">{{ placePrefix() }}{{ 'history.period' | t: { from: period().from, to: period().to } }}</p>
+    <!-- Also while loading («Cargando…»), so nothing below moves when the records arrive. -->
+    <app-refresh-control
+      class="refresh-row"
+      [updatedAt]="store.updatedAt()"
+      [loading]="store.loading()"
+      (refresh)="store.load(zoneId())"
+    />
   </header>
 
   <div class="filter-row anim-up" style="--i: 1" role="group" [attr.aria-label]="'history.filter' | t">

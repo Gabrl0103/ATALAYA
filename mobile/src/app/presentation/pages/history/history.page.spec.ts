@@ -28,7 +28,7 @@ const text = (host: HTMLElement, selector: string): string[] =>
   [...host.querySelectorAll(selector)].map((el) => el.textContent!.replace(/\s+/g, ' ').trim());
 
 function render(zoneId?: string, history: FireHistory | null = HISTORY, loading = false) {
-  const historyStore = { history: signal(history), loading: signal(loading), error: signal<string | null>(null), load: vi.fn() };
+  const historyStore = { history: signal(history), loading: signal(loading), error: signal<string | null>(null), updatedAt: signal<Date | null>(null), load: vi.fn() };
   const zonesStore = { zones: signal(ZONES), load: vi.fn() };
   TestBed.configureTestingModule({
     providers: [

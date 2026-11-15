@@ -3,6 +3,7 @@
 .head { padding-top: 6px; }
 .period { margin: 8px 0 0; font-size: 15px; line-height: 1.35; color: var(--text-2); }
 .period .mono { margin: 0 2px; white-space: nowrap; }
+.refresh-row { margin-top: 4px; }
 
 .filter-row {
   margin: 16px -24px 0;
