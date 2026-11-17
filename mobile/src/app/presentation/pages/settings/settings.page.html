@@ -157,13 +157,6 @@
           }
         </div>
       </div>
-      <div class="row anim-up" style="--i: 1">
-        <div>
-          <span>{{ 'alerts.test' | t }}</span>
-          <p class="hint" role="status">{{ (testSent() ? 'alerts.testSent' : 'alerts.testHint') | t }}</p>
-        </div>
-        <button type="button" class="action" (click)="testAlert()">{{ 'alerts.try' | t }}</button>
-      </div>
     }
     <p class="hint limits">{{ 'alerts.limits' | t }}</p>
   </section>

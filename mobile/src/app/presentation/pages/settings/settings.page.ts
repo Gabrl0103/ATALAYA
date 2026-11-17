@@ -149,11 +149,9 @@ export class SettingsPage implements OnDestroy {
   /** The explanation shown before Android (or the browser) asks for the permission. */
   protected readonly askingPermission = signal(false);
   protected readonly alertsBusy = signal(false);
-  protected readonly testSent = signal(false);
 
   /** Off: at once. On: the permission is asked only now, after saying why (unless already given). */
   protected toggleAlerts(): void {
-    this.testSent.set(false);
     if (this.alertsOn()) {
       void this.alerts.disable();
     } else if (this.alerts.permission() === 'granted') {
@@ -175,10 +173,6 @@ export class SettingsPage implements OnDestroy {
     } finally {
       this.alertsBusy.set(false);
     }
-  }
-
-  protected testAlert(): void {
-    void this.alerts.test().then((sent) => this.testSent.set(sent));
   }
 
   protected clearCache(): void {

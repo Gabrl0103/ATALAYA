@@ -196,19 +196,16 @@ describe('SettingsPage', () => {
       expect(notifier.shown).toEqual([]);
     });
 
-    it('sends the test notification and changes the threshold', async () => {
-      const { fixture, host, settings, notifier } = render('["pasto"]');
+    it('changes the threshold, with no test notification row', async () => {
+      const { fixture, host, settings } = render('["pasto"]');
       await settle(fixture);
       toggle(host).click();
       fixture.detectChanges();
       card(host).querySelector<HTMLButtonElement>('.confirm .primary')!.click();
       await settle(fixture);
 
-      const testRow = [...card(host).querySelectorAll('.row')].find((row) => text(row).includes('Probar notificación'))!;
-      testRow.querySelector<HTMLButtonElement>('button')!.click();
-      await settle(fixture);
-      expect(notifier.shown.at(-1)?.title).toBe('Notificación de prueba');
-      expect(text(testRow.querySelector('.hint'))).toBe('Enviada: revisa tus notificaciones.');
+      expect(text(card(host))).not.toContain('Probar notificación');
+      expect(card(host).querySelector('.row .action')).toBeNull();
 
       card(host).querySelectorAll<HTMLButtonElement>('[aria-labelledby="threshold-label"] button')[1]!.click();
       await settle(fixture);
