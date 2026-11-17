@@ -4,7 +4,7 @@ import {
 import { rememberFocus } from '../../../core/a11y/focus-return';
 import { Haptic } from '../../../core/haptics';
 import type { ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../../../domain/model/risk';
-import { formatDecimal, formatPercent, formatTimeAgo, formatUpdatedDay } from '../../../domain/util/format';
+import { formatDateTime, formatDecimal, formatPercent, formatTimeAgo, formatUpdatedDay } from '../../../domain/util/format';
 import { riskLabel } from '../../../domain/util/risk-labels';
 import { formatTemperature, formatWind } from '../../../domain/util/units';
 import { I18n } from '../../../i18n/i18n';
@@ -275,6 +275,8 @@ export class ZoneSheet implements OnDestroy {
   readonly detailRetry = output<void>();
   /** When the zones were loaded; null leaves the "actualizado" text out. */
   readonly updatedAt = input<Date | null>(null);
+  /** When the oldest saved data shown arrived, if new data could not be had: «Sin conexión · datos del …». */
+  readonly offlineAt = input<Date | null>(null);
   /** Average fires per year of the zone (from its records); null leaves the card out. */
   readonly firesPerYear = input<number | null>(null);
   /** The fire records are still on their way: their card waits as a placeholder. */
@@ -428,6 +430,8 @@ export class ZoneSheet implements OnDestroy {
   protected readonly ringValue = computed(() => (Math.min(Math.max(this.risk().score, 0), 100) / 100) * RING_TOTAL);
   private readonly i18n = inject(I18n);
   protected readonly riskLabel = computed(() => riskLabel(this.risk().level, this.i18n.language()));  protected readonly updated = computed(() => {
+    const offlineAt = this.offlineAt();
+    if (offlineAt) return ` · ${this.i18n.t('offline.notice', { date: formatDateTime(offlineAt, this.i18n.language()) })}`;
     const date = this.updatedAt();
     return date ? ` · ${this.i18n.t('sheet.updated', { day: formatUpdatedDay(date, this.i18n.language()) })}` : '';
   });

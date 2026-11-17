@@ -24,7 +24,7 @@ const ZONE: ZoneRiskSummary = {
 
 function render(
   detail: ZoneDetail | null = DETAIL,
-  inputs: { firesPerYear?: number | null; updatedAt?: Date | null; firesLoading?: boolean; detailFailed?: boolean } = {},
+  inputs: { firesPerYear?: number | null; updatedAt?: Date | null; offlineAt?: Date | null; firesLoading?: boolean; detailFailed?: boolean } = {},
   zone: ZoneRiskSummary = ZONE,
 ) {
   const fixture = TestBed.createComponent(ZoneSheet);
@@ -304,6 +304,11 @@ describe('ZoneSheet', () => {
   it('says when the data was updated', () => {
     expect(text(render(DETAIL, { updatedAt: new Date() }).host, '.zone-title p')).toEqual(['Nariño · actualizado hoy']);
     expect(text(render().host, '.zone-title p')).toEqual(['Nariño']);
+  });
+
+  it('says it is offline and when the saved data shown is from, instead of «actualizado»', () => {
+    const { host } = render(DETAIL, { updatedAt: new Date(), offlineAt: new Date(2026, 10, 15, 17, 7) });
+    expect(text(host, '.zone-title p')).toEqual(['Nariño · Sin conexión · datos del 15 nov. 2026, 5:07 p. m.']);
   });
   it("gives two prevention tips for the zone's level, under the forecast", () => {
     const { host } = render();

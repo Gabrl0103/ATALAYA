@@ -19,6 +19,7 @@ function render(favoriteIds: string[] = [], zones: ZoneRiskSummary[] = ZONES, lo
     hotspots: signal([]),
     loading: signal(loading),
     updatedAt: signal<Date | null>(null),
+    offline: signal(false),
     error: signal<string | null>(null),
     load: vi.fn(),
     select: vi.fn(),
@@ -156,6 +157,21 @@ describe('HomePage', () => {
     host.querySelector<HTMLButtonElement>('.refresh-row .refresh')!.click();
     expect(store.load).toHaveBeenCalledTimes(1);
     expect(host.querySelector('.page-scroll')?.hasAttribute('appPullToRefresh')).toBe(true);
+  });
+
+  it('shows the saved zones with «Sin conexión · datos del …» instead of an error, until new ones arrive', () => {
+    const { fixture, host, store } = render();
+    store.updatedAt.set(new Date(2026, 10, 15, 17, 7));
+    store.offline.set(true);
+    fixture.detectChanges();
+    expect(host.querySelector('.refresh-row .updated')?.textContent).toBe('Sin conexión · datos del 15 nov. 2026, 5:07 p. m.');
+    expect(host.querySelector('app-state-message')).toBeNull();
+    expect([...host.querySelectorAll('.zone h3')].map((el) => el.textContent?.trim())).toEqual(['Pasto', 'Ipiales']);
+
+    store.updatedAt.set(new Date(2026, 10, 16, 9, 30));
+    store.offline.set(false);
+    fixture.detectChanges();
+    expect(host.querySelector('.refresh-row .updated')?.textContent).toMatch(/^Actualizado 09:30 a\. ?m\.$/);
   });
 
   it('opens Ajustes from the gear of the header', () => {

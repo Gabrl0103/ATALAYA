@@ -18,6 +18,7 @@
       class="refresh-row anim-up"
       [updatedAt]="store.updatedAt()"
       [loading]="store.loading()"
+      [offline]="store.offline()"
       (refresh)="store.load()"
     />
   }

@@ -176,7 +176,7 @@ export class SettingsPage implements OnDestroy {
   }
 
   protected clearCache(): void {
-    this.zones.clearCache();
+    void this.zones.clearCache();
     clearTimeout(this.doneTimer);
     this.cacheCleared.set(true);
     this.doneTimer = setTimeout(() => this.cacheCleared.set(false), DONE_MS);

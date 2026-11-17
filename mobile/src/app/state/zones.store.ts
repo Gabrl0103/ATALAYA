@@ -1,6 +1,10 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin, type Subscription } from 'rxjs';
 import { apiErrorCode, type ApiErrorCode } from '../core/error/api-error';
+import {
+  OFFLINE_STORAGE, type Saved, clearOfflineData, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail,
+  saveZoneForecast, saveZones,
+} from '../data/offline-cache';
 import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from '../domain/repository/repositories';
 
@@ -56,7 +60,26 @@ export class ZonesStore {
   readonly loading = signal(false);
   /** Why the zones could not load; the map and Inicio name it in the app's language. */
   readonly error = signal<ApiErrorCode | null>(null);
+  /** When the zones shown arrived from the API (also when they are the saved ones). */
   readonly updatedAt = signal<Date | null>(null);
+  /** The zones shown are the saved ones and the API has not answered yet: the alerts wait for new ones. */
+  readonly fromSaved = signal(false);
+  /** The last request failed and older zones are shown: the screens say «Sin conexión · datos del …». */
+  readonly offline = signal(false);
+  /**
+   * When the saved detail or forecast shown in the sheet arrived, set only after asking for a new one
+   * failed (while it is being asked the saved one is shown without a notice).
+   */
+  readonly detailSavedAt = signal<Date | null>(null);
+  readonly forecastSavedAt = signal<Date | null>(null);
+  /** For the zone sheet: when the oldest data it shows arrived, if any of it is old because a request failed. */
+  readonly selectedOfflineAt = computed(() => {
+    const dates = [this.offline() ? this.updatedAt() : null, this.detailSavedAt(), this.forecastSavedAt()];
+    const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
+    return times.length > 0 ? new Date(Math.min(...times)) : null;
+  });
+  private readonly offlineStorage = inject(OFFLINE_STORAGE);
+  private restoring?: Promise<void>;
 
   /** Model forecasts by zone, with when they arrived (fallbacks are asked again: the model may be back). */
   private readonly forecasts = new Map<string, Cached<ZoneForecast>>();
@@ -67,38 +90,72 @@ export class ZonesStore {
   private detailRequest?: Subscription;
   private firesRequest?: Subscription;
 
+  /**
+   * Asks for the zones and heat spots. The first time, the ones saved on the phone are shown at once
+   * meanwhile (Render may take half a minute to wake up). A good answer replaces them and is saved; a
+   * failure keeps whatever is shown and says so (offline), and only without any data is it an error.
+   */
   load(): void {
     this.loading.set(true);
     this.error.set(null);
+    const restored = this.restoreZones();
     forkJoin({
       zones: this.zoneRepository.list(),
       hotspots: this.hotspotRepository.list(),
     }).subscribe({
       next: ({ zones, hotspots }) => {
+        const arrived = new Date();
         this.zones.set(zones);
         this.hotspots.set(hotspots);
-        this.updatedAt.set(new Date());
+        this.updatedAt.set(arrived);
+        this.fromSaved.set(false);
+        this.offline.set(false);
         this.loading.set(false);
+        if (zones.length > 0) void saveZones(this.offlineStorage, { zones, hotspots }, arrived);
       },
-      error: (error: unknown) => {
-        this.error.set(apiErrorCode(error));
-        this.loading.set(false);
-      },
+      // Waits for the saved zones (they may still be on their way) to tell the notice from the error.
+      error: (error: unknown) =>
+        void restored.then(() => {
+          if (this.zones().length > 0) this.offline.set(true);
+          else this.error.set(apiErrorCode(error));
+          this.loading.set(false);
+        }),
     });
   }
 
-  /** Asks for the boundaries once; again only after a failure (the notice's "Reintentar"). */
+  /** The zones saved on the phone, read once; they are shown only if nothing newer has arrived. */
+  private restoreZones(): Promise<void> {
+    this.restoring ??= readZones(this.offlineStorage).then((saved) => {
+      if (!saved || this.zones().length > 0) return;
+      this.zones.set(saved.value.zones);
+      this.hotspots.set(saved.value.hotspots);
+      this.updatedAt.set(saved.savedAt);
+      this.fromSaved.set(true);
+    });
+    return this.restoring;
+  }
+
+  /**
+   * Asks for the boundaries once; again only after a failure (the notice's "Reintentar"). The ones saved
+   * on the phone are drawn meanwhile, and with them a failure needs no notice (they only change with a
+   * new backend).
+   */
   loadBoundaries(): void {
     const status = this.boundariesStatus();
     if (status === 'loading' || status === 'ready') return;
     this.boundariesStatus.set('loading');
+    const saved = readBoundaries(this.offlineStorage);
+    void saved.then((found) => {
+      if (found && this.boundaries() === null) this.boundaries.set(found.value);
+    });
     this.zoneRepository.boundaries().subscribe({
       next: (boundaries) => {
         this.boundaries.set(boundaries);
         this.boundariesStatus.set('ready');
+        void saveBoundaries(this.offlineStorage, boundaries);
       },
       // Only the boundaries notice shows it: zones and markers do not depend on them.
-      error: () => this.boundariesStatus.set('error'),
+      error: () => void saved.then((found) => this.boundariesStatus.set(found ? 'ready' : 'error')),
     });
   }
 
@@ -118,24 +175,41 @@ export class ZonesStore {
     this.loadFires(zoneId);
   }
 
-  /** Hotspots, factors and the weather (when the zone list did not bring them), from the cache if fresh. */
+  /**
+   * Hotspots, factors and the weather (when the zone list did not bring them), from the cache if fresh.
+   * Otherwise the one saved on the phone (a zone opened before) is shown while a new one is asked for, and
+   * stays if that fails; a zone never opened shows the sheet's own failure.
+   */
   private loadDetail(zoneId: string): void {
     this.detailRequest?.unsubscribe();
+    this.detailSavedAt.set(null);
     const cached = fresh(this.details, zoneId);
     this.detail.set(cached ?? null);
     this.detailStatus.set(cached ? 'ready' : 'loading');
     if (cached) return;
+    const saved = readZoneDetail(this.offlineStorage, zoneId);
+    const showSaved = (found: Saved<ZoneDetail> | null): boolean => {
+      if (!found || this.selectedId() !== zoneId) return false;
+      this.detail.set(found.value);
+      this.detailStatus.set('ready');
+      return true;
+    };
+    void saved.then((found) => this.detailStatus() === 'loading' && showSaved(found));
     this.detailRequest = this.zoneRepository.detail(zoneId).subscribe({
       next: (detail) => {
         this.details.set(zoneId, { value: detail, at: Date.now() });
+        void saveZoneDetail(this.offlineStorage, zoneId, detail);
         if (this.selectedId() !== zoneId) return;
         this.detail.set(detail);
         this.detailStatus.set('ready');
+        this.detailSavedAt.set(null);
       },
       // A partial failure: the map and the rest of the sheet keep working (the zone list is not lost).
-      error: () => {
-        if (this.selectedId() === zoneId) this.detailStatus.set('error');
-      },
+      error: () =>
+        void saved.then((found) => {
+          if (found && showSaved(found)) this.detailSavedAt.set(found.savedAt);
+          else if (this.selectedId() === zoneId) this.detailStatus.set('error');
+        }),
     });
   }
 
@@ -171,9 +245,13 @@ export class ZonesStore {
     if (zoneId) this.loadForecast(zoneId);
   }
 
-  /** From the session cache if fresh; otherwise asks, dropping the request of the zone tapped before. */
+  /**
+   * From the session cache if fresh; otherwise asks, dropping the request of the zone tapped before. Like
+   * the detail, the model forecast saved on the phone is shown meanwhile and stays if the request fails.
+   */
   private loadForecast(zoneId: string): void {
     this.forecastRequest?.unsubscribe();
+    this.forecastSavedAt.set(null);
     const cached = fresh(this.forecasts, zoneId);
     if (cached) {
       this.detailForecast.set(cached);
@@ -182,30 +260,47 @@ export class ZonesStore {
     }
     this.detailForecast.set(null);
     this.forecastStatus.set('loading');
+    const saved = readZoneForecast(this.offlineStorage, zoneId);
+    const showSaved = (found: Saved<ZoneForecast> | null): boolean => {
+      if (!found || this.selectedId() !== zoneId) return false;
+      this.detailForecast.set(found.value);
+      this.forecastStatus.set('ready');
+      return true;
+    };
+    void saved.then((found) => this.forecastStatus() === 'loading' && showSaved(found));
     this.forecastRequest = this.forecastRepository.forecast(zoneId).subscribe({
       next: (forecast) => {
-        if (forecast.source === 'model') this.forecasts.set(zoneId, { value: forecast, at: Date.now() });
+        if (forecast.source === 'model') {
+          this.forecasts.set(zoneId, { value: forecast, at: Date.now() });
+          void saveZoneForecast(this.offlineStorage, zoneId, forecast);
+        }
         if (this.selectedId() !== zoneId) return;
         this.detailForecast.set(forecast);
         this.forecastStatus.set('ready');
+        this.forecastSavedAt.set(null);
       },
       // Only the forecast section shows the failure (with its own retry); the rest of the sheet stays.
-      error: () => {
-        if (this.selectedId() === zoneId) this.forecastStatus.set('error');
-      },
+      error: () =>
+        void saved.then((found) => {
+          if (found && showSaved(found)) this.forecastSavedAt.set(found.savedAt);
+          else if (this.selectedId() === zoneId) this.forecastStatus.set('error');
+        }),
     });
   }
 
   /**
    * «Borrar caché de datos» in Ajustes: forgets the forecasts, zone details, fire records and boundaries
-   * kept in memory and asks for the boundaries again (the rest, the next time a zone is tapped).
+   * kept in memory and everything saved on the phone (zones, opened zones, boundaries), then asks for the
+   * boundaries again (the rest, the next time a zone is tapped). The zones on screen stay until the next load.
    */
-  clearCache(): void {
+  async clearCache(): Promise<void> {
     this.forecasts.clear();
     this.details.clear();
     this.fires.clear();
     this.boundaries.set(null);
     this.boundariesStatus.set('idle');
+    // Removed first, or the boundaries asked for next would come back from the phone.
+    await clearOfflineData(this.offlineStorage);
     this.loadBoundaries();
     const zoneId = this.selectedId();
     if (zoneId) this.select(zoneId);
@@ -222,6 +317,8 @@ export class ZonesStore {
     this.firesStatus.set('idle');
     this.detailForecast.set(null);
     this.forecastStatus.set('idle');
+    this.detailSavedAt.set(null);
+    this.forecastSavedAt.set(null);
   }
 
   dismissError(): void {

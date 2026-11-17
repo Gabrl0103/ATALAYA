@@ -1,6 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { Subject, of, throwError } from 'rxjs';
-import type { FireHistory, ZoneBoundaries, ZoneDetail, ZoneForecast } from '../domain/model/risk';
+import { type Observable, Subject, of, throwError } from 'rxjs';
+import { ApiError } from '../core/error/api-error';
+import {
+  OFFLINE_STORAGE, clearOfflineData, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail, saveZoneForecast, saveZones,
+} from '../data/offline-cache';
+import { memoryOfflineStorage } from '../data/offline-cache.testing';
+import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from '../domain/repository/repositories';
 import { FORECAST_TTL_MS, ZonesStore } from './zones.store';
 
@@ -116,7 +121,7 @@ describe('ZonesStore zone detail and fire records', () => {
 });
 
 describe('ZonesStore partial failures', () => {
-  it('marks only the zone detail as failed, keeps the map without a banner and retries it', () => {
+  it('marks only the zone detail as failed, keeps the map without a banner and retries it', async () => {
     let fail = true;
     const { store, zoneRepository } = setup(
       () => of(FORECAST),
@@ -124,6 +129,7 @@ describe('ZonesStore partial failures', () => {
       () => (fail ? throwError(() => new Error('down')) : of(DETAIL)),
     );
     store.select('pasto');
+    await flush(); // the failure waits to know that nothing was saved for the zone
     expect(store.detailStatus()).toBe('error');
     expect(store.detail()).toBeNull();
     expect(store.error()).toBeNull(); // the map banner is only for the zone list
@@ -161,10 +167,11 @@ describe('ZonesStore forecast', () => {
     expect(store.detailForecast()).toEqual(fallback);
   });
 
-  it('marks only the forecast as failed and retries it', () => {
+  it('marks only the forecast as failed and retries it', async () => {
     let fail = true;
     const { store, repository } = setup(() => (fail ? throwError(() => new Error('No se pudo conectar con el servidor.')) : of(FORECAST)));
     store.select('pasto');
+    await flush(); // the failure waits to know that nothing was saved for the zone
     expect(store.forecastStatus()).toBe('error');
     expect(store.error()).toBeNull(); // the map banner stays for zone errors
     expect(store.detail()).toEqual(DETAIL);
@@ -231,12 +238,12 @@ describe('ZonesStore forecast', () => {
 });
 
 describe('ZonesStore cache', () => {
-  it('forgets the forecasts and the boundaries and asks for them again', () => {
+  it('forgets the forecasts and the boundaries and asks for them again', async () => {
     const { store, repository, zoneRepository } = setup(() => of(FORECAST));
     store.loadBoundaries();
     store.select('pasto');
     store.clearSelection();
-    store.clearCache();
+    await store.clearCache();
     expect(zoneRepository.boundaries).toHaveBeenCalledTimes(2);
     expect(store.boundariesStatus()).toBe('ready');
     store.select('pasto');
@@ -254,13 +261,14 @@ describe('ZonesStore boundaries', () => {
     expect(store.boundaries()).toEqual(BOUNDARIES);
   });
 
-  it('marks only the boundaries as failed, retries them and lets the notice close', () => {
+  it('marks only the boundaries as failed, retries them and lets the notice close', async () => {
     let fail = true;
     const { store, zoneRepository } = setup(
       () => of(FORECAST),
       () => (fail ? throwError(() => new Error('No se pudo conectar con el servidor.')) : of(BOUNDARIES)),
     );
     store.loadBoundaries();
+    await flush(); // the failure waits to know that no boundaries were saved
     expect(store.boundariesStatus()).toBe('error');
     expect(store.error()).toBeNull(); // zones and markers keep working
     expect(store.boundaries()).toBeNull();
@@ -272,5 +280,267 @@ describe('ZonesStore boundaries', () => {
     store.loadBoundaries();
     expect(zoneRepository.boundaries).toHaveBeenCalledTimes(2);
     expect(store.boundariesStatus()).toBe('ready');
+  });
+});
+
+const PASTO: ZoneRiskSummary = { id: 'pasto', name: 'Pasto', latitude: 1.21, longitude: -77.28, score: 62, level: 'high' };
+const IPIALES: ZoneRiskSummary = { id: 'ipiales', name: 'Ipiales', latitude: 0.83, longitude: -77.64, score: 30, level: 'medium' };
+const SPOT: Hotspot = { id: 'h1', latitude: 1.2, longitude: -77.3, detectedAt: '2026-11-16T10:00:00Z' };
+const SAVED_AT = new Date('2026-11-15T22:07:00Z');
+const NO_NETWORK = () => throwError(() => new ApiError('network', 0));
+
+/** A store whose zone list answers with `list`, on a phone that may have zones saved from before. */
+async function setupLoad(list: () => Observable<ZoneRiskSummary[]>, saved?: readonly ZoneRiskSummary[]) {
+  const storage = memoryOfflineStorage();
+  if (saved) await saveZones(storage, { zones: [...saved], hotspots: [SPOT] }, SAVED_AT);
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: ZoneRepository, useValue: { list: vi.fn(list), detail: () => of(DETAIL), boundaries: () => of(BOUNDARIES) } },
+      { provide: FireRepository, useValue: { history: () => of(FIRES) } },
+      { provide: HotspotRepository, useValue: { list: () => of([SPOT]) } },
+      { provide: ForecastRepository, useValue: { forecast: () => of(FORECAST) } },
+      { provide: OFFLINE_STORAGE, useValue: storage },
+    ],
+  });
+  return { store: TestBed.inject(ZonesStore), storage };
+}
+
+/** Lets the phone storage (promises) answer. */
+const flush = async () => {
+  for (let i = 0; i < 3; i++) await new Promise((resolve) => setTimeout(resolve));
+};
+
+describe('ZonesStore without connection', () => {
+  it('saves a good answer with the time it arrived', async () => {
+    const { store, storage } = await setupLoad(() => of([PASTO]));
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(await readZones(storage)).toEqual({ savedAt: store.updatedAt(), value: { zones: [PASTO], hotspots: [SPOT] } });
+  });
+
+  it('shows the saved zones at once while the server wakes up, without «Conectando…» in their place', async () => {
+    const answer = new Subject<ZoneRiskSummary[]>();
+    const { store } = await setupLoad(() => answer, [IPIALES]);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([IPIALES]);
+    expect(store.hotspots()).toEqual([SPOT]);
+    expect(store.updatedAt()).toEqual(SAVED_AT);
+    expect(store.fromSaved()).toBe(true);
+    expect(store.loading()).toBe(true); // still asking, in the background
+    expect(store.offline()).toBe(false);
+
+    answer.next([PASTO]);
+    answer.complete();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(store.fromSaved()).toBe(false);
+    expect(store.updatedAt()!.getTime()).toBeGreaterThan(SAVED_AT.getTime());
+  });
+
+  it('keeps the saved zones on a network error and says it is offline, not an error', async () => {
+    const { store } = await setupLoad(NO_NETWORK, [IPIALES]);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([IPIALES]);
+    expect(store.updatedAt()).toEqual(SAVED_AT);
+    expect(store.offline()).toBe(true);
+    expect(store.error()).toBeNull();
+    expect(store.loading()).toBe(false);
+  });
+
+  it('is the usual error, with nothing made up, when nothing was saved', async () => {
+    const { store } = await setupLoad(NO_NETWORK);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([]);
+    expect(store.error()).toBe('network');
+    expect(store.offline()).toBe(false);
+  });
+
+  it('keeps the zones of this session when a later refresh fails, and clears the notice when one works', async () => {
+    let fail = false;
+    const { store } = await setupLoad(() => (fail ? NO_NETWORK() : of([PASTO])));
+    store.load();
+    await flush();
+    const arrived = store.updatedAt();
+    fail = true;
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(store.updatedAt()).toBe(arrived);
+    expect(store.offline()).toBe(true);
+    fail = false;
+    store.load();
+    await flush();
+    expect(store.offline()).toBe(false);
+  });
+
+  it('does not put the saved zones over an answer that came first', async () => {
+    const { store } = await setupLoad(() => of([PASTO]), [IPIALES]);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(store.fromSaved()).toBe(false);
+  });
+});
+
+const FULL_DETAIL: ZoneDetail = {
+  ...DETAIL,
+  weather: { temperatureC: 19, humidityPct: 70, windKmh: 9, daysWithoutRain: 4 },
+  factors: { dryWeather: 0.6, nearbyHotspots: 0.4, fireHistory: 0.3 },
+};
+
+/** A store whose detail and forecast answer as given, on a phone that may have Pasto saved from before. */
+async function setupZone(answers: { detail: () => Observable<ZoneDetail>; forecast: () => Observable<ZoneForecast> }, savedPasto = false) {
+  const storage = memoryOfflineStorage();
+  if (savedPasto) {
+    await saveZoneDetail(storage, 'pasto', FULL_DETAIL, SAVED_AT);
+    await saveZoneForecast(storage, 'pasto', FORECAST, SAVED_AT);
+  }
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: ZoneRepository, useValue: { list: () => of([PASTO]), detail: vi.fn(answers.detail), boundaries: () => of(BOUNDARIES) } },
+      { provide: FireRepository, useValue: { history: () => of(FIRES) } },
+      { provide: HotspotRepository, useValue: { list: () => of([]) } },
+      { provide: ForecastRepository, useValue: { forecast: vi.fn(answers.forecast) } },
+      { provide: OFFLINE_STORAGE, useValue: storage },
+    ],
+  });
+  return { store: TestBed.inject(ZonesStore), storage };
+}
+
+describe('ZonesStore opened zones without connection', () => {
+  it('saves the detail and the model forecast of a zone when it is opened', async () => {
+    const { store, storage } = await setupZone({ detail: () => of(FULL_DETAIL), forecast: () => of(FORECAST) });
+    store.select('pasto');
+    await flush();
+    expect((await readZoneDetail(storage, 'pasto'))?.value).toEqual(FULL_DETAIL);
+    expect((await readZoneForecast(storage, 'pasto'))?.value).toEqual(FORECAST);
+  });
+
+  it('shows the saved ones at once while the new ones are on their way, with no notice yet', async () => {
+    const { store } = await setupZone({ detail: () => new Subject<ZoneDetail>(), forecast: () => new Subject<ZoneForecast>() }, true);
+    store.select('pasto');
+    await flush();
+    expect(store.detail()).toEqual(FULL_DETAIL);
+    expect(store.detailForecast()).toEqual(FORECAST);
+    expect(store.detailStatus()).toBe('ready');
+    expect(store.forecastStatus()).toBe('ready');
+    expect(store.detailSavedAt()).toBeNull();
+    expect(store.forecastSavedAt()).toBeNull();
+  });
+
+  it('keeps the saved ones on a network error and says when they are from', async () => {
+    const { store } = await setupZone({ detail: NO_NETWORK, forecast: NO_NETWORK }, true);
+    store.select('pasto');
+    await flush();
+    expect(store.detail()).toEqual(FULL_DETAIL);
+    expect(store.detailForecast()).toEqual(FORECAST);
+    expect(store.detailSavedAt()).toEqual(SAVED_AT);
+    expect(store.forecastSavedAt()).toEqual(SAVED_AT);
+
+    store.clearSelection();
+    expect(store.detailSavedAt()).toBeNull();
+    expect(store.forecastSavedAt()).toBeNull();
+  });
+
+  it("shows the sheet's own failure for a zone never opened, with nothing made up", async () => {
+    const { store } = await setupZone({ detail: NO_NETWORK, forecast: NO_NETWORK });
+    store.select('pasto');
+    await flush();
+    expect(store.detail()).toBeNull();
+    expect(store.detailForecast()).toBeNull();
+    expect(store.detailStatus()).toBe('error');
+    expect(store.forecastStatus()).toBe('error');
+    expect(store.detailSavedAt()).toBeNull();
+  });
+});
+
+describe('ZonesStore date of the saved data in the zone sheet', () => {
+  it('is the oldest of the saved data shown because a request failed, and none while everything is new', async () => {
+    const { store } = await setupZone({ detail: NO_NETWORK, forecast: () => of(FORECAST) }, true);
+    store.select('pasto');
+    await flush();
+    expect(store.selectedOfflineAt()).toEqual(SAVED_AT); // the detail is the saved one
+
+    const older = new Date('2026-11-14T08:00:00Z');
+    store.updatedAt.set(older);
+    store.offline.set(true); // the zone list is older still
+    expect(store.selectedOfflineAt()).toEqual(older);
+
+    store.offline.set(false);
+    store.clearSelection();
+    expect(store.selectedOfflineAt()).toBeNull();
+  });
+});
+
+/** A store whose boundaries answer with `answer`, on a phone that may have them saved from before. */
+async function setupBoundaries(answer: () => Observable<ZoneBoundaries>, saved = false) {
+  const storage = memoryOfflineStorage();
+  if (saved) await saveBoundaries(storage, BOUNDARIES, SAVED_AT);
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: ZoneRepository, useValue: { list: () => of([]), detail: () => of(DETAIL), boundaries: vi.fn(answer) } },
+      { provide: FireRepository, useValue: { history: () => of(FIRES) } },
+      { provide: HotspotRepository, useValue: { list: () => of([]) } },
+      { provide: ForecastRepository, useValue: { forecast: () => of(FORECAST) } },
+      { provide: OFFLINE_STORAGE, useValue: storage },
+    ],
+  });
+  return { store: TestBed.inject(ZonesStore), storage };
+}
+
+describe('ZonesStore boundaries without connection', () => {
+  it('saves the boundaries when they arrive', async () => {
+    const { store, storage } = await setupBoundaries(() => of(BOUNDARIES));
+    store.loadBoundaries();
+    await flush();
+    expect((await readBoundaries(storage))?.value).toEqual(BOUNDARIES);
+  });
+
+  it('draws the saved ones while the server wakes up, and keeps them without a notice when it fails', async () => {
+    const answer = new Subject<ZoneBoundaries>();
+    const { store } = await setupBoundaries(() => answer, true);
+    store.loadBoundaries();
+    await flush();
+    expect(store.boundaries()).toEqual(BOUNDARIES);
+
+    answer.error(new ApiError('network', 0));
+    await flush();
+    expect(store.boundaries()).toEqual(BOUNDARIES);
+    expect(store.boundariesStatus()).toBe('ready');
+  });
+
+  it('shows the notice when they fail and none were saved', async () => {
+    const { store } = await setupBoundaries(() => throwError(() => new ApiError('network', 0)));
+    store.loadBoundaries();
+    await flush();
+    expect(store.boundaries()).toBeNull();
+    expect(store.boundariesStatus()).toBe('error');
+  });
+});
+
+describe('ZonesStore «Borrar caché de datos»', () => {
+  it('removes everything saved on the phone, and the boundaries are not drawn again from it', async () => {
+    const { store, storage } = await setupBoundaries(() => new Subject<ZoneBoundaries>(), true);
+    await saveZones(storage, { zones: [PASTO], hotspots: [SPOT] }, SAVED_AT);
+    await saveZoneDetail(storage, 'pasto', FULL_DETAIL, SAVED_AT);
+    await saveZoneForecast(storage, 'pasto', FORECAST, SAVED_AT);
+    storage.data.set('settings', '{"language":"en"}'); // not ours: it stays
+
+    await store.clearCache();
+    await flush();
+    expect([...storage.data.keys()]).toEqual(['settings']);
+    expect(store.boundaries()).toBeNull();
+    expect(await readZones(storage)).toBeNull();
+  });
+
+  it('removes nothing of the app but its own keys, even when one removal fails', async () => {
+    const storage = memoryOfflineStorage({ 'offline.zones': '{}', 'offline.detail.pasto': '{}', 'favorites.zoneIds': '["pasto"]' });
+    const remove = storage.remove;
+    storage.remove = (key) => (key === 'offline.zones' ? Promise.reject(new Error('busy')) : remove(key));
+    await clearOfflineData(storage);
+    expect([...storage.data.keys()].sort()).toEqual(['favorites.zoneIds', 'offline.zones']);
   });
 });
