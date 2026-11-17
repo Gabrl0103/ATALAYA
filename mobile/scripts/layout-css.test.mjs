@@ -167,3 +167,24 @@ describe('touch targets and focus', () => {
     assert.match(base, /:where\(button, a, input, select, textarea, \[tabindex\]\):focus-visible \{\s*outline: 2px solid/);
   });
 });
+
+describe('settings row selectors', () => {
+  const settings = read('presentation/pages/settings/settings.page.css');
+
+  it('keeps the 4 px padding of a selector inside a row (only the text block gets the row padding)', () => {
+    assert.ok(settings.includes('.row > div:not(.segmented) { min-width: 0; padding: 8px 0; }'));
+    assert.doesNotMatch(settings, /\.row > div \{/);
+  });
+
+  it('gives the options of a row selector the same width, growing with the text size', () => {
+    assert.match(settings, /\.segmented\.compact \{[^}]*grid-auto-columns: 1fr;/);
+    assert.match(settings, /\.segmented\.compact button \{ min-width: [\d.]+em; \}/);
+    assert.ok(settings.includes('.segmented.compact button.mono { min-width: calc(4ch + 24px); }'));
+    assert.doesNotMatch(settings, /\.segmented\.compact button \{[^}]*min-width: \d+px/);
+  });
+
+  it('lets the selector drop under its label instead of leaving the card', () => {
+    assert.match(settings, /\.choice-row \{[^}]*flex-wrap: wrap;/);
+    assert.match(settings, /\.choice-row > span \{[^}]*min-width: 0;/);
+  });
+});
