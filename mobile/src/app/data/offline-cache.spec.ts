@@ -1,5 +1,7 @@
-import type { Hotspot, ZoneRiskSummary } from '../domain/model/risk';
-import { readZones, saveZones, type OfflineStorage } from './offline-cache';
+import type { Hotspot, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
+import {
+  readZoneDetail, readZoneForecast, readZones, saveZoneDetail, saveZoneForecast, saveZones, type OfflineStorage,
+} from './offline-cache';
 import { memoryOfflineStorage } from './offline-cache.testing';
 
 const PASTO: ZoneRiskSummary = { id: 'pasto', name: 'Pasto', latitude: 1.21, longitude: -77.28, score: 62, level: 'high' };
@@ -36,5 +38,50 @@ describe('offline cache: zone list', () => {
     };
     await expect(saveZones(failing, { zones: [PASTO], hotspots: [] })).resolves.toBeUndefined();
     expect(await readZones(failing)).toBeNull();
+  });
+});
+
+const DETAIL: ZoneDetail = {
+  id: 'pasto',
+  name: 'Pasto',
+  score: 62,
+  level: 'high',
+  weather: { temperatureC: 19, humidityPct: 70, windKmh: 9, daysWithoutRain: 4 },
+  factors: { dryWeather: 0.6, nearbyHotspots: 0.4, fireHistory: 0.3 },
+};
+const MODEL: ZoneForecast = {
+  zoneId: 'pasto',
+  source: 'model',
+  modelVersion: '1.0.0',
+  generatedAt: '2026-11-16T15:00:00Z',
+  horizons: [{ hours: 24, baseDate: '2026-11-16', probability: 0.53, score: 53, level: 'high' }],
+};
+
+describe('offline cache: opened zones', () => {
+  it('saves the detail and the forecast of each zone under its own key and reads them back', async () => {
+    const storage = memoryOfflineStorage();
+    await saveZoneDetail(storage, 'pasto', DETAIL, AT);
+    await saveZoneForecast(storage, 'pasto', MODEL, AT);
+    expect([...storage.data.keys()].sort()).toEqual(['offline.detail.pasto', 'offline.forecast.pasto']);
+    expect(await readZoneDetail(storage, 'pasto')).toEqual({ savedAt: AT, value: DETAIL });
+    expect(await readZoneForecast(storage, 'pasto')).toEqual({ savedAt: AT, value: MODEL });
+  });
+
+  it('has nothing for a zone never opened', async () => {
+    const storage = memoryOfflineStorage();
+    await saveZoneDetail(storage, 'pasto', DETAIL, AT);
+    expect(await readZoneDetail(storage, 'ipiales')).toBeNull();
+    expect(await readZoneForecast(storage, 'ipiales')).toBeNull();
+  });
+
+  it('does not keep a fallback forecast, nor read the data of another zone under a key', async () => {
+    const storage = memoryOfflineStorage();
+    const fallback: ZoneForecast = {
+      zoneId: 'pasto', source: 'fallback', reason: 'model_error', generatedAt: '2026-11-16T15:00:00Z', current: { score: 62, level: 'high' },
+    };
+    await saveZoneForecast(storage, 'pasto', fallback, AT);
+    expect(storage.data.size).toBe(0);
+    storage.data.set('offline.detail.ipiales', JSON.stringify({ savedAt: AT.getTime(), value: DETAIL }));
+    expect(await readZoneDetail(storage, 'ipiales')).toBeNull();
   });
 });

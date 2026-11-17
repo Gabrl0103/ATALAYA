@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
-import type { Hotspot, RiskLevel, ZoneRiskSummary } from '../domain/model/risk';
+import type { Hotspot, RiskLevel, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 
 /**
  * Last good answers of the API, kept on the phone so the app has real data without internet or while
@@ -9,6 +9,9 @@ import type { Hotspot, RiskLevel, ZoneRiskSummary } from '../domain/model/risk';
  */
 export const OFFLINE_PREFIX = 'offline.';
 const ZONES_KEY = `${OFFLINE_PREFIX}zones`;
+/** One key per opened zone and kind, so the detail and the forecast (arriving together) never overwrite each other. */
+const detailKey = (zoneId: string): string => `${OFFLINE_PREFIX}detail.${zoneId}`;
+const forecastKey = (zoneId: string): string => `${OFFLINE_PREFIX}forecast.${zoneId}`;
 
 /** Where it is kept: Preferences (native storage on the phone, localStorage in the browser). */
 export interface OfflineStorage {
@@ -79,6 +82,30 @@ function isZonesSnapshot(value: unknown): value is ZonesSnapshot {
   );
 }
 
+function isZoneDetail(value: unknown): value is ZoneDetail {
+  return (
+    isRecord(value) &&
+    typeof value['id'] === 'string' &&
+    typeof value['name'] === 'string' &&
+    isFiniteNumber(value['score']) &&
+    LEVELS.includes(value['level'] as RiskLevel) &&
+    isRecord(value['weather']) &&
+    isRecord(value['factors'])
+  );
+}
+
+/** Only the model's forecast is kept: a fallback says the model is not answering, which is news only now. */
+function isModelForecast(value: unknown): value is ZoneForecast {
+  return (
+    isRecord(value) &&
+    typeof value['zoneId'] === 'string' &&
+    value['source'] === 'model' &&
+    typeof value['generatedAt'] === 'string' &&
+    Array.isArray(value['horizons']) &&
+    value['horizons'].length > 0
+  );
+}
+
 /** What was saved under the key; missing, broken or of another shape (an older app) reads as nothing. */
 export async function readSaved<T>(storage: OfflineStorage, key: string, isValue: (value: unknown) => value is T): Promise<Saved<T> | null> {
   try {
@@ -99,3 +126,17 @@ export const readZones = (storage: OfflineStorage): Promise<Saved<ZonesSnapshot>
 
 export const saveZones = (storage: OfflineStorage, snapshot: ZonesSnapshot, savedAt?: Date): Promise<void> =>
   writeSaved(storage, ZONES_KEY, snapshot, savedAt);
+
+export const readZoneDetail = (storage: OfflineStorage, zoneId: string): Promise<Saved<ZoneDetail> | null> =>
+  readSaved(storage, detailKey(zoneId), (value): value is ZoneDetail => isZoneDetail(value) && value.id === zoneId);
+
+export const saveZoneDetail = (storage: OfflineStorage, zoneId: string, detail: ZoneDetail, savedAt?: Date): Promise<void> =>
+  writeSaved(storage, detailKey(zoneId), detail, savedAt);
+
+export const readZoneForecast = (storage: OfflineStorage, zoneId: string): Promise<Saved<ZoneForecast> | null> =>
+  readSaved(storage, forecastKey(zoneId), (value): value is ZoneForecast => isModelForecast(value) && value.zoneId === zoneId);
+
+/** Saves a model forecast; a fallback is left out (see isModelForecast). */
+export async function saveZoneForecast(storage: OfflineStorage, zoneId: string, forecast: ZoneForecast, savedAt?: Date): Promise<void> {
+  if (forecast.source === 'model') await writeSaved(storage, forecastKey(zoneId), forecast, savedAt);
+}

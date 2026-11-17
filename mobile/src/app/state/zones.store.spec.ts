@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { type Observable, Subject, of, throwError } from 'rxjs';
 import { ApiError } from '../core/error/api-error';
-import { OFFLINE_STORAGE, readZones, saveZones } from '../data/offline-cache';
+import { OFFLINE_STORAGE, readZoneDetail, readZoneForecast, readZones, saveZoneDetail, saveZoneForecast, saveZones } from '../data/offline-cache';
 import { memoryOfflineStorage } from '../data/offline-cache.testing';
 import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from '../domain/repository/repositories';
@@ -119,7 +119,7 @@ describe('ZonesStore zone detail and fire records', () => {
 });
 
 describe('ZonesStore partial failures', () => {
-  it('marks only the zone detail as failed, keeps the map without a banner and retries it', () => {
+  it('marks only the zone detail as failed, keeps the map without a banner and retries it', async () => {
     let fail = true;
     const { store, zoneRepository } = setup(
       () => of(FORECAST),
@@ -127,6 +127,7 @@ describe('ZonesStore partial failures', () => {
       () => (fail ? throwError(() => new Error('down')) : of(DETAIL)),
     );
     store.select('pasto');
+    await flush(); // the failure waits to know that nothing was saved for the zone
     expect(store.detailStatus()).toBe('error');
     expect(store.detail()).toBeNull();
     expect(store.error()).toBeNull(); // the map banner is only for the zone list
@@ -164,10 +165,11 @@ describe('ZonesStore forecast', () => {
     expect(store.detailForecast()).toEqual(fallback);
   });
 
-  it('marks only the forecast as failed and retries it', () => {
+  it('marks only the forecast as failed and retries it', async () => {
     let fail = true;
     const { store, repository } = setup(() => (fail ? throwError(() => new Error('No se pudo conectar con el servidor.')) : of(FORECAST)));
     store.select('pasto');
+    await flush(); // the failure waits to know that nothing was saved for the zone
     expect(store.forecastStatus()).toBe('error');
     expect(store.error()).toBeNull(); // the map banner stays for zone errors
     expect(store.detail()).toEqual(DETAIL);
@@ -377,5 +379,77 @@ describe('ZonesStore without connection', () => {
     await flush();
     expect(store.zones()).toEqual([PASTO]);
     expect(store.fromSaved()).toBe(false);
+  });
+});
+
+const FULL_DETAIL: ZoneDetail = {
+  ...DETAIL,
+  weather: { temperatureC: 19, humidityPct: 70, windKmh: 9, daysWithoutRain: 4 },
+  factors: { dryWeather: 0.6, nearbyHotspots: 0.4, fireHistory: 0.3 },
+};
+
+/** A store whose detail and forecast answer as given, on a phone that may have Pasto saved from before. */
+async function setupZone(answers: { detail: () => Observable<ZoneDetail>; forecast: () => Observable<ZoneForecast> }, savedPasto = false) {
+  const storage = memoryOfflineStorage();
+  if (savedPasto) {
+    await saveZoneDetail(storage, 'pasto', FULL_DETAIL, SAVED_AT);
+    await saveZoneForecast(storage, 'pasto', FORECAST, SAVED_AT);
+  }
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: ZoneRepository, useValue: { list: () => of([PASTO]), detail: vi.fn(answers.detail), boundaries: () => of(BOUNDARIES) } },
+      { provide: FireRepository, useValue: { history: () => of(FIRES) } },
+      { provide: HotspotRepository, useValue: { list: () => of([]) } },
+      { provide: ForecastRepository, useValue: { forecast: vi.fn(answers.forecast) } },
+      { provide: OFFLINE_STORAGE, useValue: storage },
+    ],
+  });
+  return { store: TestBed.inject(ZonesStore), storage };
+}
+
+describe('ZonesStore opened zones without connection', () => {
+  it('saves the detail and the model forecast of a zone when it is opened', async () => {
+    const { store, storage } = await setupZone({ detail: () => of(FULL_DETAIL), forecast: () => of(FORECAST) });
+    store.select('pasto');
+    await flush();
+    expect((await readZoneDetail(storage, 'pasto'))?.value).toEqual(FULL_DETAIL);
+    expect((await readZoneForecast(storage, 'pasto'))?.value).toEqual(FORECAST);
+  });
+
+  it('shows the saved ones at once while the new ones are on their way, with no notice yet', async () => {
+    const { store } = await setupZone({ detail: () => new Subject<ZoneDetail>(), forecast: () => new Subject<ZoneForecast>() }, true);
+    store.select('pasto');
+    await flush();
+    expect(store.detail()).toEqual(FULL_DETAIL);
+    expect(store.detailForecast()).toEqual(FORECAST);
+    expect(store.detailStatus()).toBe('ready');
+    expect(store.forecastStatus()).toBe('ready');
+    expect(store.detailSavedAt()).toBeNull();
+    expect(store.forecastSavedAt()).toBeNull();
+  });
+
+  it('keeps the saved ones on a network error and says when they are from', async () => {
+    const { store } = await setupZone({ detail: NO_NETWORK, forecast: NO_NETWORK }, true);
+    store.select('pasto');
+    await flush();
+    expect(store.detail()).toEqual(FULL_DETAIL);
+    expect(store.detailForecast()).toEqual(FORECAST);
+    expect(store.detailSavedAt()).toEqual(SAVED_AT);
+    expect(store.forecastSavedAt()).toEqual(SAVED_AT);
+
+    store.clearSelection();
+    expect(store.detailSavedAt()).toBeNull();
+    expect(store.forecastSavedAt()).toBeNull();
+  });
+
+  it("shows the sheet's own failure for a zone never opened, with nothing made up", async () => {
+    const { store } = await setupZone({ detail: NO_NETWORK, forecast: NO_NETWORK });
+    store.select('pasto');
+    await flush();
+    expect(store.detail()).toBeNull();
+    expect(store.detailForecast()).toBeNull();
+    expect(store.detailStatus()).toBe('error');
+    expect(store.forecastStatus()).toBe('error');
+    expect(store.detailSavedAt()).toBeNull();
   });
 });
