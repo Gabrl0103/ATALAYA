@@ -187,4 +187,10 @@ describe('settings row selectors', () => {
     assert.match(settings, /\.choice-row \{[^}]*flex-wrap: wrap;/);
     assert.match(settings, /\.choice-row > span \{[^}]*min-width: 0;/);
   });
+
+  it('fills the row with «Avisar desde» when it drops a line and stacks its options before cutting them', () => {
+    assert.match(settings, /\.choice-row\.wide-choice > \.segmented \{[^}]*flex: 1 0 calc\(12em \+ 14px\);/);
+    assert.match(settings, /\.choice-row\.wide-choice > \.segmented \{[^}]*repeat\(auto-fit, minmax\(min\(100%, 6em\), 1fr\)\)/);
+    assert.match(readFileSync(join(appDir, 'presentation/pages/settings/settings.page.html'), 'utf8'), /class="row choice-row wide-choice[^"]*">\s*<span id="threshold-label">/);
+  });
 });
