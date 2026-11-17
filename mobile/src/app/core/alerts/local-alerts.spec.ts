@@ -53,6 +53,7 @@ function setup({ favorites = ['pasto'], answer = 'granted', current = 'prompt', 
     zones: signal(ZONES),
     updatedAt: signal<Date | null>(new Date()),
     loading: signal(false),
+    fromSaved: signal(false),
     load: vi.fn(),
     select: vi.fn(),
   };
@@ -112,6 +113,23 @@ describe('LocalAlerts', () => {
     await alerts.check();
     expect(notifier.shown.at(-1)?.body).toContain('Puntaje 55/100');
     expect(notifier.shown).toHaveLength(3);
+  });
+
+  it('waits for the zones of the API: the saved ones shown meanwhile do not warn', async () => {
+    const { alerts, notifier, zones, setLevel } = setup();
+    await alerts.enable();
+    const settle = async () => {
+      TestBed.tick();
+      for (let i = 0; i < 5; i++) await new Promise((resolve) => setTimeout(resolve));
+    };
+    zones.fromSaved.set(true);
+    setLevel('pasto', 'extreme', 81);
+    await settle();
+    expect(notifier.shown).toHaveLength(1);
+
+    zones.fromSaved.set(false); // the API answered
+    await settle();
+    expect(notifier.shown.map((n) => n.title)).toEqual(['Pasto: riesgo Alto', 'Pasto: riesgo Extremo']);
   });
 
   it('with Extremo as the threshold, only favorites in Extremo warn', async () => {

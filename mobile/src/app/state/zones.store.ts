@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin, type Subscription } from 'rxjs';
 import { apiErrorCode, type ApiErrorCode } from '../core/error/api-error';
+import { OFFLINE_STORAGE, readZones, saveZones } from '../data/offline-cache';
 import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from '../domain/repository/repositories';
 
@@ -56,7 +57,14 @@ export class ZonesStore {
   readonly loading = signal(false);
   /** Why the zones could not load; the map and Inicio name it in the app's language. */
   readonly error = signal<ApiErrorCode | null>(null);
+  /** When the zones shown arrived from the API (also when they are the saved ones). */
   readonly updatedAt = signal<Date | null>(null);
+  /** The zones shown are the saved ones and the API has not answered yet: the alerts wait for new ones. */
+  readonly fromSaved = signal(false);
+  /** The last request failed and older zones are shown: the screens say «Sin conexión · datos del …». */
+  readonly offline = signal(false);
+  private readonly offlineStorage = inject(OFFLINE_STORAGE);
+  private restoring?: Promise<void>;
 
   /** Model forecasts by zone, with when they arrived (fallbacks are asked again: the model may be back). */
   private readonly forecasts = new Map<string, Cached<ZoneForecast>>();
@@ -67,24 +75,49 @@ export class ZonesStore {
   private detailRequest?: Subscription;
   private firesRequest?: Subscription;
 
+  /**
+   * Asks for the zones and heat spots. The first time, the ones saved on the phone are shown at once
+   * meanwhile (Render may take half a minute to wake up). A good answer replaces them and is saved; a
+   * failure keeps whatever is shown and says so (offline), and only without any data is it an error.
+   */
   load(): void {
     this.loading.set(true);
     this.error.set(null);
+    const restored = this.restoreZones();
     forkJoin({
       zones: this.zoneRepository.list(),
       hotspots: this.hotspotRepository.list(),
     }).subscribe({
       next: ({ zones, hotspots }) => {
+        const arrived = new Date();
         this.zones.set(zones);
         this.hotspots.set(hotspots);
-        this.updatedAt.set(new Date());
+        this.updatedAt.set(arrived);
+        this.fromSaved.set(false);
+        this.offline.set(false);
         this.loading.set(false);
+        if (zones.length > 0) void saveZones(this.offlineStorage, { zones, hotspots }, arrived);
       },
-      error: (error: unknown) => {
-        this.error.set(apiErrorCode(error));
-        this.loading.set(false);
-      },
+      // Waits for the saved zones (they may still be on their way) to tell the notice from the error.
+      error: (error: unknown) =>
+        void restored.then(() => {
+          if (this.zones().length > 0) this.offline.set(true);
+          else this.error.set(apiErrorCode(error));
+          this.loading.set(false);
+        }),
     });
+  }
+
+  /** The zones saved on the phone, read once; they are shown only if nothing newer has arrived. */
+  private restoreZones(): Promise<void> {
+    this.restoring ??= readZones(this.offlineStorage).then((saved) => {
+      if (!saved || this.zones().length > 0) return;
+      this.zones.set(saved.value.zones);
+      this.hotspots.set(saved.value.hotspots);
+      this.updatedAt.set(saved.savedAt);
+      this.fromSaved.set(true);
+    });
+    return this.restoring;
   }
 
   /** Asks for the boundaries once; again only after a failure (the notice's "Reintentar"). */

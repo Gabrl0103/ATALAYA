@@ -49,9 +49,10 @@ export class LocalAlerts {
     });
     void this.notifier.checkPermission().then((state) => this.permission.set(state), () => undefined);
 
-    // A new zone list, another threshold or a change of favorites: compare again.
+    // A new zone list, another threshold or a change of favorites: compare again. Not with the zones
+    // saved on the phone (shown while the API answers): they were already compared when they arrived.
     effect(() => {
-      if (!this.settings.alerts() || this.zones.zones().length === 0) return;
+      if (!this.settings.alerts() || this.zones.zones().length === 0 || this.zones.fromSaved()) return;
       this.settings.alertThreshold();
       this.favorites.ids();
       untracked(() => void this.check());

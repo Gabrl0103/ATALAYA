@@ -25,6 +25,7 @@ function render(savedFavorites: string | null = null, answer: PermissionState = 
     zones: signal([PASTO]),
     updatedAt: signal(new Date()),
     loading: signal(false),
+    fromSaved: signal(false),
     load: vi.fn(),
     select: vi.fn(),
   };

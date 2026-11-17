@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { Subject, of, throwError } from 'rxjs';
-import type { FireHistory, ZoneBoundaries, ZoneDetail, ZoneForecast } from '../domain/model/risk';
+import { type Observable, Subject, of, throwError } from 'rxjs';
+import { ApiError } from '../core/error/api-error';
+import { OFFLINE_STORAGE, readZones, saveZones } from '../data/offline-cache';
+import { memoryOfflineStorage } from '../data/offline-cache.testing';
+import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from '../domain/repository/repositories';
 import { FORECAST_TTL_MS, ZonesStore } from './zones.store';
 
@@ -272,5 +275,107 @@ describe('ZonesStore boundaries', () => {
     store.loadBoundaries();
     expect(zoneRepository.boundaries).toHaveBeenCalledTimes(2);
     expect(store.boundariesStatus()).toBe('ready');
+  });
+});
+
+const PASTO: ZoneRiskSummary = { id: 'pasto', name: 'Pasto', latitude: 1.21, longitude: -77.28, score: 62, level: 'high' };
+const IPIALES: ZoneRiskSummary = { id: 'ipiales', name: 'Ipiales', latitude: 0.83, longitude: -77.64, score: 30, level: 'medium' };
+const SPOT: Hotspot = { id: 'h1', latitude: 1.2, longitude: -77.3, detectedAt: '2026-11-16T10:00:00Z' };
+const SAVED_AT = new Date('2026-11-15T22:07:00Z');
+const NO_NETWORK = () => throwError(() => new ApiError('network', 0));
+
+/** A store whose zone list answers with `list`, on a phone that may have zones saved from before. */
+async function setupLoad(list: () => Observable<ZoneRiskSummary[]>, saved?: readonly ZoneRiskSummary[]) {
+  const storage = memoryOfflineStorage();
+  if (saved) await saveZones(storage, { zones: [...saved], hotspots: [SPOT] }, SAVED_AT);
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: ZoneRepository, useValue: { list: vi.fn(list), detail: () => of(DETAIL), boundaries: () => of(BOUNDARIES) } },
+      { provide: FireRepository, useValue: { history: () => of(FIRES) } },
+      { provide: HotspotRepository, useValue: { list: () => of([SPOT]) } },
+      { provide: ForecastRepository, useValue: { forecast: () => of(FORECAST) } },
+      { provide: OFFLINE_STORAGE, useValue: storage },
+    ],
+  });
+  return { store: TestBed.inject(ZonesStore), storage };
+}
+
+/** Lets the phone storage (promises) answer. */
+const flush = async () => {
+  for (let i = 0; i < 3; i++) await new Promise((resolve) => setTimeout(resolve));
+};
+
+describe('ZonesStore without connection', () => {
+  it('saves a good answer with the time it arrived', async () => {
+    const { store, storage } = await setupLoad(() => of([PASTO]));
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(await readZones(storage)).toEqual({ savedAt: store.updatedAt(), value: { zones: [PASTO], hotspots: [SPOT] } });
+  });
+
+  it('shows the saved zones at once while the server wakes up, without «Conectando…» in their place', async () => {
+    const answer = new Subject<ZoneRiskSummary[]>();
+    const { store } = await setupLoad(() => answer, [IPIALES]);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([IPIALES]);
+    expect(store.hotspots()).toEqual([SPOT]);
+    expect(store.updatedAt()).toEqual(SAVED_AT);
+    expect(store.fromSaved()).toBe(true);
+    expect(store.loading()).toBe(true); // still asking, in the background
+    expect(store.offline()).toBe(false);
+
+    answer.next([PASTO]);
+    answer.complete();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(store.fromSaved()).toBe(false);
+    expect(store.updatedAt()!.getTime()).toBeGreaterThan(SAVED_AT.getTime());
+  });
+
+  it('keeps the saved zones on a network error and says it is offline, not an error', async () => {
+    const { store } = await setupLoad(NO_NETWORK, [IPIALES]);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([IPIALES]);
+    expect(store.updatedAt()).toEqual(SAVED_AT);
+    expect(store.offline()).toBe(true);
+    expect(store.error()).toBeNull();
+    expect(store.loading()).toBe(false);
+  });
+
+  it('is the usual error, with nothing made up, when nothing was saved', async () => {
+    const { store } = await setupLoad(NO_NETWORK);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([]);
+    expect(store.error()).toBe('network');
+    expect(store.offline()).toBe(false);
+  });
+
+  it('keeps the zones of this session when a later refresh fails, and clears the notice when one works', async () => {
+    let fail = false;
+    const { store } = await setupLoad(() => (fail ? NO_NETWORK() : of([PASTO])));
+    store.load();
+    await flush();
+    const arrived = store.updatedAt();
+    fail = true;
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(store.updatedAt()).toBe(arrived);
+    expect(store.offline()).toBe(true);
+    fail = false;
+    store.load();
+    await flush();
+    expect(store.offline()).toBe(false);
+  });
+
+  it('does not put the saved zones over an answer that came first', async () => {
+    const { store } = await setupLoad(() => of([PASTO]), [IPIALES]);
+    store.load();
+    await flush();
+    expect(store.zones()).toEqual([PASTO]);
+    expect(store.fromSaved()).toBe(false);
   });
 });
