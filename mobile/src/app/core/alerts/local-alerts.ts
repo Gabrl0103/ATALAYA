@@ -18,8 +18,6 @@ import { ALERTS_STORAGE, NOTIFIER, type AlertNotification } from './notifier';
 export const STALE_MS = 10 * 60_000;
 /** The forecast only adds to the text: an alert does not wait longer than this for it. */
 const FORECAST_WAIT_MS = 6000;
-/** Id of «Probar notificación» (notificationId never gives 0). */
-const TEST_ID = 0;
 
 /**
  * Local alerts about the favorites, with no server of its own nor remote push: each time the zone list
@@ -88,15 +86,6 @@ export class LocalAlerts {
 
   async disable(): Promise<void> {
     await this.settings.update({ alerts: false });
-  }
-
-  /** «Probar notificación»: says what the alerts look like, with no made-up zone in it. */
-  async test(): Promise<boolean> {
-    const state = await this.notifier.checkPermission().catch((): PermissionState => 'denied');
-    this.permission.set(state);
-    if (state !== 'granted') return false;
-    await this.notifier.show([{ id: TEST_ID, title: this.i18n.t('alerts.testTitle'), body: this.i18n.t('alerts.testBody') }]);
-    return true;
   }
 
   /** Compares the favorites with the levels seen last time and warns (see planAlerts). */

@@ -63,7 +63,7 @@ describe('parseSeenLevels', () => {
 });
 
 describe('notificationId', () => {
-  it('gives each zone the same positive int every time, never the 0 of the test notification', () => {
+  it('gives each zone the same positive int every time, never 0', () => {
     expect(notificationId('pasto')).toBe(notificationId('pasto'));
     expect(notificationId('pasto')).not.toBe(notificationId('ipiales'));
     for (const id of ['pasto', 'ipiales', 'el-tablon-de-gomez', 'a']) {

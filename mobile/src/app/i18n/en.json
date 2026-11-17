@@ -217,8 +217,6 @@
   "alerts.title": "{name}: {level} risk",
   "alerts.body": "Score {score}/100. Tap to see it on the map.",
   "alerts.bodyForecast": "Score {score}/100. Forecast: {percent} probability of heat spots in the next 72 h. Tap to see it on the map.",
-  "alerts.testTitle": "Test notification",
-  "alerts.testBody": "This is how the alerts about your favorite municipalities will look.",
   "alerts.settingsTitle": "Alerts",
   "alerts.hint": "Lets you know when one of your favorites goes up a level.",
   "alerts.noFavorites": "Mark municipalities with the heart on their sheet to get alerts about them.",
