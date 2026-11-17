@@ -173,22 +173,8 @@ describe('LocalAlerts', () => {
     notifier.tap('pasto');
     expect(zones.select).toHaveBeenCalledWith('pasto');
     expect(navigate).toHaveBeenCalledWith('/map');
-    notifier.tap(null); // the test notification has no zone
+    notifier.tap(null); // a notification with no zone opens nothing
     expect(zones.select).toHaveBeenCalledTimes(1);
-  });
-
-  it('sends a test notification with no zone in it, only with the permission', async () => {
-    const granted = setup({ current: 'granted' });
-    expect(await granted.alerts.test()).toBe(true);
-    expect(granted.notifier.shown).toEqual([
-      { id: 0, title: 'Notificación de prueba', body: 'Así llegarán las alertas de tus municipios favoritos.' },
-    ]);
-
-    TestBed.resetTestingModule();
-    const notAsked = setup();
-    expect(await notAsked.alerts.test()).toBe(false);
-    expect(notAsked.notifier.requests).toBe(0); // the permission is only asked from the switch
-    expect(notAsked.notifier.shown).toEqual([]);
   });
 
   it('writes the alert in English when the app is in English', async () => {

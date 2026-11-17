@@ -54,6 +54,6 @@ export function parseSeenLevels(value: string | null): SeenLevels {
 export function notificationId(zoneId: string): number {
   let hash = 5381;
   for (const char of zoneId) hash = ((hash * 33) ^ char.charCodeAt(0)) >>> 0;
-  // 1…2^31 − 1 (positive int); 0 is kept for the test notification.
+  // 1…2^31 − 1 (positive int, never 0).
   return (hash % 0x7ffffffe) + 1;
 }

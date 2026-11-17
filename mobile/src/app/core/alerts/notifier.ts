@@ -9,7 +9,7 @@ export interface AlertNotification {
   readonly id: number;
   readonly title: string;
   readonly body: string;
-  /** The zone the tap opens on the map; none for the test notification. */
+  /** The zone the tap opens on the map; with none, the tap only opens the app. */
   readonly zoneId?: string;
 }
 
