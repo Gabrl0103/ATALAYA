@@ -93,8 +93,15 @@ export function overviewCounts(zoneCount: number, hotspotCount: number, language
       @if (canZoom()) {
         <button type="button" class="zoom" (click)="zoomRequested.emit()">{{ 'overview.zoom' | t }}</button>
       }
-      @if (open()) {
-        <app-refresh-control class="note" [updatedAt]="updatedAt()" [loading]="loading()" (refresh)="refreshRequested.emit()" />
+      <!-- Also with the sheet down when the data is old: «Sin conexión · datos del …» must stay in sight. -->
+      @if (open() || offline()) {
+        <app-refresh-control
+          class="note"
+          [updatedAt]="updatedAt()"
+          [loading]="loading()"
+          [offline]="offline()"
+          (refresh)="refreshRequested.emit()"
+        />
       }
     </section>
   `,
@@ -107,6 +114,8 @@ export class MapOverviewSheet {
   /** When the zones arrived («Actualizado …», with «Actualizar» beside it once the sheet is up). */
   readonly updatedAt = input<Date | null>(null);
   readonly loading = input(false);
+  /** Asking for new zones failed and the ones shown are older. */
+  readonly offline = input(false);
   readonly refreshRequested = output<void>();
   /** False without a map (no WebGL): then there is nothing to zoom. */
   readonly canZoom = input(true);

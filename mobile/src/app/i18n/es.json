@@ -57,6 +57,7 @@
   "map.boundariesError": "No se pudieron cargar los límites municipales. El mapa muestra solo los puntos.",
   "map.updated": "Actualizado {time}",
   "map.loading": "Cargando…",
+  "offline.notice": "Sin conexión · datos del {date}",
   "map.boundariesCredit": "Límites: <a href=\"https://www.dane.gov.co\">DANE</a> (MGN 2025)",
   "overview.title": "Departamento de Nariño",
   "overview.showDetails": "Mostrar detalles",

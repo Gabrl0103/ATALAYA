@@ -453,3 +453,21 @@ describe('ZonesStore opened zones without connection', () => {
     expect(store.detailSavedAt()).toBeNull();
   });
 });
+
+describe('ZonesStore date of the saved data in the zone sheet', () => {
+  it('is the oldest of the saved data shown because a request failed, and none while everything is new', async () => {
+    const { store } = await setupZone({ detail: NO_NETWORK, forecast: () => of(FORECAST) }, true);
+    store.select('pasto');
+    await flush();
+    expect(store.selectedOfflineAt()).toEqual(SAVED_AT); // the detail is the saved one
+
+    const older = new Date('2026-11-14T08:00:00Z');
+    store.updatedAt.set(older);
+    store.offline.set(true); // the zone list is older still
+    expect(store.selectedOfflineAt()).toEqual(older);
+
+    store.offline.set(false);
+    store.clearSelection();
+    expect(store.selectedOfflineAt()).toBeNull();
+  });
+});

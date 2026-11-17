@@ -57,6 +57,7 @@
   "map.boundariesError": "The municipal boundaries could not be loaded. The map shows only the points.",
   "map.updated": "Updated {time}",
   "map.loading": "Loading…",
+  "offline.notice": "Offline · data from {date}",
   "map.boundariesCredit": "Boundaries: <a href=\"https://www.dane.gov.co\">DANE</a> (MGN 2025)",
   "overview.title": "Department of Nariño",
   "overview.showDetails": "Show details",

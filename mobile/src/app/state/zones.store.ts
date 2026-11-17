@@ -71,6 +71,12 @@ export class ZonesStore {
    */
   readonly detailSavedAt = signal<Date | null>(null);
   readonly forecastSavedAt = signal<Date | null>(null);
+  /** For the zone sheet: when the oldest data it shows arrived, if any of it is old because a request failed. */
+  readonly selectedOfflineAt = computed(() => {
+    const dates = [this.offline() ? this.updatedAt() : null, this.detailSavedAt(), this.forecastSavedAt()];
+    const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
+    return times.length > 0 ? new Date(Math.min(...times)) : null;
+  });
   private readonly offlineStorage = inject(OFFLINE_STORAGE);
   private restoring?: Promise<void>;
 
