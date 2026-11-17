@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
-import type { Hotspot, RiskLevel, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
+import type { Hotspot, RiskLevel, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 
 /**
  * Last good answers of the API, kept on the phone so the app has real data without internet or while
@@ -9,6 +9,8 @@ import type { Hotspot, RiskLevel, ZoneDetail, ZoneForecast, ZoneRiskSummary } fr
  */
 export const OFFLINE_PREFIX = 'offline.';
 const ZONES_KEY = `${OFFLINE_PREFIX}zones`;
+/** The municipal outlines: about 150 KB, well within Preferences (SharedPreferences / localStorage). */
+const BOUNDARIES_KEY = `${OFFLINE_PREFIX}boundaries`;
 /** One key per opened zone and kind, so the detail and the forecast (arriving together) never overwrite each other. */
 const detailKey = (zoneId: string): string => `${OFFLINE_PREFIX}detail.${zoneId}`;
 const forecastKey = (zoneId: string): string => `${OFFLINE_PREFIX}forecast.${zoneId}`;
@@ -106,6 +108,17 @@ function isModelForecast(value: unknown): value is ZoneForecast {
   );
 }
 
+function isBoundaries(value: unknown): value is ZoneBoundaries {
+  return (
+    isRecord(value) &&
+    value['type'] === 'FeatureCollection' &&
+    typeof value['source'] === 'string' &&
+    Array.isArray(value['features']) &&
+    value['features'].length > 0 &&
+    value['features'].every((feature) => isRecord(feature) && isRecord(feature['geometry']) && isRecord(feature['properties']))
+  );
+}
+
 /** What was saved under the key; missing, broken or of another shape (an older app) reads as nothing. */
 export async function readSaved<T>(storage: OfflineStorage, key: string, isValue: (value: unknown) => value is T): Promise<Saved<T> | null> {
   try {
@@ -140,3 +153,8 @@ export const readZoneForecast = (storage: OfflineStorage, zoneId: string): Promi
 export async function saveZoneForecast(storage: OfflineStorage, zoneId: string, forecast: ZoneForecast, savedAt?: Date): Promise<void> {
   if (forecast.source === 'model') await writeSaved(storage, forecastKey(zoneId), forecast, savedAt);
 }
+
+export const readBoundaries = (storage: OfflineStorage): Promise<Saved<ZoneBoundaries> | null> => readSaved(storage, BOUNDARIES_KEY, isBoundaries);
+
+export const saveBoundaries = (storage: OfflineStorage, boundaries: ZoneBoundaries, savedAt?: Date): Promise<void> =>
+  writeSaved(storage, BOUNDARIES_KEY, boundaries, savedAt);

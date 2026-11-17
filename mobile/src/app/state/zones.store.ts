@@ -2,7 +2,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin, type Subscription } from 'rxjs';
 import { apiErrorCode, type ApiErrorCode } from '../core/error/api-error';
 import {
-  OFFLINE_STORAGE, type Saved, readZoneDetail, readZoneForecast, readZones, saveZoneDetail, saveZoneForecast, saveZones,
+  OFFLINE_STORAGE, type Saved, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail,
+  saveZoneForecast, saveZones,
 } from '../data/offline-cache';
 import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from '../domain/repository/repositories';
@@ -134,18 +135,27 @@ export class ZonesStore {
     return this.restoring;
   }
 
-  /** Asks for the boundaries once; again only after a failure (the notice's "Reintentar"). */
+  /**
+   * Asks for the boundaries once; again only after a failure (the notice's "Reintentar"). The ones saved
+   * on the phone are drawn meanwhile, and with them a failure needs no notice (they only change with a
+   * new backend).
+   */
   loadBoundaries(): void {
     const status = this.boundariesStatus();
     if (status === 'loading' || status === 'ready') return;
     this.boundariesStatus.set('loading');
+    const saved = readBoundaries(this.offlineStorage);
+    void saved.then((found) => {
+      if (found && this.boundaries() === null) this.boundaries.set(found.value);
+    });
     this.zoneRepository.boundaries().subscribe({
       next: (boundaries) => {
         this.boundaries.set(boundaries);
         this.boundariesStatus.set('ready');
+        void saveBoundaries(this.offlineStorage, boundaries);
       },
       // Only the boundaries notice shows it: zones and markers do not depend on them.
-      error: () => this.boundariesStatus.set('error'),
+      error: () => void saved.then((found) => this.boundariesStatus.set(found ? 'ready' : 'error')),
     });
   }
 

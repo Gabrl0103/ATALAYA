@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { type Observable, Subject, of, throwError } from 'rxjs';
 import { ApiError } from '../core/error/api-error';
-import { OFFLINE_STORAGE, readZoneDetail, readZoneForecast, readZones, saveZoneDetail, saveZoneForecast, saveZones } from '../data/offline-cache';
+import {
+  OFFLINE_STORAGE, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail, saveZoneForecast, saveZones,
+} from '../data/offline-cache';
 import { memoryOfflineStorage } from '../data/offline-cache.testing';
 import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import { FireRepository, ForecastRepository, HotspotRepository, ZoneRepository } from '../domain/repository/repositories';
@@ -259,13 +261,14 @@ describe('ZonesStore boundaries', () => {
     expect(store.boundaries()).toEqual(BOUNDARIES);
   });
 
-  it('marks only the boundaries as failed, retries them and lets the notice close', () => {
+  it('marks only the boundaries as failed, retries them and lets the notice close', async () => {
     let fail = true;
     const { store, zoneRepository } = setup(
       () => of(FORECAST),
       () => (fail ? throwError(() => new Error('No se pudo conectar con el servidor.')) : of(BOUNDARIES)),
     );
     store.loadBoundaries();
+    await flush(); // the failure waits to know that no boundaries were saved
     expect(store.boundariesStatus()).toBe('error');
     expect(store.error()).toBeNull(); // zones and markers keep working
     expect(store.boundaries()).toBeNull();
@@ -469,5 +472,51 @@ describe('ZonesStore date of the saved data in the zone sheet', () => {
     store.offline.set(false);
     store.clearSelection();
     expect(store.selectedOfflineAt()).toBeNull();
+  });
+});
+
+/** A store whose boundaries answer with `answer`, on a phone that may have them saved from before. */
+async function setupBoundaries(answer: () => Observable<ZoneBoundaries>, saved = false) {
+  const storage = memoryOfflineStorage();
+  if (saved) await saveBoundaries(storage, BOUNDARIES, SAVED_AT);
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: ZoneRepository, useValue: { list: () => of([]), detail: () => of(DETAIL), boundaries: vi.fn(answer) } },
+      { provide: FireRepository, useValue: { history: () => of(FIRES) } },
+      { provide: HotspotRepository, useValue: { list: () => of([]) } },
+      { provide: ForecastRepository, useValue: { forecast: () => of(FORECAST) } },
+      { provide: OFFLINE_STORAGE, useValue: storage },
+    ],
+  });
+  return { store: TestBed.inject(ZonesStore), storage };
+}
+
+describe('ZonesStore boundaries without connection', () => {
+  it('saves the boundaries when they arrive', async () => {
+    const { store, storage } = await setupBoundaries(() => of(BOUNDARIES));
+    store.loadBoundaries();
+    await flush();
+    expect((await readBoundaries(storage))?.value).toEqual(BOUNDARIES);
+  });
+
+  it('draws the saved ones while the server wakes up, and keeps them without a notice when it fails', async () => {
+    const answer = new Subject<ZoneBoundaries>();
+    const { store } = await setupBoundaries(() => answer, true);
+    store.loadBoundaries();
+    await flush();
+    expect(store.boundaries()).toEqual(BOUNDARIES);
+
+    answer.error(new ApiError('network', 0));
+    await flush();
+    expect(store.boundaries()).toEqual(BOUNDARIES);
+    expect(store.boundariesStatus()).toBe('ready');
+  });
+
+  it('shows the notice when they fail and none were saved', async () => {
+    const { store } = await setupBoundaries(() => throwError(() => new ApiError('network', 0)));
+    store.loadBoundaries();
+    await flush();
+    expect(store.boundaries()).toBeNull();
+    expect(store.boundariesStatus()).toBe('error');
   });
 });

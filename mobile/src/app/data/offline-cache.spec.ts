@@ -1,6 +1,7 @@
-import type { Hotspot, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
+import type { Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
 import {
-  readZoneDetail, readZoneForecast, readZones, saveZoneDetail, saveZoneForecast, saveZones, type OfflineStorage,
+  readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail, saveZoneForecast, saveZones,
+  type OfflineStorage,
 } from './offline-cache';
 import { memoryOfflineStorage } from './offline-cache.testing';
 
@@ -83,5 +84,32 @@ describe('offline cache: opened zones', () => {
     expect(storage.data.size).toBe(0);
     storage.data.set('offline.detail.ipiales', JSON.stringify({ savedAt: AT.getTime(), value: DETAIL }));
     expect(await readZoneDetail(storage, 'ipiales')).toBeNull();
+  });
+});
+
+const BOUNDARIES: ZoneBoundaries = {
+  type: 'FeatureCollection',
+  source: 'DANE, Marco Geoestadístico Nacional 2025',
+  features: [{
+    type: 'Feature',
+    id: 'pasto',
+    properties: { id: 'pasto', divipola: 52001, name: 'Pasto' },
+    geometry: { type: 'Polygon', coordinates: [[[-77.3, 1.2], [-77.2, 1.2], [-77.2, 1.3], [-77.3, 1.2]]] },
+  }],
+};
+
+describe('offline cache: map boundaries', () => {
+  it('saves the boundaries and reads them back', async () => {
+    const storage = memoryOfflineStorage();
+    await saveBoundaries(storage, BOUNDARIES, AT);
+    expect([...storage.data.keys()]).toEqual(['offline.boundaries']);
+    expect(await readBoundaries(storage)).toEqual({ savedAt: AT, value: BOUNDARIES });
+  });
+
+  it('reads anything but a FeatureCollection with outlines as nothing', async () => {
+    const saved = (value: unknown) => memoryOfflineStorage({ 'offline.boundaries': JSON.stringify({ savedAt: AT.getTime(), value }) });
+    expect(await readBoundaries(saved({ ...BOUNDARIES, features: [] }))).toBeNull();
+    expect(await readBoundaries(saved({ ...BOUNDARIES, type: 'Feature' }))).toBeNull();
+    expect(await readBoundaries(memoryOfflineStorage())).toBeNull();
   });
 });
