@@ -175,7 +175,7 @@
   "settings.clearFavoritesConfirm.one": "¿Borrar tu municipio favorito?",
   "settings.clearFavoritesConfirm.other": "¿Borrar tus {count} municipios favoritos?",
   "settings.clearCache": "Borrar caché de datos",
-  "settings.clearCacheHint": "Pronósticos y límites del mapa guardados en memoria.",
+  "settings.clearCacheHint": "Zonas, pronósticos y límites del mapa guardados en el teléfono.",
   "settings.cacheCleared": "Listo: se volverán a pedir.",
   "settings.help": "Ayuda",
   "settings.replayIntro": "Ver introducción otra vez",

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { type Observable, Subject, of, throwError } from 'rxjs';
 import { ApiError } from '../core/error/api-error';
 import {
-  OFFLINE_STORAGE, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail, saveZoneForecast, saveZones,
+  OFFLINE_STORAGE, clearOfflineData, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail, saveZoneForecast, saveZones,
 } from '../data/offline-cache';
 import { memoryOfflineStorage } from '../data/offline-cache.testing';
 import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
@@ -238,12 +238,12 @@ describe('ZonesStore forecast', () => {
 });
 
 describe('ZonesStore cache', () => {
-  it('forgets the forecasts and the boundaries and asks for them again', () => {
+  it('forgets the forecasts and the boundaries and asks for them again', async () => {
     const { store, repository, zoneRepository } = setup(() => of(FORECAST));
     store.loadBoundaries();
     store.select('pasto');
     store.clearSelection();
-    store.clearCache();
+    await store.clearCache();
     expect(zoneRepository.boundaries).toHaveBeenCalledTimes(2);
     expect(store.boundariesStatus()).toBe('ready');
     store.select('pasto');
@@ -518,5 +518,29 @@ describe('ZonesStore boundaries without connection', () => {
     await flush();
     expect(store.boundaries()).toBeNull();
     expect(store.boundariesStatus()).toBe('error');
+  });
+});
+
+describe('ZonesStore «Borrar caché de datos»', () => {
+  it('removes everything saved on the phone, and the boundaries are not drawn again from it', async () => {
+    const { store, storage } = await setupBoundaries(() => new Subject<ZoneBoundaries>(), true);
+    await saveZones(storage, { zones: [PASTO], hotspots: [SPOT] }, SAVED_AT);
+    await saveZoneDetail(storage, 'pasto', FULL_DETAIL, SAVED_AT);
+    await saveZoneForecast(storage, 'pasto', FORECAST, SAVED_AT);
+    storage.data.set('settings', '{"language":"en"}'); // not ours: it stays
+
+    await store.clearCache();
+    await flush();
+    expect([...storage.data.keys()]).toEqual(['settings']);
+    expect(store.boundaries()).toBeNull();
+    expect(await readZones(storage)).toBeNull();
+  });
+
+  it('removes nothing of the app but its own keys, even when one removal fails', async () => {
+    const storage = memoryOfflineStorage({ 'offline.zones': '{}', 'offline.detail.pasto': '{}', 'favorites.zoneIds': '["pasto"]' });
+    const remove = storage.remove;
+    storage.remove = (key) => (key === 'offline.zones' ? Promise.reject(new Error('busy')) : remove(key));
+    await clearOfflineData(storage);
+    expect([...storage.data.keys()].sort()).toEqual(['favorites.zoneIds', 'offline.zones']);
   });
 });

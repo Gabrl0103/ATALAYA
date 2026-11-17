@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin, type Subscription } from 'rxjs';
 import { apiErrorCode, type ApiErrorCode } from '../core/error/api-error';
 import {
-  OFFLINE_STORAGE, type Saved, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail,
+  OFFLINE_STORAGE, type Saved, clearOfflineData, readBoundaries, readZoneDetail, readZoneForecast, readZones, saveBoundaries, saveZoneDetail,
   saveZoneForecast, saveZones,
 } from '../data/offline-cache';
 import type { FireHistory, Hotspot, ZoneBoundaries, ZoneDetail, ZoneForecast, ZoneRiskSummary } from '../domain/model/risk';
@@ -290,14 +290,17 @@ export class ZonesStore {
 
   /**
    * «Borrar caché de datos» in Ajustes: forgets the forecasts, zone details, fire records and boundaries
-   * kept in memory and asks for the boundaries again (the rest, the next time a zone is tapped).
+   * kept in memory and everything saved on the phone (zones, opened zones, boundaries), then asks for the
+   * boundaries again (the rest, the next time a zone is tapped). The zones on screen stay until the next load.
    */
-  clearCache(): void {
+  async clearCache(): Promise<void> {
     this.forecasts.clear();
     this.details.clear();
     this.fires.clear();
     this.boundaries.set(null);
     this.boundariesStatus.set('idle');
+    // Removed first, or the boundaries asked for next would come back from the phone.
+    await clearOfflineData(this.offlineStorage);
     this.loadBoundaries();
     const zoneId = this.selectedId();
     if (zoneId) this.select(zoneId);

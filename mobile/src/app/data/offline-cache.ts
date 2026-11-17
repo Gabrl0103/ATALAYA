@@ -158,3 +158,9 @@ export const readBoundaries = (storage: OfflineStorage): Promise<Saved<ZoneBound
 
 export const saveBoundaries = (storage: OfflineStorage, boundaries: ZoneBoundaries, savedAt?: Date): Promise<void> =>
   writeSaved(storage, BOUNDARIES_KEY, boundaries, savedAt);
+
+/** «Borrar caché de datos»: removes everything saved here (the keys with the prefix), nothing else of the app. */
+export async function clearOfflineData(storage: OfflineStorage): Promise<void> {
+  const keys = await storage.keys().catch((): readonly string[] => []);
+  await Promise.all(keys.filter((key) => key.startsWith(OFFLINE_PREFIX)).map((key) => storage.remove(key).catch(() => undefined)));
+}

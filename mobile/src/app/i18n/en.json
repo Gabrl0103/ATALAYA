@@ -175,7 +175,7 @@
   "settings.clearFavoritesConfirm.one": "Clear your favorite municipality?",
   "settings.clearFavoritesConfirm.other": "Clear your {count} favorite municipalities?",
   "settings.clearCache": "Clear data cache",
-  "settings.clearCacheHint": "Forecasts and map boundaries kept in memory.",
+  "settings.clearCacheHint": "Zones, forecasts and map boundaries saved on the phone.",
   "settings.cacheCleared": "Done: they will be asked for again.",
   "settings.help": "Help",
   "settings.replayIntro": "See the introduction again",
